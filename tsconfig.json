@@ -2,11 +2,10 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": ".",
-    "jsx": "react-jsx"
+    "rootDir": "."
   },
-  "include": ["**/*.ts", "**/*.json", "**/*.tsx"],
-  "exclude": ["**/*.test.ts", "dist"],
+  "include": ["**/*.ts"],
+  "exclude": ["ui", "**/*.test.ts", "dist", "example.ts", "pipeline-test.ts"],
   "references": [
     {
       "path": "../bdd"
