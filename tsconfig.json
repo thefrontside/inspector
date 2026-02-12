@@ -1,5 +1,4 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "."
@@ -12,10 +11,5 @@
     "dist",
     "example.ts",
     "pipeline-test.ts"
-  ],
-  "references": [
-    {
-      "path": "../bdd"
-    }
   ]
 }

@@ -6,19 +6,22 @@
   "author": "engineering@frontside.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thefrontside/effectionx.git"
+    "url": "git+https://github.com/thefrontside/inspector.git"
   },
   "bugs": {
-    "url": "https://github.com/thefrontside/effectionx/issues"
+    "url": "https://github.com/thefrontside/inspector/issues"
   },
   "engines": {
     "node": ">= 22"
   },
   "sideEffects": true,
-  "files": ["dist", "crank/dist"],
+  "files": [
+    "dist",
+    "crank/dist"
+  ],
   "scripts": {
     "start": "vite --host 0.0.0.0 crank",
-    "build:bundle": "vite build crank"
+    "build": "vite build crank"
   },
   "peerDependencies": {
     "effection": "^4.1.0-alpha.3"
@@ -26,7 +29,7 @@
   "dependencies": {
     "@ark/util": "^0.56.0",
     "@b9g/crank": "^0.7.5",
-    "@effectionx/stream-helpers": "workspace:*",
+    "@effectionx/stream-helpers": "^0.7.2",
     "@standard-schema/spec": "^1.0.0",
     "arktype": "^2.1.27",
     "canvg": "^4.0.3",
@@ -36,7 +39,7 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@effectionx/bdd": "workspace:*",
+    "@effectionx/bdd": "^0.4.2",
     "@nano-router/history": "^4.0.4",
     "@nano-router/router": "^4.0.4",
     "@shoelace-style/shoelace": "^2.20.1",

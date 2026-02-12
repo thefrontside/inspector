@@ -30,6 +30,9 @@ The UI supports loading saved recordings useful for review and sharing. From the
 
 You can capture the SSE stream from a running inspector and save the emitted data. Start by using [the instructions for running the process live](#live).
 
+> [!WARNING]
+> This generates a stream of patch-like updates rather than an array of heirarchies, the latter of which is required to render. We need to add one more step to make the conversion somehow or otherwise adjust for a different process.
+
 ```bash
 # Start capturing and it will close once your effection process closes
 curl -sN -X POST http://localhost:41000/watchScopes \
@@ -47,3 +50,7 @@ curl -s -X POST http://localhost:41000/play -H 'Content-Type: application/json' 
 ```
 
 You can also monitor player state with `/watchPlayerState`.
+
+## Contributing
+
+See [the Contributing Guide](CONTRIBUTING.md).
