@@ -19,6 +19,7 @@
     "dist",
     "crank/dist"
   ],
+  "packageManager": "pnpm@9.15.9",
   "scripts": {
     "start": "vite --host 0.0.0.0 crank",
     "build": "vite build crank"
