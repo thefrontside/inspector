@@ -73,6 +73,260 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0(vite@7.3.1(@types/node@25.2.3)(lightningcss@1.31.1))
 
+  jsonl-store:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+
+  node:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+
+  process:
+    dependencies:
+      '@effectionx/node':
+        specifier: workspace:*
+        version: link:../node
+      cross-spawn:
+        specifier: ^7
+        version: 7.0.6
+      ctrlc-windows:
+        specifier: ^2
+        version: 2.2.0
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+      shellwords-ts:
+        specifier: ^3.0.1
+        version: 3.0.1
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+      '@effectionx/stream-helpers':
+        specifier: workspace:*
+        version: link:../stream-helpers
+      '@types/cross-spawn':
+        specifier: ^6
+        version: 6.0.6
+
+  raf:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+      '@essentials/raf':
+        specifier: ^1
+        version: 1.2.0
+
+  scope-eval:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+
+  signals:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+      immutable:
+        specifier: ^5
+        version: 5.1.4
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+
+  stream-helpers:
+    dependencies:
+      '@effectionx/signals':
+        specifier: workspace:*
+        version: link:../signals
+      '@effectionx/timebox':
+        specifier: workspace:*
+        version: link:../timebox
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+      immutable:
+        specifier: ^5
+        version: 5.1.4
+      remeda:
+        specifier: ^2
+        version: 2.33.4
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+
+  stream-yaml:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+      yaml:
+        specifier: ^2
+        version: 2.8.2
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+      '@effectionx/stream-helpers':
+        specifier: workspace:*
+        version: link:../stream-helpers
+
+  task-buffer:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+      '@sinonjs/fake-timers':
+        specifier: ^14
+        version: 14.0.0
+      '@types/sinonjs__fake-timers':
+        specifier: ^8
+        version: 8.1.5
+
+  test-adapter:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+
+  timebox:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+
+  tinyexec:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+      tinyexec:
+        specifier: ^0.3.2
+        version: 0.3.2
+
+  vitest:
+    dependencies:
+      '@effectionx/test-adapter':
+        specifier: workspace:*
+        version: link:../test-adapter
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+      '@effectionx/process':
+        specifier: workspace:*
+        version: link:../process
+      vitest:
+        specifier: ^3
+        version: 3.2.4(@types/node@22.19.7)(lightningcss@1.31.1)(yaml@2.8.2)
+
+  watch:
+    dependencies:
+      '@effectionx/fs':
+        specifier: workspace:*
+        version: link:../fs
+      '@effectionx/process':
+        specifier: workspace:*
+        version: link:../process
+      chokidar:
+        specifier: ^4
+        version: 4.0.3
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+      ignore:
+        specifier: ^7
+        version: 7.0.5
+      remeda:
+        specifier: ^2
+        version: 2.33.4
+      zod:
+        specifier: ^3
+        version: 3.25.76
+      zod-opts:
+        specifier: ^0
+        version: 0.1.8
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+      '@effectionx/signals':
+        specifier: workspace:*
+        version: link:../signals
+      '@effectionx/stream-helpers':
+        specifier: workspace:*
+        version: link:../stream-helpers
+
+  websocket:
+    dependencies:
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+      '@types/ws':
+        specifier: ^8
+        version: 8.18.1
+      ws:
+        specifier: ^8
+        version: 8.19.0
+
+  worker:
+    dependencies:
+      '@effectionx/signals':
+        specifier: workspace:*
+        version: link:../signals
+      effection:
+        specifier: 4.1.0-alpha.3
+        version: 4.1.0-alpha.3
+      web-worker:
+        specifier: ^1
+        version: 1.5.0
+    devDependencies:
+      '@effectionx/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+      '@effectionx/converge':
+        specifier: workspace:*
+        version: link:../converge
+
 packages:
 
   '@ark/schema@0.56.0':
