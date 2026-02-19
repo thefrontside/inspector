@@ -1,7 +1,7 @@
 import type { Context } from "@b9g/crank";
 import { pipe } from "remeda";
 
-import { updateNodeMap } from "./data/update-node-map.ts";
+import { updateNodeMap } from "../../lib/update-node-map.ts";
 import { stratify } from "./data/stratify.ts";
 import { createSSEClient } from "../../lib/sse-client.ts";
 import { protocol as scope } from "../../scope/protocol.ts";

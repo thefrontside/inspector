@@ -9,7 +9,7 @@ import {
   until,
   type Operation,
 } from "effection";
-import type { NodeMap } from "./data/types.ts";
+import type { NodeMap } from "../../lib/update-node-map.ts";
 import { RenderRecording } from "./components/render-recording.tsx";
 
 export async function* Recording(this: Context): AsyncGenerator<Element> {

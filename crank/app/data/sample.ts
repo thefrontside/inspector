@@ -7,7 +7,7 @@ import {
   type Operation,
   type Yielded,
 } from "effection";
-import type { Transform } from "./types.ts";
+import type { Transform } from "../../../lib/update-node-map.ts";
 
 /**
  * Sample a stream at an interval specified by `interval`

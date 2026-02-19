@@ -1,6 +1,22 @@
-import type { ScopeEvent } from "../../../scope/protocol.ts";
-import type { NodeMap, Transform } from "./types.ts";
-import { reduce } from "../../../lib/reduce.ts";
+import type { ScopeEvent } from "../scope/protocol.ts";
+import { reduce } from "./reduce.ts";
+import type { Stream } from "effection";
+
+/**
+ * A function that transforms one stream into another
+ */
+
+export type Transform<A, B> = <TClose>(
+  input: Stream<A, TClose>,
+) => Stream<B, TClose>;
+
+export interface Node {
+  id: string;
+  parentId?: string;
+  data: Record<string, unknown>;
+}
+
+export type NodeMap = Record<string, Node>;
 
 export function updateNodeMap(
   initial: NodeMap,

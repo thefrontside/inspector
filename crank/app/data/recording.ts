@@ -1,5 +1,5 @@
 import { type Stream, type Operation, createSignal } from "effection";
-import type { NodeMap } from "./types.ts";
+import type { NodeMap } from "../../../lib/update-node-map.ts";
 import { createSubject } from "@effectionx/stream-helpers";
 import { pipe } from "remeda";
 
