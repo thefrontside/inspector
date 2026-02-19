@@ -78,4 +78,9 @@ export const protocol = createProtocol({
     progress: schema.Never,
     returns: schema.ScopeTree,
   },
+  recordNodeMap: {
+    args: schema.None,
+    progress: schema.ScopeEvent,
+    returns: schema.Undef,
+  },
 });

@@ -35,7 +35,7 @@ You can capture the SSE stream from a running inspector and save the emitted dat
 
 ```bash
 # Start capturing and it will close once your effection process closes
-curl -sN -X POST http://localhost:41000/watchScopes \
+curl -sN -X POST http://localhost:41000/recordNodeMap \
   -H "Accept: text/event-stream" -d '[]' \
   | jq -R -s 'split("\n") | map(select(startswith("data: "))) | map(.[6:] | fromjson)' \
   > recording.json

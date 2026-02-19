@@ -32,6 +32,7 @@ global.around(api.Main, {
         yield* body(args);
       } finally {
         yield* detach();
+        console.log("detached, inspector shut down");
       }
     });
   },
