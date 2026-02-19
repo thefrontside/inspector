@@ -12,12 +12,24 @@ pnpm install
 
 ### Run the inspector locally:
 
+To just run the UI:
+
 ```shell
 cd inspector
 pnpm start
 ```
 
 This runs Vite and serves the Crank-based inspector UI. Open http://localhost:5173 (or whatever Vite prints).
+
+To run server with the example file, use"
+
+```shell
+node --import tsx --import ./loader.ts examples/example.ts --suspend
+```
+
+This will run the loader with an example effection program. It serves both a live stream of data, and also the built files for the UI. If you are working on the UI on the `/live` integration, you may need to use both of these dev servers, and `localhost:5173` appropriately proxies to port `:41000`. If you have run a `pnpm run build`, then you can directly visit http://localhost:41000.
+
+### Checks
 
 - Run tests & checks (from repo root):
   - Run tests: `pnpm test`

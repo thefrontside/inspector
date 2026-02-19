@@ -24,14 +24,11 @@ When started this way the inspector will launch a small SSE server (default port
 
 ### Recording ✅
 
-The UI supports loading saved recordings useful for review and sharing. From the Home screen click **Load Recording → Browse files** and choose a `.json` or `.effection` file. A recording is a JSON array of NodeMap snapshots. The inspector accepts `.json` and `.effection` files.
+The UI supports loading saved recordings useful for review and sharing. From the Home screen click `Load Recording` > `Browse files` and choose a `.json` or `.effection` file. A recording is a JSON array of NodeMap snapshots. The inspector accepts `.json` and `.effection` files.
 
 #### Creating a recording from a live session:
 
 You can capture the SSE stream from a running inspector and save the emitted data. Start by using [the instructions for running the process live](#live).
-
-> [!WARNING]
-> This generates a stream of patch-like updates rather than an array of heirarchies, the latter of which is required to render. We need to add one more step to make the conversion somehow or otherwise adjust for a different process.
 
 ```bash
 # Start capturing and it will close once your effection process closes
