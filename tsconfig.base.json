@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "incremental": true,
+    "composite": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "esnext",
+    "skipLibCheck": true,
+    "rewriteRelativeImportExtensions": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

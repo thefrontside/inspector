@@ -1,15 +1,12 @@
 {
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "."
-  },
-  "include": ["**/*.ts", "package.json"],
-  "exclude": [
-    "crank",
-    "*.config.ts",
-    "**/*.test.ts",
-    "dist",
-    "example.ts",
-    "pipeline-test.ts"
+  // for editors and LSPs, not used by tsc
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./crank/tsconfig.app.json"
+    }
   ]
 }
