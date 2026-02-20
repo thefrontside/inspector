@@ -20,15 +20,13 @@ export function TreeView({
 export function TreeNode({
   hierarchy,
   selection,
-}: { hierarchy: Hierarchy; selection: Hierarchy }): Element {
+}: {
+  hierarchy: Hierarchy;
+  selection: Hierarchy;
+}): Element {
   let selected = hierarchy.id === selection.id;
   return (
-    <sl-tree-item
-      key={hierarchy.id}
-      selection="single"
-      data-id={hierarchy.id}
-      selected={selected}
-    >
+    <sl-tree-item key={hierarchy.id} selection="single" data-id={hierarchy.id} selected={selected}>
       {getNodeLabel(hierarchy)}
       {hierarchy.children.map((h) => (
         <TreeNode hierarchy={h} selection={selection} />

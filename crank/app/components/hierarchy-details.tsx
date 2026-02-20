@@ -8,7 +8,7 @@ function valueToString(v: unknown): string {
   if (typeof v === "object") {
     try {
       return JSON.stringify(v);
-    } catch (_err) {
+    } catch (ignore) {
       return String(v);
     }
   }
@@ -43,10 +43,7 @@ export function Details({ slot, node }: { slot?: string; node: Hierarchy }) {
   function copyAllProperties() {
     if (!node) return;
     const txt = JSON.stringify(node.data ?? {}, null, 2);
-    if (
-      navigator.clipboard &&
-      typeof navigator.clipboard.writeText === "function"
-    ) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
       navigator.clipboard.writeText(txt).catch(() => {});
     }
   }
@@ -78,9 +75,7 @@ export function Details({ slot, node }: { slot?: string; node: Hierarchy }) {
                   {node ? String(node.data.type ?? "") : ""}
                 </div>
               </div>
-              <div class={detailsStyles.statusText}>
-                ● {String(node.data.status ?? "")}
-              </div>
+              <div class={detailsStyles.statusText}>● {String(node.data.status ?? "")}</div>
             </div>
 
             <div class={detailsStyles.propertiesSection}>
@@ -104,9 +99,7 @@ export function Details({ slot, node }: { slot?: string; node: Hierarchy }) {
                   properties.map((p) => (
                     <div key={p.k} class={detailsStyles.kvRow}>
                       <div class={detailsStyles.propertyKey}>{p.k}</div>
-                      <div class={detailsStyles.propertyValue}>
-                        {String(p.v)}
-                      </div>
+                      <div class={detailsStyles.propertyValue}>{String(p.v)}</div>
                     </div>
                   ))
                 )}

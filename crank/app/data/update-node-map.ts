@@ -2,9 +2,7 @@ import type { ScopeEvent } from "../../../scope/protocol.ts";
 import type { NodeMap, Transform } from "./types.ts";
 import { reduce } from "../../../lib/reduce.ts";
 
-export function updateNodeMap(
-  initial: NodeMap,
-): Transform<ScopeEvent, NodeMap> {
+export function updateNodeMap(initial: NodeMap): Transform<ScopeEvent, NodeMap> {
   return reduce(function* (nodemap, item) {
     if (item.type === "tree") {
       for (let node of item.value) {

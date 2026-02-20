@@ -13,8 +13,7 @@ function FeatureCards({ uploadSlot }: { uploadSlot?: Element }) {
           <h3>Connect to Live Process</h3>
         </div>
         <div>
-          Inspect a running Effection process in real-time via the running
-          inspector connection
+          Inspect a running Effection process in real-time via the running inspector connection
         </div>
         <div slot="footer">
           <a href="/live">
@@ -30,10 +29,7 @@ function FeatureCards({ uploadSlot }: { uploadSlot?: Element }) {
           <sl-icon name="cloud-upload" label="Load recording" />
           <h3>Load Recording</h3>
         </div>
-        <div>
-          Analyze a previously recorded session with time-travel controls and
-          playback
-        </div>
+        <div>Analyze a previously recorded session with time-travel controls and playback</div>
         <div slot="footer">
           {uploadSlot}
           <div class={homeStyles.meta}>.json, .effection files</div>
@@ -79,9 +75,7 @@ export async function* Home(this: Context): AsyncGenerator<Element> {
         <sl-button
           type="button"
           variant="neutral"
-          onclick={() =>
-            (document.getElementById("file-input") as HTMLInputElement).click()
-          }
+          onclick={() => (document.getElementById("file-input") as HTMLInputElement).click()}
         >
           Browse files
         </sl-button>

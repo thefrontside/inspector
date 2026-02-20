@@ -1,7 +1,7 @@
 export function toJson(value: unknown) {
   try {
     return JSON.parse(JSON.stringify(value));
-  } catch (_error) {
+  } catch (ignore) {
     return String(value);
   }
 }

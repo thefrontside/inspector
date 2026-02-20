@@ -23,13 +23,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Check formatting
-        run: echo noop
+        run: pnpm run fmt:check
 
       - name: Lint
-        run: echo noop
+        run: pnpm run lint
 
       - name: Typecheck
-        run: echo noop
+        run: pnpm run typecheck
 
   test:
     name: Test

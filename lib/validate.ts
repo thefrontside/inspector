@@ -17,9 +17,7 @@ export function validate<T>(
 ): Result<StandardSchemaV1.InferInput<StandardSchemaV1<T>>> {
   let validation = schema["~standard"].validate(value);
   if (validation instanceof Promise) {
-    return Err(
-      new TypeError("invalid protocol: async validations are not allowed"),
-    );
+    return Err(new TypeError("invalid protocol: async validations are not allowed"));
   }
   if (validation.issues) {
     let issues = validation.issues.join("\n");

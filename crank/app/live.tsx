@@ -17,11 +17,7 @@ const protocol = combine.protocols(scope, player);
 
 const client = createSSEClient(protocol);
 
-const hierarchies = pipe(
-  client.methods.watchScopes(),
-  updateNodeMap({}),
-  stratify(),
-);
+const hierarchies = pipe(client.methods.watchScopes(), updateNodeMap({}), stratify());
 
 export async function* Live(this: Context): AsyncGenerator<Element> {
   let scope = createCrankScope(this);
@@ -79,7 +75,10 @@ type PlayerStatus = "playing" | "paused";
 function PauseControls({
   status,
   unpause = () => {},
-}: { status: PlayerStatus; unpause?: () => void }): Element {
+}: {
+  status: PlayerStatus;
+  unpause?: () => void;
+}): Element {
   unpause();
   return (
     <sl-icon-button
@@ -141,10 +140,7 @@ function Status({ state }: { state: ConnectionState<unknown, unknown> }) {
       return (
         <>
           <sl-badge variant="neutral">connection</sl-badge>
-          <sl-tooltip
-            content={`${error.name}: ${error.message}`}
-            placement="bottom-start"
-          >
+          <sl-tooltip content={`${error.name}: ${error.message}`} placement="bottom-start">
             <sl-badge variant="danger" pulse={false}>
               error
             </sl-badge>

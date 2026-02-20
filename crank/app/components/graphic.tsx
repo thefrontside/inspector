@@ -37,8 +37,7 @@ export async function* Graphic(
     if (!svg) return;
     const root = svg.closest && (svg.closest("html") as Element | null);
     if (!root) return;
-    const graphicWrapper =
-      svg.closest && (svg.closest("#graphic-wrapper") as Element | null);
+    const graphicWrapper = svg.closest && (svg.closest("#graphic-wrapper") as Element | null);
     if (!graphicWrapper) return;
 
     const svgRect = svg.getBoundingClientRect();
@@ -151,11 +150,7 @@ function themeBasedFill(dark: string, light: string) {
   // Prefer explicit app theme class, then fall back to system preference
   if (typeof window === "undefined") return light;
   if (document.documentElement.classList.contains("sl-theme-dark")) return dark;
-  if (
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  )
-    return dark;
+  if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return dark;
   return light;
 }
 
@@ -241,18 +236,14 @@ export function renderChart(
       });
 
     // Apply the zoom behavior to the svg. Casts added for TS safety.
-    svg.call(
-      zoomBehavior as unknown as d3.ZoomBehavior<SVGSVGElement, unknown>,
-    );
+    svg.call(zoomBehavior as unknown as d3.ZoomBehavior<SVGSVGElement, unknown>);
 
     // dblclick to reset zoom
     svg.on("dblclick.zoom", () => {
       svg
         .transition()
         .duration(350)
-        .call((sel) =>
-          sel.call(zoomBehavior.transform as any, d3.zoomIdentity),
-        );
+        .call((sel) => sel.call(zoomBehavior.transform as any, d3.zoomIdentity));
     });
 
     // @ts-expect-error Mark the node as having the zoom behavior initialized
@@ -342,9 +333,7 @@ export function renderChart(
       (update) => update,
       (exit) => exit.remove().attr("fill", "red"),
     )
-    .attr("fill", (d: any) =>
-      selectedId === d.data.id ? "#ff9800" : d.children ? "#555" : "#999",
-    )
+    .attr("fill", (d: any) => (selectedId === d.data.id ? "#ff9800" : d.children ? "#555" : "#999"))
     .transition()
     .duration(500)
     .ease(d3.easeLinear)

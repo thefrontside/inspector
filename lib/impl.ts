@@ -12,9 +12,7 @@ export function fn<TArgs extends unknown[], TReturn>(
 
 export function op<TArgs extends unknown[], TReturn>(
   fn: (...args: TArgs) => Operation<TReturn>,
-): (
-  ...args: TArgs
-) => Stream<never, TReturn extends void ? undefined : TReturn> {
+): (...args: TArgs) => Stream<never, TReturn extends void ? undefined : TReturn> {
   return lift((...args) => ({
     *next() {
       return {

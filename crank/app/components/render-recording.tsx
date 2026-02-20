@@ -1,9 +1,6 @@
 import { Fragment, type Context } from "@b9g/crank";
 
-import {
-  resource,
-  type Subscription,
-} from "effection";
+import { resource, type Subscription } from "effection";
 import { pipe } from "remeda";
 import { arrayLoader, useRecording } from "../data/recording.ts";
 import type { Recording } from "../data/recording.ts";
@@ -27,11 +24,7 @@ export async function* RenderRecording(
       let recording = yield* useRecording(arrayLoader(nodeMap));
       $recording.resolve(recording);
 
-      const hierarchies = pipe(
-        recording.replayStream(),
-        sample(raf()),
-        stratify(),
-      );
+      const hierarchies = pipe(recording.replayStream(), sample(raf()), stratify());
 
       yield* provide(yield* hierarchies);
     }),

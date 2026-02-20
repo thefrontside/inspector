@@ -5,12 +5,7 @@ export function Header({ toggleTheme }: { toggleTheme: () => void }): Element {
     <header class={layoutStyles.topBar}>
       <div class={layoutStyles.brand}>
         <div class={layoutStyles.logo}>
-          <sl-button
-            href="/"
-            aria-label="Home"
-            type="button"
-            class={layoutStyles.logoButton}
-          >
+          <sl-button href="/" aria-label="Home" type="button" class={layoutStyles.logoButton}>
             <img
               src="/effection-logo.svg"
               class={`${layoutStyles.logoImg} ${layoutStyles.lightLogo}`}
@@ -25,11 +20,7 @@ export function Header({ toggleTheme }: { toggleTheme: () => void }): Element {
         </div>
 
         <div class={layoutStyles.themeSwitcher}>
-          <sl-button
-            aria-label="Toggle theme"
-            type="button"
-            onclick={() => toggleTheme()}
-          >
+          <sl-button aria-label="Toggle theme" type="button" onclick={() => toggleTheme()}>
             <span class={layoutStyles.iconSun}>
               <sl-icon name="sun" />
             </span>

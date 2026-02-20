@@ -12,13 +12,7 @@ import {
 import type { Handle, Methods } from "./types.ts";
 import { validateUnsafe } from "./validate.ts";
 
-import {
-  createEventStream,
-  defineEventHandler,
-  H3,
-  serve,
-  serveStatic,
-} from "h3";
+import { createEventStream, defineEventHandler, H3, serve, serveStatic } from "h3";
 import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -71,19 +65,13 @@ export function useSSEServer<M extends Methods>(
                   );
                   next = yield* subscription.next();
                 }
-                let value = validateUnsafe(
-                  protocol.methods[name].returns,
-                  next.value,
-                );
-                yield* until(
-                  stream.push({ event: "return", data: JSON.stringify(value) }),
-                );
+                let value = validateUnsafe(protocol.methods[name].returns, next.value);
+                yield* until(stream.push({ event: "return", data: JSON.stringify(value) }));
               }),
             );
             yield* once(req.signal, "abort");
           } catch (cause) {
-            let error =
-              cause instanceof Error ? cause : new Error("unknown", { cause });
+            let error = cause instanceof Error ? cause : new Error("unknown", { cause });
             let { name, message } = error;
             yield* until(
               stream.push({
@@ -104,9 +92,7 @@ export function useSSEServer<M extends Methods>(
 
     const ROOT_DIR = join(import.meta.dirname, "..");
     const PUBLIC_DIR = join(
-      ...(ROOT_DIR === "dist"
-        ? [ROOT_DIR, "..", "crank", "dist"]
-        : [ROOT_DIR, "crank", "dist"]),
+      ...(ROOT_DIR === "dist" ? [ROOT_DIR, "..", "crank", "dist"] : [ROOT_DIR, "crank", "dist"]),
     );
 
     const frontendRoutes = ["/live", "/recording", "/demo"];
@@ -120,9 +106,7 @@ export function useSSEServer<M extends Methods>(
           },
           getMeta: async (id) => {
             const filename = frontendRoutes.includes(id) ? "index.html" : id;
-            const stats = await stat(join(PUBLIC_DIR, filename)).catch(
-              () => null,
-            );
+            const stats = await stat(join(PUBLIC_DIR, filename)).catch(() => null);
             if (!stats || !stats.isFile()) return;
             return { size: stats.size, mtime: stats.mtime };
           },

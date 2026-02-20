@@ -1,13 +1,6 @@
 import { filter, map } from "@effectionx/stream-helpers";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import {
-  createSignal,
-  each,
-  on,
-  resource,
-  spawn,
-  type Stream,
-} from "effection";
+import { createSignal, each, on, resource, spawn, type Stream } from "effection";
 import { pipe } from "remeda";
 import { validateUnsafe } from "../../../lib/validate";
 
@@ -62,11 +55,7 @@ export function createLocalStorage<T>(
   };
 }
 
-function decode<T>(
-  schema: StandardSchemaV1<T>,
-  item: string | null,
-  defaultValue: T,
-): T {
+function decode<T>(schema: StandardSchemaV1<T>, item: string | null, defaultValue: T): T {
   if (item === null) {
     return defaultValue;
   }

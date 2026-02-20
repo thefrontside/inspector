@@ -9,12 +9,7 @@ export interface Combine {
   protocols<A extends Methods, B extends Methods, C extends Methods>(
     ...protocols: [Protocol<A>, Protocol<B>, Protocol<C>]
   ): Protocol<A & B & C>;
-  protocols<
-    A extends Methods,
-    B extends Methods,
-    C extends Methods,
-    D extends Methods,
-  >(
+  protocols<A extends Methods, B extends Methods, C extends Methods, D extends Methods>(
     ...protocols: [Protocol<A>, Protocol<B>, Protocol<C>, Protocol<D>]
   ): Protocol<A & B & C & D>;
 
@@ -25,12 +20,7 @@ export interface Combine {
   inspectors<A extends Methods, B extends Methods, C extends Methods>(
     ...inspectors: [Inspector<A>, Inspector<B>, Inspector<C>]
   ): Inspector<A & B & C>;
-  inspectors<
-    A extends Methods,
-    B extends Methods,
-    C extends Methods,
-    D extends Methods,
-  >(
+  inspectors<A extends Methods, B extends Methods, C extends Methods, D extends Methods>(
     ...inspectors: [Inspector<A>, Inspector<B>, Inspector<C>, Inspector<D>]
   ): Inspector<A & B & C & D>;
 }
@@ -46,21 +36,19 @@ export const combine: Combine = {
     );
   },
   inspectors: (...inspectors: Inspector<Methods>[]) => {
-    return inspectors.reduce(
-      (acc: Inspector<Methods>, inspector: Inspector<Methods>) => {
-        let protocol = combine.protocols(acc.protocol, inspector.protocol);
-        let attach = function* (scope: Scope): Operation<Handle<Methods>> {
-          let a = yield* acc.attach(scope);
-          let b = yield* inspector.attach(scope);
-          let methods = Object.assign({}, a.methods, b.methods);
-          return {
-            protocol,
-            methods,
-            invoke: ({ name, args }) => methods[name](...args),
-          };
+    return inspectors.reduce((acc: Inspector<Methods>, inspector: Inspector<Methods>) => {
+      let protocol = combine.protocols(acc.protocol, inspector.protocol);
+      let attach = function* (scope: Scope): Operation<Handle<Methods>> {
+        let a = yield* acc.attach(scope);
+        let b = yield* inspector.attach(scope);
+        let methods = Object.assign({}, a.methods, b.methods);
+        return {
+          protocol,
+          methods,
+          invoke: ({ name, args }) => methods[name](...args),
         };
-        return { protocol, attach };
-      },
-    );
+      };
+      return { protocol, attach };
+    });
   },
 };

@@ -19,9 +19,7 @@ global.around(api.Main, {
         let address = yield* useSSEServer(handle, { port: 41000 });
 
         let { version } = packageJSON;
-        console.log(
-          `effection inspector@${version} running at ${address}/live`,
-        );
+        console.log(`effection inspector@${version} running at ${address}/live`);
       });
 
       try {
