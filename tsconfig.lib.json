@@ -1,0 +1,11 @@
+{
+  // checks cover all .ts files,
+  // but excludes the crank directory which has its own tsconfig
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "."
+  },
+  "include": ["**/*.ts", "package.json"],
+  "exclude": ["dist", "crank"]
+}

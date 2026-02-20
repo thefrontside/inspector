@@ -1,0 +1,11 @@
+{
+  // This is the base tsconfig to build the lib,
+  // excludes
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "."
+  },
+  "include": ["**/*.ts", "package.json"],
+  "exclude": ["dist", "crank", "tests", "examples"]
+}
