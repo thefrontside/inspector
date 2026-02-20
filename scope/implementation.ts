@@ -3,21 +3,13 @@ import { createImplementation, toJson } from "../lib/mod.ts";
 import { op } from "../lib/impl.ts";
 import { createContext, createSignal, type Scope } from "effection";
 import { api } from "effection/experimental";
-import {
-  protocol,
-  type ScopeNode,
-  type ScopeEvent,
-  type ScopeTree,
-} from "./protocol.ts";
+import { protocol, type ScopeNode, type ScopeEvent, type ScopeTree } from "./protocol.ts";
 import { pipe } from "remeda";
 import { createSubject } from "@effectionx/stream-helpers";
 import { AttributesContext, getLabels } from "../lib/labels.ts";
 
 const Id = createContext<string>("@effectionx/inspector.id", "global");
-const Children = createContext<Set<Scope>>(
-  "@effection/scope.children",
-  new Set(),
-);
+const Children = createContext<Set<Scope>>("@effection/scope.children", new Set());
 
 export const scope = createImplementation(protocol, function* (root) {
   let ids = 0;
@@ -84,10 +76,7 @@ export const scope = createImplementation(protocol, function* (root) {
 
   return {
     watchScopes: () =>
-      pipe(
-        stream,
-        createSubject<ScopeEvent>({ type: "tree", value: readTree(root) }),
-      ),
+      pipe(stream, createSubject<ScopeEvent>({ type: "tree", value: readTree(root) })),
     getScopes: op(function* () {
       return readTree(root);
     }),

@@ -18,6 +18,4 @@ export interface Hierarchy {
 /**
  * A function that transforms one stream into another
  */
-export type Transform<A, B> = <TClose>(
-  input: Stream<A, TClose>,
-) => Stream<B, TClose>;
+export type Transform<A, B> = <TClose>(input: Stream<A, TClose>) => Stream<B, TClose>;

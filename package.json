@@ -1,31 +1,44 @@
 {
   "name": "@effectionx/inspector",
   "version": "0.0.1",
-  "type": "module",
+  "bugs": {
+    "url": "https://github.com/thefrontside/inspector/issues"
+  },
   "license": "MIT",
   "author": "engineering@frontside.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/inspector.git"
   },
-  "bugs": {
-    "url": "https://github.com/thefrontside/inspector/issues"
-  },
-  "sideEffects": true,
   "files": [
     "dist",
     "crank/dist"
   ],
-  "packageManager": "pnpm@9.15.9",
+  "type": "module",
+  "sideEffects": true,
+  "exports": {
+    ".": {
+      "development": "./loader.ts",
+      "default": "./dist/loader.js"
+    },
+    "./lib": {
+      "development": "./mod.ts",
+      "default": "./dist/mod.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "start": "vite --host 0.0.0.0 crank",
     "build": "pnpm run build:tsc && pnpm run build:ui",
     "build:tsc": "tsc -p tsconfig.build.json",
     "build:ui": "vite build crank",
-    "test": "node --test"
-  },
-  "peerDependencies": {
-    "effection": "^4.1.0-alpha.3"
+    "test": "node --test",
+    "check": "pnpm run \"/(typecheck$)|(lint$)|(fmt$)/\"",
+    "typecheck": "tsc -p tsconfig.lib.json --noEmit",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "dependencies": {
     "@ark/util": "^0.56.0",
@@ -50,20 +63,15 @@
     "effection": "4.1.0-alpha.5",
     "expect": "^30.2.0",
     "lightningcss": "^1.31.1",
+    "oxfmt": "^0.34.0",
+    "oxlint": "^1.49.0",
     "parse-sse": "^0.1.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-static-copy": "^3.2.0"
   },
-  "exports": {
-    ".": {
-      "development": "./loader.ts",
-      "default": "./dist/loader.js"
-    },
-    "./lib": {
-      "development": "./mod.ts",
-      "default": "./dist/mod.js"
-    },
-    "./package.json": "./package.json"
-  }
+  "peerDependencies": {
+    "effection": "^4.1.0-alpha.3"
+  },
+  "packageManager": "pnpm@9.15.9"
 }

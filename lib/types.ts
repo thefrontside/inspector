@@ -24,9 +24,7 @@ export interface Protocol<M extends Methods> {
 }
 
 export type Implementation<M extends Methods> = (scope: Scope) => Operation<{
-  [N in keyof M]: (
-    ...args: InvocationArgs<M, N>["args"]
-  ) => InvocationResult<M, N>;
+  [N in keyof M]: (...args: InvocationArgs<M, N>["args"]) => InvocationResult<M, N>;
 }>;
 
 export type Handle<M extends Methods> = {

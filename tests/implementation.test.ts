@@ -1,16 +1,17 @@
 import { describe, it } from "@effectionx/bdd";
 import { expect } from "expect";
-import type { Stream } from "effection";
-import { scope } from "arktype";
+import { createScope, type Stream } from "effection";
+import { scope as arktypeScope } from "arktype";
 import type { Method } from "../lib/types.ts";
 
 import { createImplementation, createProtocol } from "../lib/mod.ts";
 
 describe("createImplementation()", () => {
   it("attach yields a handle with protocol and methods and invoke calls the method", function* () {
+    const [scope] = createScope();
     type EchoMethod = { echo: Method<never[], never, string> };
 
-    const schema = scope({
+    const schema = arktypeScope({
       NoneArr: "never[]",
       None: "never",
       Str: "string",
@@ -38,7 +39,7 @@ describe("createImplementation()", () => {
       };
     });
 
-    const handle = yield* inspector.attach();
+    const handle = yield* inspector.attach(scope);
 
     // ensure protocol and methods exist
     expect(handle.protocol).toBe(protocol);

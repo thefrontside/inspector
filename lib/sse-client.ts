@@ -1,10 +1,4 @@
-import {
-  resource,
-  stream,
-  until,
-  useAbortSignal,
-  useAttributes,
-} from "effection";
+import { resource, stream, until, useAbortSignal, useAttributes } from "effection";
 import {
   toJson,
   type Handle,
@@ -36,18 +30,11 @@ export function createSSEClient<M extends Methods>(
 ): Handle<M> {
   let handle: Handle<M> = {
     protocol,
-    invoke<N extends keyof M>({
-      name,
-      args,
-    }: InvocationArgs<M, N>): InvocationResult<M, N> {
+    invoke<N extends keyof M>({ name, args }: InvocationArgs<M, N>): InvocationResult<M, N> {
       let methodName = String(name);
 
       // validate the arguments against the protocol
-      validateUnsafe(
-        protocol.methods[name].args,
-        args,
-        `arguments ${methodName}()`,
-      );
+      validateUnsafe(protocol.methods[name].args, args, `arguments ${methodName}()`);
 
       return resource(function* (provide) {
         yield* useAttributes({ name: `inspector.${methodName}()` });
@@ -97,10 +84,7 @@ export function createSSEClient<M extends Methods>(
             } else if (type === "return") {
               return {
                 done: true,
-                value: validateUnsafe(
-                  protocol.methods[methodName].returns,
-                  parsed,
-                ),
+                value: validateUnsafe(protocol.methods[methodName].returns, parsed),
               };
             } else if (type === "throw") {
               throw parsed;
