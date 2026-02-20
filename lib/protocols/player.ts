@@ -1,5 +1,5 @@
 import { type } from "arktype";
-import { createProtocol } from "../lib/protocol.ts";
+import { createProtocol } from "../protocol.ts";
 
 export const protocol = createProtocol({
   watchPlayerState: {

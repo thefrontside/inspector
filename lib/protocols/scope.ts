@@ -1,5 +1,5 @@
 import { scope } from "arktype";
-import { createProtocol } from "../lib/mod.ts";
+import { createProtocol } from "../mod.ts";
 
 const $ = scope({
   ScopeNode: {

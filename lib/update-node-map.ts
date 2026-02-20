@@ -1,5 +1,5 @@
-import { Json } from "@ark/util";
-import type { ScopeEvent } from "../scope/protocol.ts";
+import type { Json } from "@ark/util";
+import type { ScopeEvent } from "./protocols/scope.ts";
 import { reduce } from "./reduce.ts";
 import type { Stream } from "effection";
 

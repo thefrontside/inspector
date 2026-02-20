@@ -7,9 +7,9 @@ import {
   withResolvers,
   type Operation,
 } from "effection";
-import { createImplementation } from "../lib/implementation.ts";
-import { protocol } from "./protocol.ts";
-import { op } from "../lib/impl.ts";
+import { createImplementation } from "../implementation.ts";
+import { protocol } from "../protocols/player.ts";
+import { op } from "../impl.ts";
 
 export type PlayerStatus = "playing" | "paused";
 

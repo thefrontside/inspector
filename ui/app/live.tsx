@@ -4,16 +4,17 @@ import { pipe } from "remeda";
 import { updateNodeMap } from "../../lib/update-node-map.ts";
 import { stratify } from "./data/stratify.ts";
 import { createSSEClient } from "../../lib/sse-client.ts";
-import { protocol as scope } from "../../scope/protocol.ts";
-import { protocol as player } from "../../player/protocol.ts";
+
+
 import { combine } from "../../lib/combine.ts";
 import { StructureInspector } from "./components/structure-inspector.tsx";
 import { createConnection, type ConnectionState } from "./data/connection.ts";
 import { Toolbar } from "./toolbar.tsx";
 import styles from "./live.module.css";
 import { createCrankScope } from "./lib/crank-scope.ts";
+import { player, scope } from "../../lib/protocols.ts";
 
-const protocol = combine.protocols(scope, player);
+const protocol = combine.protocols(scope.protocol, player.protocol);
 
 const client = createSSEClient(protocol);
 

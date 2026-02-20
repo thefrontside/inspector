@@ -1,11 +1,11 @@
 import { global, useAttributes } from "effection";
 import { api } from "effection/experimental";
 import { combine } from "./mod.ts";
-import { scope } from "./scope/implementation.ts";
-import { player } from "./player/implementation.ts";
+import { scope } from "./lib/implementations/scope.ts";
+import { player } from "./lib/implementations/player.ts";
 import { attach } from "./lib/attach.ts";
 import { useSSEServer } from "./lib/sse-server.ts";
-import { pause } from "./player/implementation.ts";
+import { pause } from "./lib/implementations/player.ts";
 import packageJSON from "./package.json" with { type: "json" };
 
 const inspector = combine.inspectors(scope, player);
