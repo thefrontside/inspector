@@ -18,9 +18,7 @@ export interface Node {
 
 export type NodeMap = Record<string, Node>;
 
-export function updateNodeMap(
-  initial: NodeMap,
-): Transform<ScopeEvent, NodeMap> {
+export function updateNodeMap(initial: NodeMap): Transform<ScopeEvent, NodeMap> {
   return reduce(function* (nodemap, item) {
     if (item.type === "tree") {
       for (let node of item.value) {

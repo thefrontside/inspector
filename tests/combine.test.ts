@@ -1,8 +1,8 @@
 import { describe, it } from "@effectionx/bdd";
 import { expect } from "expect";
 import { combine, createImplementation, createProtocol } from "../lib/mod.ts";
-import { scope } from "arktype";
-import type { Stream } from "effection";
+import { scope as arktypeScope } from "arktype";
+import { createScope, type Stream } from "effection";
 import type { Method } from "../lib/types.ts";
 
 describe("combine", () => {
@@ -10,7 +10,7 @@ describe("combine", () => {
     type AMethods = { a: Method<never[], never, string> };
     type BMethods = { b: Method<never[], never, string> };
 
-    const schema = scope({
+    const schema = arktypeScope({
       NoneArr: "never[]",
       None: "never",
       Str: "string",
@@ -31,10 +31,11 @@ describe("combine", () => {
   });
 
   it("combines inspectors and their attach results", function* () {
+    const [scope] = createScope();
     type AMethods = { a: Method<never[], never, string> };
     type BMethods = { b: Method<never[], never, string> };
 
-    const schema = scope({
+    const schema = arktypeScope({
       NoneArr: "never[]",
       None: "never",
       Str: "string",
@@ -75,7 +76,7 @@ describe("combine", () => {
     });
 
     const combined = combine.inspectors(aIns, bIns);
-    const handle = yield* combined.attach();
+    const handle = yield* combined.attach(scope);
 
     expect(Object.keys(handle.protocol.methods).sort()).toEqual(["a", "b"]);
 

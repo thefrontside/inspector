@@ -8,8 +8,4 @@ export const SettingsSchema = type({
 
 export type Settings = typeof SettingsSchema.infer;
 
-export const settings = createLocalStorage<Settings>(
-  "settings",
-  SettingsSchema,
-  {},
-);
+export const settings = createLocalStorage<Settings>("settings", SettingsSchema, {});

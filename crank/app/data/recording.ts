@@ -18,9 +18,7 @@ export interface Tick {
   nodemap: NodeMap;
 }
 
-export function* useRecording(
-  load: () => Operation<Cassette>,
-): Operation<Recording> {
+export function* useRecording(load: () => Operation<Cassette>): Operation<Recording> {
   let { length, loadOffset } = yield* load();
   let stream = createSignal<number, never>();
 

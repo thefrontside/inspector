@@ -22,9 +22,7 @@ export type PlayerContext =
       resume: () => Operation<void>;
     };
 
-const PlayerContext = createContext<{ ref: PlayerContext }>(
-  "@effectionx/inspector.player",
-);
+const PlayerContext = createContext<{ ref: PlayerContext }>("@effectionx/inspector.player");
 
 const state = createChannel<PlayerStatus, never>();
 

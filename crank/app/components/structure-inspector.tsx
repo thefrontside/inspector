@@ -83,12 +83,7 @@ export function TreeNode({
 }): Element {
   let selected = hierarchy.id === selection.id;
   return (
-    <sl-tree-item
-      key={hierarchy.id}
-      selection="single"
-      data-id={hierarchy.id}
-      selected={selected}
-    >
+    <sl-tree-item key={hierarchy.id} selection="single" data-id={hierarchy.id} selected={selected}>
       {getNodeLabel(hierarchy)}
       {hierarchy.children.map((h) => (
         <TreeNode key={h.id} hierarchy={h} selection={selection} />
@@ -112,21 +107,12 @@ export function initialStructure(): Stratification {
   };
 }
 
-function applyFilters(
-  filters: Partial<StructureInspectorFilters>,
-  root: Hierarchy,
-): Hierarchy {
+function applyFilters(filters: Partial<StructureInspectorFilters>, root: Hierarchy): Hierarchy {
   let children = root.children.flatMap((child) => {
-    let attributes = (child.data["@effection/attributes"] ?? {}) as Record<
-      string,
-      unknown
-    >;
+    let attributes = (child.data["@effection/attributes"] ?? {}) as Record<string, unknown>;
     if (attributes.name === "Inspector" && !filters.showInspectorRuntime) {
       return [];
-    } else if (
-      attributes.name === "anonymous" &&
-      !filters.showAnonymousScopes
-    ) {
+    } else if (attributes.name === "anonymous" && !filters.showAnonymousScopes) {
       return child.children;
     } else {
       return [applyFilters(filters, child)];

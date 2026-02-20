@@ -44,7 +44,7 @@ export async function* Recording(this: Context): AsyncGenerator<Element> {
 
   // file input handler to support manual upload from the Recording page
   // TODO add a file input element to the Recording page UI
-  const handleFileSelect = (e: Event) => {
+  const _handleFileSelect = (e: Event) => {
     const input = e.currentTarget as HTMLInputElement;
     const file = input.files?.[0];
     if (file) {

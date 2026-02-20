@@ -1,11 +1,5 @@
 import type { Operation, Scope } from "effection";
-import type {
-  Handle,
-  Implementation,
-  Inspector,
-  Methods,
-  Protocol,
-} from "./types.ts";
+import type { Handle, Implementation, Inspector, Methods, Protocol } from "./types.ts";
 
 export function createImplementation<M extends Methods>(
   protocol: Protocol<M>,

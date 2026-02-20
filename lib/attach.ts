@@ -1,10 +1,4 @@
-import {
-  type Operation,
-  type Scope,
-  suspend,
-  useAttributes,
-  withResolvers,
-} from "effection";
+import { type Operation, type Scope, suspend, useAttributes, withResolvers } from "effection";
 import type { Methods, Inspector, Handle } from "./types.ts";
 
 export function* attach<M extends Methods>(

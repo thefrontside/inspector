@@ -1,11 +1,5 @@
 import type { Context } from "@b9g/crank";
-import {
-  createScope,
-  Ok,
-  sleep,
-  withResolvers,
-  type Operation,
-} from "effection";
+import { createScope, Ok, sleep, withResolvers, type Operation } from "effection";
 import type { Recording } from "../data/recording.ts";
 import playbackStyles from "./playback-controls.module.css";
 
@@ -48,9 +42,7 @@ export async function* PlaybackControls(
       playing = false;
     }
 
-    const v = Number(
-      event?.target && "value" in event?.target ? event.target.value : 0,
-    );
+    const v = Number(event?.target && "value" in event.target ? event.target.value : 0);
     recording.setOffset(v);
     refresh(() => (offset = v));
   });
