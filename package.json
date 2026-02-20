@@ -47,7 +47,7 @@
     "@shoelace-style/shoelace": "^2.20.1",
     "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
-    "effection": "4.1.0-alpha.3",
+    "effection": "4.1.0-alpha.5",
     "expect": "^30.2.0",
     "lightningcss": "^1.31.1",
     "parse-sse": "^0.1.0",

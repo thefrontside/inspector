@@ -16,7 +16,7 @@ importers:
         version: 0.7.5
       '@effectionx/stream-helpers':
         specifier: ^0.7.2
-        version: 0.7.2(effection@4.1.0-alpha.3)
+        version: 0.7.2(effection@4.1.0-alpha.5)
       '@standard-schema/spec':
         specifier: ^1.0.0
         version: 1.1.0
@@ -41,7 +41,7 @@ importers:
     devDependencies:
       '@effectionx/bdd':
         specifier: ^0.4.2
-        version: 0.4.2(effection@4.1.0-alpha.3)
+        version: 0.4.2(effection@4.1.0-alpha.5)
       '@nano-router/history':
         specifier: ^4.0.4
         version: 4.0.4
@@ -55,8 +55,8 @@ importers:
         specifier: ^7.4.3
         version: 7.4.3
       effection:
-        specifier: 4.1.0-alpha.3
-        version: 4.1.0-alpha.3
+        specifier: 4.1.0-alpha.5
+        version: 4.1.0-alpha.5
       expect:
         specifier: ^30.2.0
         version: 30.2.0
@@ -811,8 +811,8 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  effection@4.1.0-alpha.3:
-    resolution: {integrity: sha512-EQRygHWOFDopUWAdGBz87sIvLemhdgGTqKKpvrDmrE+ZaO0l85gEBJ2xXT4Rk5LqknRV4FcQrIeqZtn0OHoO/w==}
+  effection@4.1.0-alpha.5:
+    resolution: {integrity: sha512-UCYrU5wGaRYxhcUHx7eVeJ+Cwm/r7zsL484lswbGDVxKeOjqTARNcOxH0CWc4y9Xr5S1KjW0tsdOdgOdXE8wag==}
     engines: {node: '>= 16'}
 
   esbuild@0.27.3:
@@ -1193,31 +1193,31 @@ snapshots:
 
   '@ctrl/tinycolor@4.2.0': {}
 
-  '@effectionx/bdd@0.4.2(effection@4.1.0-alpha.3)':
+  '@effectionx/bdd@0.4.2(effection@4.1.0-alpha.5)':
     dependencies:
-      '@effectionx/test-adapter': 0.7.1(effection@4.1.0-alpha.3)
-      effection: 4.1.0-alpha.3
+      '@effectionx/test-adapter': 0.7.1(effection@4.1.0-alpha.5)
+      effection: 4.1.0-alpha.5
 
-  '@effectionx/signals@0.5.1(effection@4.1.0-alpha.3)':
+  '@effectionx/signals@0.5.1(effection@4.1.0-alpha.5)':
     dependencies:
-      effection: 4.1.0-alpha.3
+      effection: 4.1.0-alpha.5
       immutable: 5.1.4
 
-  '@effectionx/stream-helpers@0.7.2(effection@4.1.0-alpha.3)':
+  '@effectionx/stream-helpers@0.7.2(effection@4.1.0-alpha.5)':
     dependencies:
-      '@effectionx/signals': 0.5.1(effection@4.1.0-alpha.3)
-      '@effectionx/timebox': 0.4.1(effection@4.1.0-alpha.3)
-      effection: 4.1.0-alpha.3
+      '@effectionx/signals': 0.5.1(effection@4.1.0-alpha.5)
+      '@effectionx/timebox': 0.4.1(effection@4.1.0-alpha.5)
+      effection: 4.1.0-alpha.5
       immutable: 5.1.4
       remeda: 2.33.6
 
-  '@effectionx/test-adapter@0.7.1(effection@4.1.0-alpha.3)':
+  '@effectionx/test-adapter@0.7.1(effection@4.1.0-alpha.5)':
     dependencies:
-      effection: 4.1.0-alpha.3
+      effection: 4.1.0-alpha.5
 
-  '@effectionx/timebox@0.4.1(effection@4.1.0-alpha.3)':
+  '@effectionx/timebox@0.4.1(effection@4.1.0-alpha.5)':
     dependencies:
-      effection: 4.1.0-alpha.3
+      effection: 4.1.0-alpha.5
 
   '@esbuild/aix-ppc64@0.27.3':
     optional: true
@@ -1838,7 +1838,7 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  effection@4.1.0-alpha.3: {}
+  effection@4.1.0-alpha.5: {}
 
   esbuild@0.27.3:
     optionalDependencies:
