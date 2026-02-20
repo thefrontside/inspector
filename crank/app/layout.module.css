@@ -5,13 +5,6 @@
   margin-top: 24px;
 }
 
-.footer {
-  margin-top: 12px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
 @media (max-width: 800px) {
   .grid {
     grid-template-columns: 1fr;
@@ -108,30 +101,6 @@
   display: inline-block;
 }
 .iconMoon {
-  display: none;
-}
-
-/* Theme-aware tweaks */
-.themeLight {
-  --logo-bg: #1f2937;
-  --topbar-bg: #ffffff;
-}
-
-.themeDark {
-  --logo-bg: rgba(255, 255, 255, 0.06);
-  --topbar-bg: #0b1220;
-}
-
-.themeDark .iconSun {
-  display: none;
-}
-.themeDark .iconMoon {
-  display: inline-block;
-}
-.themeLight .iconSun {
-  display: inline-block;
-}
-.themeLight .iconMoon {
   display: none;
 }
 
