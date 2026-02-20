@@ -2,13 +2,7 @@ import type { Context } from "@b9g/crank";
 import { Layout } from "./layout.tsx";
 import { router } from "../src/router.ts";
 
-import {
-  createScope,
-  each,
-  createSignal,
-  until,
-  type Operation,
-} from "effection";
+import { createScope, each, createSignal, until, type Operation } from "effection";
 import type { NodeMap } from "../../lib/update-node-map.ts";
 import { RenderRecording } from "./components/render-recording.tsx";
 

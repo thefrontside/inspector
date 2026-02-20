@@ -1,12 +1,4 @@
-import {
-  action,
-  all,
-  scoped,
-  spawn,
-  withResolvers,
-  type Operation,
-  type Yielded,
-} from "effection";
+import { action, all, scoped, spawn, withResolvers, type Operation, type Yielded } from "effection";
 import type { Transform } from "../../../lib/update-node-map.ts";
 
 /**

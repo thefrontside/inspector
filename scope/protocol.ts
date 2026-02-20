@@ -56,6 +56,7 @@ const $ = scope({
         didHave: "boolean",
       },
     ),
+  NodeMap: "Record<string, ScopeNode>",
   Never: "never",
   None: "never[]",
   Undef: "undefined",
@@ -80,7 +81,7 @@ export const protocol = createProtocol({
   },
   recordNodeMap: {
     args: schema.None,
-    progress: schema.ScopeEvent,
+    progress: schema.NodeMap,
     returns: schema.Undef,
   },
 });
