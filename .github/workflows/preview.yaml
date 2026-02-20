@@ -25,4 +25,4 @@ jobs:
         run: pnpm build
 
       - name: Publish previews
-        run: npx pkg-pr-new publish --pnpm
+        run: pnpx pkg-pr-new publish
