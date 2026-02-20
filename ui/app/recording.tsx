@@ -16,7 +16,6 @@ export async function* Recording(this: Context): AsyncGenerator<Element> {
   let nodeMap: NodeMap[] = [];
   // runs on first render if we navigated here with a file in the router state
   if (state?.file) {
-    console.log("Received file from router state:", state.file);
     nodeMap = JSON.parse(await state.file.text()) as NodeMap[];
   }
 
@@ -35,16 +34,6 @@ export async function* Recording(this: Context): AsyncGenerator<Element> {
       }
     }
   });
-
-  // file input handler to support manual upload from the Recording page
-  // TODO add a file input element to the Recording page UI
-  const _handleFileSelect = (e: Event) => {
-    const input = e.currentTarget as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      files.send(file);
-    }
-  };
 
   try {
     for ({} of this) {

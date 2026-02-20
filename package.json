@@ -34,7 +34,7 @@
     "build:ui": "vite build ui",
     "test": "node --test",
     "check": "pnpm run \"/(typecheck$)|(lint$)|(fmt$)/\"",
-    "typecheck": "tsc -p tsconfig.lib.json --noEmit",
+    "typecheck": "tsc -b --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",

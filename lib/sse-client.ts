@@ -8,7 +8,7 @@ import {
   type Protocol,
 } from "../mod.ts";
 import { validateUnsafe } from "../lib/validate.ts";
-import { parseServerSentEvents } from "parse-sse";
+import { parseServerSentEvents, type ServerSentEvent } from "parse-sse";
 
 export interface SSEClientOptions {
   url?: string;
@@ -59,7 +59,9 @@ export function createSSEClient<M extends Methods>(
           throw new Error(`${response.status} ${response.statusText}`);
         }
 
-        let events = stream(parseServerSentEvents(response));
+        let sse = parseServerSentEvents(response) as unknown as AsyncIterable<ServerSentEvent>;
+
+        let events = stream(sse);
 
         let subscription = yield* events;
 
