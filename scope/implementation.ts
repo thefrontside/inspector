@@ -7,6 +7,7 @@ import { protocol, type ScopeNode, type ScopeEvent, type ScopeTree } from "./pro
 import { pipe } from "remeda";
 import { createSubject } from "@effectionx/stream-helpers";
 import { AttributesContext, getLabels } from "../lib/labels.ts";
+import { updateNodeMap } from "../lib/update-node-map.ts";
 
 const Id = createContext<string>("@effectionx/inspector.id", "global");
 const Children = createContext<Set<Scope>>("@effection/scope.children", new Set());
@@ -80,6 +81,12 @@ export const scope = createImplementation(protocol, function* (root) {
     getScopes: op(function* () {
       return readTree(root);
     }),
+    recordNodeMap: () =>
+      pipe(
+        stream,
+        createSubject<ScopeEvent>({ type: "tree", value: readTree(root) }),
+        updateNodeMap({}),
+      ),
   };
 }) as Inspector<typeof protocol.methods>;
 

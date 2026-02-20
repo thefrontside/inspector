@@ -1,6 +1,6 @@
 import type { Context, Element } from "@b9g/crank";
 import { Layout } from "./layout.tsx";
-import type { NodeMap } from "./data/types.ts";
+import type { NodeMap } from "../../lib/update-node-map.ts";
 import { RenderRecording } from "./components/render-recording.tsx";
 import json from "./demo.json" with { type: "json" };
 

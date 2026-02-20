@@ -6,7 +6,7 @@ import { arrayLoader, useRecording } from "../data/recording.ts";
 import type { Recording } from "../data/recording.ts";
 import { raf, sample } from "../data/sample.ts";
 import { stratify } from "../data/stratify.ts";
-import type { NodeMap } from "../data/types.ts";
+import type { NodeMap } from "../../../lib/update-node-map.ts";
 import { PlaybackControls } from "../components/playback-controls.tsx";
 import type { Stratification } from "../data/stratify.ts";
 import { StructureInspector } from "./structure-inspector.tsx";
