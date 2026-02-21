@@ -90,9 +90,12 @@ export function useSSEServer<M extends Methods>(
       });
     }
 
+    const UI_DIRNAME = "crank";
     const ROOT_DIR = join(import.meta.dirname, "..");
     const PUBLIC_DIR = join(
-      ...(ROOT_DIR === "dist" ? [ROOT_DIR, "..", "crank", "dist"] : [ROOT_DIR, "crank", "dist"]),
+      ...(ROOT_DIR.endsWith("dist")
+        ? [ROOT_DIR, "..", UI_DIRNAME, "dist"]
+        : [ROOT_DIR, UI_DIRNAME, "dist"]),
     );
 
     const frontendRoutes = ["/live", "/recording", "/demo"];
