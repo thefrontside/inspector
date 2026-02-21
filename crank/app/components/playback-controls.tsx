@@ -82,7 +82,7 @@ export async function* PlaybackControls(
             </div>
           </div>
 
-          <sl-divider class={playbackStyles.divider} />
+          <sl-divider />
         </>
       );
     }

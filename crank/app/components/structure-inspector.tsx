@@ -6,6 +6,7 @@ import type { Context } from "@b9g/crank";
 import { Graphic } from "./graphic.tsx";
 import { createCrankScope } from "../lib/crank-scope.ts";
 import { settings } from "../data/settings.ts";
+import structureInspectorStyles from "./structure-inspector.module.css";
 
 export interface StructureInspectorFilters {
   showInspectorRuntime: boolean;
@@ -37,7 +38,7 @@ export function* StructureInspector(
     selection = selection ?? root;
 
     yield (
-      <sl-split-panel position="70">
+      <sl-split-panel position="70" class={structureInspectorStyles.fullPanel}>
         <TreeView slot="start" root={root} selection={selection} />
         <Details slot="end" node={selection} />
       </sl-split-panel>

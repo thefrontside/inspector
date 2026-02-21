@@ -7,13 +7,3 @@ body {
   display: flex;
   flex-direction: column;
 }
-
-main {
-  flex-grow: 1;
-  /* Ensure sticky top bar doesn't overlap content */
-  padding-top: 16px;
-}
-
-sl-split-panel {
-  height: 100%;
-}

@@ -40,14 +40,6 @@ function flattenNodeData(
 }
 
 export function Details({ slot, node }: { slot?: string; node: Hierarchy }) {
-  function copyAllProperties() {
-    if (!node) return;
-    const txt = JSON.stringify(node.data ?? {}, null, 2);
-    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-      navigator.clipboard.writeText(txt).catch(() => {});
-    }
-  }
-
   const properties = flattenNodeData(node.data);
 
   return (
@@ -65,45 +57,31 @@ export function Details({ slot, node }: { slot?: string; node: Hierarchy }) {
         </sl-tab-panel>
 
         <sl-tab-panel name="attributes">
-          <div class={detailsStyles.tabPanel}>
-            <div class={detailsStyles.headerRow}>
-              <div>
-                <div class={detailsStyles.detailsHeading}>
-                  {node ? getNodeLabel(node) : "Attributes"}
-                </div>
-                <div class={detailsStyles.mutedText}>
-                  {node ? String(node.data.type ?? "") : ""}
-                </div>
+          <div class={detailsStyles.headerRow}>
+            <div>
+              <div class={detailsStyles.detailsHeading}>
+                {node ? getNodeLabel(node) : "Attributes"}
               </div>
-              <div class={detailsStyles.statusText}>● {String(node.data.status ?? "")}</div>
+              <div class={detailsStyles.mutedText}>{node ? String(node.data.type ?? "") : ""}</div>
+            </div>
+          </div>
+
+          <div class={detailsStyles.propertiesSection}>
+            <div class={detailsStyles.propertiesHeader}>
+              <div class={detailsStyles.detailsHeading}>Properties</div>
             </div>
 
-            <div class={detailsStyles.propertiesSection}>
-              <div class={detailsStyles.propertiesHeader}>
-                <div class={detailsStyles.detailsHeading}>Properties</div>
-                <div>
-                  <button
-                    type="button"
-                    class={detailsStyles.copyAll}
-                    onclick={() => copyAllProperties()}
-                  >
-                    Copy all
-                  </button>
-                </div>
-              </div>
-
-              <div class={detailsStyles.kvList}>
-                {properties.length === 0 ? (
-                  <div class={detailsStyles.mutedText}>No properties</div>
-                ) : (
-                  properties.map((p) => (
-                    <div key={p.k} class={detailsStyles.kvRow}>
-                      <div class={detailsStyles.propertyKey}>{p.k}</div>
-                      <div class={detailsStyles.propertyValue}>{String(p.v)}</div>
-                    </div>
-                  ))
-                )}
-              </div>
+            <div class={detailsStyles.kvList}>
+              {properties.length === 0 ? (
+                <div class={detailsStyles.mutedText}>No properties</div>
+              ) : (
+                properties.map((p) => (
+                  <div key={p.k} class={detailsStyles.kvRow}>
+                    <div class={detailsStyles.propertyKey}>{p.k}</div>
+                    <div class={detailsStyles.propertyValue}>{String(p.v)}</div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </sl-tab-panel>

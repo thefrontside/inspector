@@ -11,6 +11,12 @@
   }
 }
 
+.coreLayout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
 /* Header / Top bar styles */
 .topBar {
   position: sticky;
@@ -24,6 +30,14 @@
   padding: 4px 6px;
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
+}
+
+.main {
+  flex-grow: 1;
+  /* Ensure sticky top bar doesn't overlap content */
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
 }
 
 .brand {
