@@ -1,4 +1,4 @@
-import type { Children, Context } from "@b9g/crank";
+import { Fragment, type Children, type Context } from "@b9g/crank";
 import layoutStyles from "./layout.module.css";
 import { settings } from "./data/settings.ts";
 import type { SlDrawer, SlLazyChangeEvent } from "@shoelace-style/shoelace";
@@ -64,7 +64,7 @@ export async function* Layout(
 
   for ({} of this) {
     yield (
-      <div id="layout">
+      <Fragment>
         <sl-drawer label="Settings" ref={(el: SlDrawer) => (drawer = el)}>
           <p>
             <sl-checkbox name="showInspectorRuntime" checked={settings.value.showInspectorRuntime}>
@@ -77,42 +77,44 @@ export async function* Layout(
             </sl-checkbox>
           </p>
         </sl-drawer>
-        <header class={layoutStyles.topBar}>
-          <div class={layoutStyles.brand}>
-            <div class={layoutStyles.logo}>
-              <sl-button href="/" aria-label="Home" type="button" class={layoutStyles.logoButton}>
-                <img
-                  src="/effection-logo.svg"
-                  class={`${layoutStyles.logoImg} ${layoutStyles.lightLogo}`}
-                  alt="Effection logo"
-                />
-                <img
-                  src="/effection-logo-dark.svg"
-                  class={`${layoutStyles.logoImg} ${layoutStyles.darkLogo}`}
-                  alt="Effection logo dark"
-                />
-              </sl-button>
-            </div>
+        <div id="layout" class={layoutStyles.coreLayout}>
+          <header class={layoutStyles.topBar}>
+            <div class={layoutStyles.brand}>
+              <div class={layoutStyles.logo}>
+                <sl-button href="/" aria-label="Home" type="button" class={layoutStyles.logoButton}>
+                  <img
+                    src="/effection-logo.svg"
+                    class={`${layoutStyles.logoImg} ${layoutStyles.lightLogo}`}
+                    alt="Effection logo"
+                  />
+                  <img
+                    src="/effection-logo-dark.svg"
+                    class={`${layoutStyles.logoImg} ${layoutStyles.darkLogo}`}
+                    alt="Effection logo dark"
+                  />
+                </sl-button>
+              </div>
 
-            <div id="toolbar" ref={(el: Element) => this.provide("toolbar", el)}></div>
+              <div id="toolbar" ref={(el: Element) => this.provide("toolbar", el)}></div>
 
-            <div class={layoutStyles.themeSwitcher}>
-              <sl-button aria-label="Settings" onclick={() => drawer.show()}>
-                <sl-icon name="gear"></sl-icon>
-              </sl-button>
-              <sl-button aria-label="Toggle theme" type="button" onclick={() => toggleTheme()}>
-                <span class={layoutStyles.iconSun}>
-                  <sl-icon name="sun" />
-                </span>
-                <span class={layoutStyles.iconMoon}>
-                  <sl-icon name="moon" />
-                </span>
-              </sl-button>
+              <div class={layoutStyles.themeSwitcher}>
+                <sl-button aria-label="Settings" onclick={() => drawer.show()}>
+                  <sl-icon name="gear"></sl-icon>
+                </sl-button>
+                <sl-button aria-label="Toggle theme" type="button" onclick={() => toggleTheme()}>
+                  <span class={layoutStyles.iconSun}>
+                    <sl-icon name="sun" />
+                  </span>
+                  <span class={layoutStyles.iconMoon}>
+                    <sl-icon name="moon" />
+                  </span>
+                </sl-button>
+              </div>
             </div>
-          </div>
-        </header>
-        <main>{children}</main>
-      </div>
+          </header>
+          <main class={layoutStyles.main}>{children}</main>
+        </div>
+      </Fragment>
     );
   }
 }
