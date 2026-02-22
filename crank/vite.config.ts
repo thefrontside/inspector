@@ -25,6 +25,12 @@ export default defineConfig({
       "/play": "http://localhost:41000",
     },
   },
+  css: {
+    transformer: "lightningcss",
+    lightningcss: {
+      cssModules: true,
+    },
+  },
   build: {
     // relative to this config file, not the package root
     outDir: "dist",
