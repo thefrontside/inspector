@@ -5,7 +5,6 @@ import { updateNodeMap } from "../../lib/update-node-map.ts";
 import { stratify } from "./data/stratify.ts";
 import { createSSEClient } from "../../lib/sse-client.ts";
 
-
 import { combine } from "../../lib/combine.ts";
 import { StructureInspector } from "./components/structure-inspector.tsx";
 import { createConnection, type ConnectionState } from "./data/connection.ts";

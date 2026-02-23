@@ -57,7 +57,6 @@ export function Details({ slot, node }: { slot?: string; node: Hierarchy }) {
 
         <sl-tab-panel name="attributes">
           <div class={detailsStyles.propertiesSection}>
-
             <div class={detailsStyles.kvList}>
               {properties.length === 0 ? (
                 <div class={detailsStyles.mutedText}>No properties</div>
