@@ -99,7 +99,7 @@ export function useSSEServer<M extends Methods>(
     );
 
     const frontendRoutes = ["/live", "/recording", "/demo"];
-    // handle static assets from the crank dist directory (js, css, etc.)
+    // handle static assets from the ui dist directory (js, css, etc.)
     app.use(
       defineEventHandler(async (event) => {
         return await serveStatic(event, {

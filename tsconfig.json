@@ -6,7 +6,7 @@
       "path": "./tsconfig.lib.json"
     },
     {
-      "path": "./crank/tsconfig.app.json"
+      "path": "./ui/tsconfig.json"
     }
   ]
 }

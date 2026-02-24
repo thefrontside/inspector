@@ -1,13 +1,13 @@
-import type { Inspector } from "../lib/mod.ts";
-import { createImplementation, toJson } from "../lib/mod.ts";
-import { op } from "../lib/impl.ts";
+import type { Inspector } from "../mod.ts";
+import { createImplementation, toJson } from "../mod.ts";
+import { op } from "../impl.ts";
 import { createContext, createSignal, type Scope } from "effection";
 import { api } from "effection/experimental";
-import { protocol, type ScopeNode, type ScopeEvent, type ScopeTree } from "./protocol.ts";
+import { protocol, type ScopeNode, type ScopeEvent, type ScopeTree } from "../protocols/scope.ts";
 import { pipe } from "remeda";
 import { createSubject } from "@effectionx/stream-helpers";
-import { AttributesContext, getLabels } from "../lib/labels.ts";
-import { updateNodeMap } from "../lib/update-node-map.ts";
+import { AttributesContext, getLabels } from "../labels.ts";
+import { updateNodeMap } from "../update-node-map.ts";
 
 const Id = createContext<string>("@effectionx/inspector.id", "global");
 const Children = createContext<Set<Scope>>("@effection/scope.children", new Set());

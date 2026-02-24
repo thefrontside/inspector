@@ -7,5 +7,5 @@
     "rootDir": "."
   },
   "include": ["**/*.ts", "package.json"],
-  "exclude": ["dist", "crank", "tests", "examples"]
+  "exclude": ["dist", "ui", "tests", "examples"]
 }

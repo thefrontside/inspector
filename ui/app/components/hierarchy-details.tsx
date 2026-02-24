@@ -1,4 +1,3 @@
-import { getNodeLabel } from "../data/labels.ts";
 import type { Hierarchy } from "../data/types.ts";
 
 import detailsStyles from "./hierarchy-details.module.css";
@@ -57,20 +56,7 @@ export function Details({ slot, node }: { slot?: string; node: Hierarchy }) {
         </sl-tab-panel>
 
         <sl-tab-panel name="attributes">
-          <div class={detailsStyles.headerRow}>
-            <div>
-              <div class={detailsStyles.detailsHeading}>
-                {node ? getNodeLabel(node) : "Attributes"}
-              </div>
-              <div class={detailsStyles.mutedText}>{node ? String(node.data.type ?? "") : ""}</div>
-            </div>
-          </div>
-
           <div class={detailsStyles.propertiesSection}>
-            <div class={detailsStyles.propertiesHeader}>
-              <div class={detailsStyles.detailsHeading}>Properties</div>
-            </div>
-
             <div class={detailsStyles.kvList}>
               {properties.length === 0 ? (
                 <div class={detailsStyles.mutedText}>No properties</div>
