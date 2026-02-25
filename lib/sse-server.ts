@@ -90,7 +90,7 @@ export function useSSEServer<M extends Methods>(
       });
     }
 
-    const UI_DIRNAME = "crank";
+    const UI_DIRNAME = "ui";
     const ROOT_DIR = join(import.meta.dirname, "..");
     const PUBLIC_DIR = join(
       ...(ROOT_DIR.endsWith("dist")
