@@ -50,10 +50,7 @@ async function buildSvgStringForExport(sourceSvg: SVGSVGElement) {
 
   let serialized = new XMLSerializer().serializeToString(clone);
   if (!serialized.includes('xmlns="http://www.w3.org/2000/svg"')) {
-    serialized = serialized.replace(
-      "<svg",
-      '<svg xmlns="http://www.w3.org/2000/svg"',
-    );
+    serialized = serialized.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
   }
   if (!serialized.startsWith("<?xml")) {
     serialized = `<?xml version="1.0" encoding="UTF-8"?>\n${serialized}`;
@@ -96,10 +93,7 @@ function insertBrandBadge(
   plate.setAttribute("ry", String(logoHeight * 0.35));
   plate.setAttribute("fill", "rgba(16, 24, 40, 0.82)");
   plate.setAttribute("stroke", "rgba(255, 255, 255, 0.22)");
-  plate.setAttribute(
-    "stroke-width",
-    String(Math.max(1, framedBounds.width * 0.0009)),
-  );
+  plate.setAttribute("stroke-width", String(Math.max(1, framedBounds.width * 0.0009)));
 
   const image = document.createElementNS(svgNs, "image");
   image.setAttribute("href", logoDataUrl);
@@ -142,9 +136,7 @@ function computeGraphicBounds(sourceSvg: SVGSVGElement) {
   const union = unionBBox(linkBounds, nodeBounds);
   if (union) return union;
 
-  const viewport = sourceSvg.querySelector(
-    "g[data-viewport]",
-  ) as SVGGElement | null;
+  const viewport = sourceSvg.querySelector("g[data-viewport]") as SVGGElement | null;
   const viewportBounds = safeBBox(viewport);
   if (viewportBounds) return viewportBounds;
 
@@ -263,8 +255,7 @@ export async function exportSvgElementToPng(
   svgElement: SVGSVGElement,
   fileNamePrefix = "effectionx-graph",
 ) {
-  const { svgString, width, height } =
-    await buildSvgStringForExport(svgElement);
+  const { svgString, width, height } = await buildSvgStringForExport(svgElement);
   const scale = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
 
   const canvas = document.createElement("canvas");
