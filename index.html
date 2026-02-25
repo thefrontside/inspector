@@ -628,7 +628,8 @@
 
     function updateLogs() {
       const src = includeChildren ? logsByScope : logsOwnOnly;
-      renderLogs(src[currentScope] || []);
+      const logs = (src[currentScope] || []).filter(l => isLevelEnabled(l.level));
+      renderLogs(logs);
     }
 
     function updateLevelToggles() {
@@ -693,6 +694,7 @@
         minLevel = LEVELS.indexOf(val);
       }
       renderTreePills();
+      updateLogs();
     });
 
     // ── Get all descendant scope ids (inclusive) ──────
