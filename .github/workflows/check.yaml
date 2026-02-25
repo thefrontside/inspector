@@ -43,8 +43,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Run tests
+        run: pnpm test
+
       - name: Build
         run: pnpm build
 
-      - name: Run tests
-        run: echo noop
+      - name: Run UI tests
+        run: pnpm run test:ui:built

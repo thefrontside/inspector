@@ -19,5 +19,8 @@ dist/
 # Environment files
 .env.local
 
+# Playwright test and report artifacts
+/test-results
+
 # Agent Shell
 /.agent-shell
