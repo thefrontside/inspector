@@ -46,7 +46,6 @@
     "@effectionx/stream-helpers": "^0.8.0",
     "@standard-schema/spec": "^1.0.0",
     "arktype": "^2.1.27",
-    "canvg": "^4.0.3",
     "d3": "^7.9.0",
     "h3": "2.0.1-rc.14",
     "remeda": "^2",
