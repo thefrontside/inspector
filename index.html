@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspector Logs UI Mockup</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/themes/light.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/themes/dark.css" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/shoelace-autoloader.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: var(--sl-font-sans); font-size: 14px; }
+    body { display: flex; flex-direction: column; }
+
+    /* ── Header ─────────────────────────────────── */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      height: 52px; display: flex; align-items: center;
+      background: var(--topbar-bg, rgba(255,255,255,0.02));
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      padding: 4px 12px;
+      backdrop-filter: blur(6px);
+    }
+    .topbar .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+    .topbar .spacer { flex: 1; }
+
+    /* ── Main area ──────────────────────────────── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    sl-split-panel { flex: 1; }
+    sl-split-panel::part(panel) { overflow: auto; }
+
+    /* ── Tree ───────────────────────────────────── */
+    .tree-pane { padding: 8px; }
+
+    .tree-label {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .tree-label .scope-name { white-space: nowrap; }
+
+    /* Highlight a tree item when hovering its scope button in the log list */
+    sl-tree-item.scope-highlight {
+      background: var(--sl-color-primary-100);
+      border-radius: 4px;
+      outline: 2px solid var(--sl-color-primary-400);
+      outline-offset: -2px;
+      transition: background 0.15s, outline-color 0.15s;
+    }
+    .sl-theme-dark sl-tree-item.scope-highlight {
+      background: rgba(59, 130, 246, 0.15);
+      outline-color: var(--sl-color-primary-600);
+    }
+
+    /* ── Split pill badge ──────────────────────── */
+    .split-pill {
+      display: inline-flex; align-items: center;
+      border-radius: 8px; overflow: hidden;
+      cursor: pointer; height: 16px;
+      transition: opacity 0.15s;
+      border: 1px solid var(--sl-color-neutral-300);
+    }
+    .split-pill:hover { transform: scale(1.1); }
+    .split-pill.seen { opacity: 0.35; }
+
+    .split-pill-section {
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; line-height: 1;
+      min-width: 18px; height: 100%; padding: 0 5px;
+    }
+    .split-pill-section.level-error {
+      background: var(--sl-color-danger-100); color: var(--sl-color-danger-700);
+    }
+    .split-pill-section.level-warn {
+      background: var(--sl-color-warning-100); color: var(--sl-color-warning-700);
+    }
+    .split-pill-section.level-info {
+      background: var(--sl-color-primary-100); color: var(--sl-color-primary-700);
+    }
+    .split-pill-section.level-debug {
+      background: var(--sl-color-neutral-100); color: var(--sl-color-neutral-600);
+    }
+    .split-pill-section + .split-pill-section {
+      border-left: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* ── Details ────────────────────────────────── */
+    .details-pane { padding: 0 6px; display: flex; flex-direction: column; height: 100%; }
+    .details-pane sl-tab-group { flex: 1; display: flex; flex-direction: column; }
+    .details-pane sl-tab-panel { flex: 1; overflow: auto; }
+
+    .logs-inner {}
+
+    /* Attributes */
+    .kv-list { margin-top: 8px; }
+    .kv-row { display: flex; gap: 12px; padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,0.05); }
+    .kv-key { font-weight: 600; min-width: 120px; color: var(--sl-color-neutral-700); }
+    .kv-val { flex: 1; white-space: pre-wrap; }
+
+    /* ── Logs panel ─────────────────────────────── */
+    .logs-toolbar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 0; border-bottom: 1px solid var(--sl-color-neutral-200);
+      flex-wrap: wrap;
+    }
+    .logs-toolbar sl-input { flex: 1; min-width: 120px; }
+
+    .log-list {
+      overflow-y: auto; padding: 4px 0;
+      max-height: calc(100vh - 250px);
+      font-family: var(--sl-font-mono, ui-monospace, monospace);
+      font-size: 12.5px; line-height: 1.6;
+    }
+    .log-entry {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 3px 6px; border-radius: 3px;
+    }
+    .log-entry:hover { background: var(--sl-color-neutral-100); }
+
+    .log-depth {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      margin-top: 7px;
+      cursor: pointer;
+    }
+    .log-depth:hover .log-depth-dot,
+    .log-depth:hover .log-depth-line {
+      filter: brightness(1.3);
+    }
+    .log-depth-line {
+      height: 1.5px;
+    }
+    .log-depth-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .log-depth-line.info, .log-depth-dot.info   { background: var(--sl-color-primary-500); }
+    .log-depth-line.warn, .log-depth-dot.warn   { background: var(--sl-color-warning-500); }
+    .log-depth-line.error, .log-depth-dot.error { background: var(--sl-color-danger-500); }
+    .log-depth-line.debug, .log-depth-dot.debug { background: var(--sl-color-neutral-400); }
+
+    .log-entry.warn  { color: var(--sl-color-warning-700); }
+    .log-entry.error { color: var(--sl-color-danger-700); background: var(--sl-color-danger-50); }
+
+    /* Depth marker tooltip */
+    .log-depth {
+      position: relative;
+    }
+    .log-depth-tooltip {
+      display: none;
+      position: absolute;
+      left: 0; bottom: calc(100% + 6px);
+      background: var(--sl-color-neutral-800);
+      color: var(--sl-color-neutral-0);
+      font-size: 11px; line-height: 1.4;
+      padding: 4px 8px; border-radius: 4px;
+      white-space: nowrap; z-index: 10;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .log-depth-tooltip .tooltip-name {
+      font-weight: 700;
+    }
+    .log-depth-tooltip .tooltip-attrs {
+      color: var(--sl-color-neutral-400);
+      font-size: 10px;
+    }
+    .log-depth:hover .log-depth-tooltip {
+      display: block;
+    }
+
+    .log-message { flex: 1; word-break: break-word; }
+
+    .logs-empty {
+      display: flex; align-items: center; justify-content: center;
+      height: 100%; color: var(--sl-color-neutral-500); font-style: italic;
+    }
+
+    /* ── Level setting ─────────────────────────── */
+    .level-settings {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--sl-color-neutral-200);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .level-settings-label {
+      font-size: 12px; font-weight: 600; color: var(--sl-color-neutral-600);
+      white-space: nowrap;
+    }
+    .level-select { min-width: 110px; }
+    .level-dot {
+      display: inline-block;
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .level-dot.level-error { background: var(--sl-color-danger-500); }
+    .level-dot.level-warn  { background: var(--sl-color-warning-500); }
+    .level-dot.level-info  { background: var(--sl-color-primary-500); }
+    .level-dot.level-debug { background: var(--sl-color-neutral-400); }
+    .level-dot.level-none  {
+      background: transparent;
+      border: 1.5px solid var(--sl-color-neutral-400);
+      width: 8px; height: 8px;
+      box-sizing: border-box;
+    }
+    .clear-btn {
+      margin-left: auto;
+    }
+
+    /* ── Dark mode tweaks ──────────────────────── */
+    .sl-theme-dark .log-entry:hover { background: var(--sl-color-neutral-800); }
+    .sl-theme-dark .log-entry.error { background: rgba(239,68,68,0.1); }
+    .sl-theme-dark .kv-row { border-bottom-color: rgba(255,255,255,0.05); }
+    .sl-theme-dark .logs-toolbar { border-bottom-color: var(--sl-color-neutral-700); }
+    .sl-theme-dark .level-settings { border-bottom-color: var(--sl-color-neutral-700); }
+    .sl-theme-dark .split-pill { border-color: var(--sl-color-neutral-600); }
+    .sl-theme-dark .split-pill-section + .split-pill-section { border-left-color: rgba(255,255,255,0.15); }
+    .sl-theme-dark .log-depth-tooltip {
+      background: var(--sl-color-neutral-200);
+      color: var(--sl-color-neutral-900);
+    }
+    .sl-theme-dark .log-depth-tooltip .tooltip-attrs {
+      color: var(--sl-color-neutral-600);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ──────────────────────────────────────── -->
+  <div class="topbar">
+    <div class="brand">
+      <sl-icon name="diagram-3" style="font-size:22px; color:var(--sl-color-primary-600)"></sl-icon>
+      Effection Inspector
+    </div>
+    <div class="spacer"></div>
+    <sl-button size="small" variant="text"><sl-icon name="gear"></sl-icon></sl-button>
+    <sl-button size="small" variant="text" onclick="document.documentElement.classList.toggle('sl-theme-dark')">
+      <sl-icon name="moon"></sl-icon>
+    </sl-button>
+  </div>
+
+  <!-- ── Main Split ──────────────────────────────────── -->
+  <div class="main">
+    <sl-split-panel position="65">
+
+      <!-- LEFT: Scope Tree -->
+      <div slot="start" class="tree-pane">
+        <sl-tab-group>
+          <sl-tab slot="nav" panel="tree">Tree</sl-tab>
+          <sl-tab slot="nav" panel="graphic">Graphic</sl-tab>
+          <sl-tab-panel name="tree">
+            <sl-tree selection="single" id="scope-tree">
+              <sl-tree-item expanded selected data-id="root">
+                <span class="tree-label">
+                  <span class="scope-name">Server</span>
+                </span>
+                <sl-tree-item expanded data-id="http">
+                  <span class="tree-label">
+                    <span class="scope-name">HTTP Listener</span>
+                  </span>
+                  <sl-tree-item data-id="req1">
+                    <span class="tree-label">
+                      <span class="scope-name">GET /api/users</span>
+                    </span>
+                  </sl-tree-item>
+                  <sl-tree-item data-id="req2">
+                    <span class="tree-label">
+                      <span class="scope-name">POST /api/login</span>
+                    </span>
+                  </sl-tree-item>
+                </sl-tree-item>
+                <sl-tree-item expanded data-id="db">
+                  <span class="tree-label">
+                    <span class="scope-name">Database Pool</span>
+                  </span>
+                  <sl-tree-item data-id="conn1">
+                    <span class="tree-label">
+                      <span class="scope-name">Connection #1</span>
+                    </span>
+                  </sl-tree-item>
+                  <sl-tree-item data-id="conn2">
+                    <span class="tree-label">
+                      <span class="scope-name">Connection #2</span>
+                    </span>
+                  </sl-tree-item>
+                </sl-tree-item>
+                <sl-tree-item data-id="ws">
+                  <span class="tree-label">
+                    <span class="scope-name">WebSocket Handler</span>
+                  </span>
+                </sl-tree-item>
+              </sl-tree-item>
+            </sl-tree>
+          </sl-tab-panel>
+          <sl-tab-panel name="graphic">
+            <div style="padding:40px;text-align:center;color:var(--sl-color-neutral-400)">
+              (D3 graphic view placeholder)
+            </div>
+          </sl-tab-panel>
+        </sl-tab-group>
+      </div>
+
+      <!-- RIGHT: Details + Logs -->
+      <div slot="end" class="details-pane">
+        <sl-tab-group id="details-tabs">
+          <sl-tab slot="nav" panel="attributes">Attributes</sl-tab>
+          <sl-tab slot="nav" panel="logs" id="logs-tab">
+            Logs
+          </sl-tab>
+          <sl-tab slot="nav" panel="json">JSON</sl-tab>
+
+          <!-- Attributes Tab -->
+          <sl-tab-panel name="attributes">
+            <div class="kv-list">
+              <div class="kv-row"><div class="kv-key">name</div><div class="kv-val">Server</div></div>
+              <div class="kv-row"><div class="kv-key">status</div><div class="kv-val">running</div></div>
+              <div class="kv-row"><div class="kv-key">port</div><div class="kv-val">3000</div></div>
+              <div class="kv-row"><div class="kv-key">uptime</div><div class="kv-val">4m 32s</div></div>
+            </div>
+          </sl-tab-panel>
+
+          <!-- JSON Tab -->
+          <sl-tab-panel name="json">
+            <pre style="font-size:12px;white-space:pre-wrap;word-break:break-word">{
+  "id": "root",
+  "data": {
+    "@effection/attributes": {
+      "name": "Server",
+      "status": "running",
+      "port": 3000
+    }
+  },
+  "children": [
+    { "id": "http", "data": { "@effection/attributes": { "name": "HTTP Listener" } } },
+    { "id": "db",   "data": { "@effection/attributes": { "name": "Database Pool" } } },
+    { "id": "ws",   "data": { "@effection/attributes": { "name": "WebSocket Handler" } } }
+  ]
+}</pre>
+          </sl-tab-panel>
+
+          <!-- Logs Tab (last in order, activated via script) -->
+          <sl-tab-panel name="logs">
+           <div class="logs-inner">
+            <!-- Level setting -->
+            <div class="level-settings">
+              <span class="level-settings-label">Level:</span>
+              <sl-select size="small" value="warn" class="level-select" id="level-select">
+                <sl-option value="error">
+                  error
+                  <span class="level-dot level-error" slot="suffix"></span>
+                </sl-option>
+                <sl-option value="warn">
+                  warn
+                  <span class="level-dot level-warn" slot="suffix"></span>
+                </sl-option>
+                <sl-option value="info">
+                  info
+                  <span class="level-dot level-info" slot="suffix"></span>
+                </sl-option>
+                <sl-option value="debug">
+                  debug
+                  <span class="level-dot level-debug" slot="suffix"></span>
+                </sl-option>
+                <sl-option value="none">
+                  None
+                  <span class="level-dot level-none" slot="suffix"></span>
+                </sl-option>
+              </sl-select>
+              <sl-button size="small" variant="text" class="clear-btn" id="clear-badges" title="Clear logs">
+                <sl-icon name="slash-circle" slot="prefix"></sl-icon>
+              </sl-button>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="logs-toolbar">
+              <sl-input placeholder="Filter logs..." size="small" clearable>
+                <sl-icon name="search" slot="prefix"></sl-icon>
+              </sl-input>
+              <sl-checkbox id="include-children" checked>Include children</sl-checkbox>
+            </div>
+
+            <!-- Log entries -->
+            <div class="log-list" id="log-list">
+            </div>
+           </div>
+          </sl-tab-panel>
+        </sl-tab-group>
+      </div>
+
+    </sl-split-panel>
+  </div>
+
+  <!-- ── Interactive behavior ──────────────────────── -->
+  <script type="module">
+    const LEVELS = ['error', 'warn', 'info', 'debug'];
+
+    // Map scope display name → { id, depth (absolute from root) }
+    const scopeInfo = {
+      'Server':        { id: 'root',  depth: 0 },
+      'HTTP Listener': { id: 'http',  depth: 1 },
+      'GET /users':    { id: 'req1',  depth: 2 },
+      'POST /login':   { id: 'req2',  depth: 2 },
+      'DB Pool':       { id: 'db',    depth: 1 },
+      'Conn #1':       { id: 'conn1', depth: 2 },
+      'Conn #2':       { id: 'conn2', depth: 2 },
+      'WebSocket':     { id: 'ws',    depth: 1 },
+    };
+
+    // Absolute depth of each scope id
+    const scopeDepth = {
+      root: 0, http: 1, req1: 2, req2: 2,
+      db: 1, conn1: 2, conn2: 2, ws: 1,
+    };
+
+    // Scope attributes for tooltips
+    const scopeAttrs = {
+      'Server':        { status: 'running', port: 3000 },
+      'HTTP Listener': { protocol: 'http/1.1' },
+      'GET /users':    { method: 'GET', path: '/api/users' },
+      'POST /login':   { method: 'POST', path: '/api/login' },
+      'DB Pool':       { driver: 'postgres', poolSize: 5 },
+      'Conn #1':       { id: 1, host: 'localhost:5432' },
+      'Conn #2':       { id: 2, host: 'localhost:5432' },
+      'WebSocket':     { path: '/live', clients: 1 },
+    };
+
+    const scopeCounts = {
+      root:  { error: 1, warn: 2, info: 8, debug: 1 },
+      http:  { error: 1, warn: 0, info: 4, debug: 0 },
+      req1:  { error: 0, warn: 0, info: 3, debug: 0 },
+      req2:  { error: 1, warn: 0, info: 1, debug: 0 },
+      db:    { error: 0, warn: 1, info: 2, debug: 1 },
+      conn1: { error: 0, warn: 0, info: 1, debug: 1 },
+      conn2: { error: 0, warn: 1, info: 0, debug: 0 },
+      ws:    { error: 0, warn: 0, info: 1, debug: 0 },
+    };
+
+    const logsByScope = {
+      root: [
+        { level: 'info',  scope: 'Server',      msg: 'Listening on port 3000' },
+        { level: 'info',  scope: 'DB Pool',     msg: 'Pool initialized with 5 connections' },
+        { level: 'info',  scope: 'Conn #1',     msg: 'Connected to postgres://localhost:5432/app' },
+        { level: 'warn',  scope: 'Conn #2',     msg: 'Slow query detected: SELECT * FROM users WHERE... (342ms)' },
+        { level: 'info',  scope: 'GET /users',  msg: 'Incoming request from 127.0.0.1' },
+        { level: 'info',  scope: 'GET /users',  msg: 'Resolved 23 users in 12ms' },
+        { level: 'info',  scope: 'GET /users',  msg: 'Response 200 OK' },
+        { level: 'error', scope: 'POST /login', msg: 'Authentication failed: invalid credentials for user "admin"' },
+        { level: 'info',  scope: 'POST /login', msg: 'Rate limit check: 3/10 attempts remaining' },
+        { level: 'info',  scope: 'WebSocket',   msg: 'Client connected: ws://localhost:3000/live' },
+        { level: 'warn',  scope: 'Server',      msg: 'Memory usage at 78% — consider scaling' },
+        { level: 'debug', scope: 'Conn #1',     msg: 'Heartbeat OK' },
+      ],
+      http: [
+        { level: 'info',  scope: 'GET /users',  msg: 'Incoming request from 127.0.0.1' },
+        { level: 'info',  scope: 'GET /users',  msg: 'Resolved 23 users in 12ms' },
+        { level: 'info',  scope: 'GET /users',  msg: 'Response 200 OK' },
+        { level: 'error', scope: 'POST /login', msg: 'Authentication failed: invalid credentials for user "admin"' },
+        { level: 'info',  scope: 'POST /login', msg: 'Rate limit check: 3/10 attempts remaining' },
+      ],
+      req1: [
+        { level: 'info', scope: 'GET /users', msg: 'Incoming request from 127.0.0.1' },
+        { level: 'info', scope: 'GET /users', msg: 'Resolved 23 users in 12ms' },
+        { level: 'info', scope: 'GET /users', msg: 'Response 200 OK' },
+      ],
+      req2: [
+        { level: 'error', scope: 'POST /login', msg: 'Authentication failed: invalid credentials for user "admin"' },
+        { level: 'info',  scope: 'POST /login', msg: 'Rate limit check: 3/10 attempts remaining' },
+      ],
+      db: [
+        { level: 'info',  scope: 'DB Pool', msg: 'Pool initialized with 5 connections' },
+        { level: 'info',  scope: 'Conn #1', msg: 'Connected to postgres://localhost:5432/app' },
+        { level: 'warn',  scope: 'Conn #2', msg: 'Slow query detected: SELECT * FROM users WHERE... (342ms)' },
+        { level: 'debug', scope: 'Conn #1', msg: 'Heartbeat OK' },
+      ],
+      conn1: [
+        { level: 'info',  scope: 'Conn #1', msg: 'Connected to postgres://localhost:5432/app' },
+        { level: 'debug', scope: 'Conn #1', msg: 'Heartbeat OK' },
+      ],
+      conn2: [
+        { level: 'warn', scope: 'Conn #2', msg: 'Slow query detected: SELECT * FROM users WHERE... (342ms)' },
+      ],
+      ws: [
+        { level: 'info', scope: 'WebSocket', msg: 'Client connected: ws://localhost:3000/live' },
+      ],
+    };
+
+    const logsOwnOnly = {
+      root:  logsByScope.root.filter(l => l.scope === 'Server'),
+      http:  [],
+      req1:  logsByScope.req1,
+      req2:  logsByScope.req2,
+      db:    [logsByScope.db[0]],
+      conn1: logsByScope.conn1,
+      conn2: logsByScope.conn2,
+      ws:    logsByScope.ws,
+    };
+
+    // ── State ─────────────────────────────────────────
+    let currentScope = 'root';
+    let includeChildren = true;
+    let minLevel = 1; // 0=error, 1=warn, 2=info, 3=debug
+    let seenScopes = new Set();
+
+    // ── Helpers ───────────────────────────────────────
+    function isLevelEnabled(level) {
+      if (minLevel < 0) return false;
+      return LEVELS.indexOf(level) <= minLevel;
+    }
+
+    function selectScope(scopeId) {
+      const treeItem = document.querySelector(`sl-tree-item[data-id="${scopeId}"]`);
+      if (treeItem) {
+        document.querySelectorAll('sl-tree-item[selected]').forEach(i => i.selected = false);
+        treeItem.selected = true;
+        currentScope = scopeId;
+        updateLogs();
+      }
+    }
+
+    // ── Render split pills in the tree ────────────────
+    function renderTreePills() {
+      document.querySelectorAll('.split-pill').forEach(el => el.remove());
+
+      for (const [scopeId, counts] of Object.entries(scopeCounts)) {
+        const label = document.querySelector(`sl-tree-item[data-id="${scopeId}"] > .tree-label`);
+        if (!label) continue;
+
+        const sections = [];
+        for (const level of LEVELS) {
+          if (isLevelEnabled(level) && counts[level] > 0) {
+            sections.push({ level, count: counts[level] });
+          }
+        }
+        if (sections.length === 0) continue;
+
+        const pill = document.createElement('span');
+        pill.className = 'split-pill';
+        pill.dataset.scope = scopeId;
+        if (seenScopes.has(scopeId)) pill.classList.add('seen');
+
+        const tip = sections.map(s => `${s.count} ${s.level}`).join(', ');
+        pill.title = tip;
+
+        for (const s of sections) {
+          const sec = document.createElement('span');
+          sec.className = `split-pill-section level-${s.level}`;
+          sec.textContent = s.count;
+          pill.appendChild(sec);
+        }
+
+        label.appendChild(pill);
+      }
+    }
+
+    // ── Render logs ───────────────────────────────────
+    function renderLogs(logs) {
+      const list = document.getElementById('log-list');
+      list.innerHTML = '';
+      if (logs.length === 0) {
+        list.innerHTML = '<div class="logs-empty">No logs for this scope</div>';
+        return;
+      }
+      const currentDepth = scopeDepth[currentScope] ?? 0;
+
+      for (const log of logs) {
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${log.level}`;
+        const info = scopeInfo[log.scope];
+
+        // Depth dots: relative nesting from currently selected scope
+        // At minimum 1 dot (the log's own level dot)
+        const relativeDepth = info
+          ? Math.max(1, info.depth - currentDepth + 1)
+          : 1;
+
+        const depth = document.createElement('div');
+        depth.className = 'log-depth';
+        const indent = relativeDepth - 1; // 0 for top node
+        if (indent > 0) {
+          const line = document.createElement('div');
+          line.className = `log-depth-line ${log.level}`;
+          line.style.width = `${indent * 12}px`;
+          depth.appendChild(line);
+        }
+        const dot = document.createElement('div');
+        dot.className = `log-depth-dot ${log.level}`;
+        depth.appendChild(dot);
+
+        // Tooltip with scope name + attributes
+        const tooltip = document.createElement('div');
+        tooltip.className = 'log-depth-tooltip';
+        const nameSpan = document.createElement('div');
+        nameSpan.className = 'tooltip-name';
+        nameSpan.textContent = log.scope;
+        tooltip.appendChild(nameSpan);
+        const attrs = scopeAttrs[log.scope];
+        if (attrs) {
+          for (const [k, v] of Object.entries(attrs)) {
+            const attrLine = document.createElement('div');
+            attrLine.className = 'tooltip-attrs';
+            attrLine.textContent = `${k}: ${v}`;
+            tooltip.appendChild(attrLine);
+          }
+        }
+        depth.appendChild(tooltip);
+
+        // Click to navigate, hover to highlight tree node
+        const targetId = info?.id;
+        if (targetId) {
+          depth.addEventListener('click', () => selectScope(targetId));
+          depth.addEventListener('mouseenter', () => {
+            const item = document.querySelector(`sl-tree-item[data-id="${targetId}"]`);
+            if (item) item.classList.add('scope-highlight');
+          });
+          depth.addEventListener('mouseleave', () => {
+            const item = document.querySelector(`sl-tree-item[data-id="${targetId}"]`);
+            if (item) item.classList.remove('scope-highlight');
+          });
+        }
+
+        entry.appendChild(depth);
+
+        const msg = document.createElement('div');
+        msg.className = 'log-message';
+        msg.textContent = log.msg;
+        entry.appendChild(msg);
+
+        list.appendChild(entry);
+      }
+    }
+
+    function updateLogs() {
+      const src = includeChildren ? logsByScope : logsOwnOnly;
+      renderLogs(src[currentScope] || []);
+    }
+
+    function updateLevelToggles() {
+      // Select reflects current state
+      document.getElementById('level-select').value =
+        minLevel < 0 ? 'none' : LEVELS[minLevel];
+    }
+
+    // ── Tree selection ────────────────────────────────
+    document.getElementById('scope-tree').addEventListener('sl-selection-change', (e) => {
+      const item = e.detail.selection[0];
+      if (item) {
+        currentScope = item.dataset.id;
+        updateLogs();
+      }
+    });
+
+    // ── Pill click → select scope + switch to logs tab ──
+    document.getElementById('scope-tree').addEventListener('click', (e) => {
+      const pill = e.target.closest('.split-pill');
+      if (!pill) return;
+      e.stopPropagation();
+
+      const scopeId = pill.dataset.scope;
+      selectScope(scopeId);
+
+      seenScopes.add(scopeId);
+      renderTreePills();
+
+      document.getElementById('details-tabs').show('logs');
+    });
+
+    // Mark scope as seen when logs tab activates
+    document.getElementById('details-tabs').addEventListener('sl-tab-show', (e) => {
+      if (e.detail.name === 'logs') {
+        seenScopes.add(currentScope);
+        renderTreePills();
+      }
+    });
+
+    // ── Include children checkbox ─────────────────────
+    document.getElementById('include-children').addEventListener('sl-change', (e) => {
+      includeChildren = e.target.checked;
+      updateLogs();
+    });
+
+    // ── Text filter ───────────────────────────────────
+    document.querySelector('.logs-toolbar sl-input').addEventListener('sl-input', (e) => {
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll('#log-list .log-entry').forEach(el => {
+        const text = el.textContent.toLowerCase();
+        el.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+
+    // ── Level select ──────────────────────────────────
+    document.getElementById('level-select').addEventListener('sl-change', (e) => {
+      const val = e.target.value;
+      if (val === 'none') {
+        minLevel = -1;
+      } else {
+        minLevel = LEVELS.indexOf(val);
+      }
+      renderTreePills();
+    });
+
+    // ── Get all descendant scope ids (inclusive) ──────
+    function getDescendants(scopeId) {
+      const result = [scopeId];
+      const item = document.querySelector(`sl-tree-item[data-id="${scopeId}"]`);
+      if (item) {
+        item.querySelectorAll('sl-tree-item').forEach(child => {
+          if (child.dataset.id) result.push(child.dataset.id);
+        });
+      }
+      return result;
+    }
+
+    // Reverse lookup: scope display name → scope id
+    const nameToId = {};
+    for (const [name, info] of Object.entries(scopeInfo)) {
+      nameToId[name] = info.id;
+    }
+
+    // ── Clear logs for current scope + descendants ────
+    document.getElementById('clear-badges').addEventListener('click', () => {
+      const toClear = new Set(getDescendants(currentScope));
+
+      // Clear log arrays for affected scopes
+      for (const id of toClear) {
+        if (logsByScope[id]) logsByScope[id] = [];
+        if (logsOwnOnly[id]) logsOwnOnly[id] = [];
+        if (scopeCounts[id]) scopeCounts[id] = { error: 0, warn: 0, info: 0, debug: 0 };
+        seenScopes.delete(id);
+      }
+
+      // Also remove entries from ancestor scopes that came from cleared scopes
+      for (const [id, logs] of Object.entries(logsByScope)) {
+        if (toClear.has(id)) continue;
+        logsByScope[id] = logs.filter(log => {
+          const logId = nameToId[log.scope];
+          return !logId || !toClear.has(logId);
+        });
+      }
+
+      // Recount ancestor badges
+      for (const [id, logs] of Object.entries(logsByScope)) {
+        if (toClear.has(id)) continue;
+        const counts = { error: 0, warn: 0, info: 0, debug: 0 };
+        for (const log of logs) counts[log.level]++;
+        scopeCounts[id] = counts;
+      }
+
+      renderTreePills();
+      updateLogs();
+    });
+
+    // ── Live demo: stream new logs ────────────────────
+    const liveMessages = [
+      { level: 'info',  scope: 'Server',     msg: 'Health check: OK', targets: ['root'] },
+      { level: 'debug', scope: 'Conn #1',    msg: 'Query completed in 3ms', targets: ['root','db','conn1'] },
+      { level: 'info',  scope: 'WebSocket',  msg: 'Ping received from client', targets: ['root','ws'] },
+      { level: 'warn',  scope: 'Conn #2',    msg: 'Connection pool at 80% capacity', targets: ['root','db','conn2'] },
+      { level: 'info',  scope: 'GET /users',  msg: 'Cache hit for user list', targets: ['root','http','req1'] },
+      { level: 'error', scope: 'POST /login', msg: 'Token expired for session abc123', targets: ['root','http','req2'] },
+    ];
+    let liveIdx = 0;
+
+    setTimeout(() => {
+      setInterval(() => {
+        const entry = liveMessages[liveIdx % liveMessages.length];
+        liveIdx++;
+        const log = { level: entry.level, scope: entry.scope, msg: entry.msg };
+
+        for (const t of entry.targets) {
+          if (logsByScope[t]) logsByScope[t].push(log);
+        }
+        const leaf = entry.targets[entry.targets.length - 1];
+        if (logsOwnOnly[leaf]) logsOwnOnly[leaf].push(log);
+
+        for (const t of entry.targets) {
+          if (!scopeCounts[t]) scopeCounts[t] = { error: 0, warn: 0, info: 0, debug: 0 };
+          scopeCounts[t][entry.level]++;
+
+          const tabGroup = document.getElementById('details-tabs');
+          const activeTab = tabGroup.querySelector('sl-tab[aria-selected="true"]');
+          const isViewingLogs = activeTab && activeTab.getAttribute('panel') === 'logs';
+          if (!(isViewingLogs && currentScope === t)) {
+            seenScopes.delete(t);
+          }
+        }
+
+        renderTreePills();
+        updateLogs();
+
+        const list = document.getElementById('log-list');
+        list.scrollTop = list.scrollHeight;
+      }, 2500);
+    }, 3000);
+
+    // ── Initial render ────────────────────────────────
+    updateLevelToggles();
+    renderTreePills();
+    updateLogs();
+
+    // ── Make Logs the default tab ─────────────────────
+    // Shoelace always activates the first tab in DOM order. We need to
+    // switch to Logs after Shoelace has finished its internal init.
+    // Poll until the logs tab has the proper internal state to be shown.
+    {
+      const tabGroup = document.getElementById('details-tabs');
+      const poll = setInterval(() => {
+        const logsTab = tabGroup.querySelector('sl-tab[panel="logs"]');
+        if (logsTab && typeof tabGroup.show === 'function') {
+          try {
+            tabGroup.show('logs');
+            // Verify it actually activated
+            const active = tabGroup.querySelector('sl-tab[aria-selected="true"]');
+            if (active && active.getAttribute('panel') === 'logs') {
+              clearInterval(poll);
+            }
+          } catch(e) { /* not ready yet */ }
+        }
+      }, 50);
+      // Safety: stop polling after 5 seconds
+      setTimeout(() => clearInterval(poll), 5000);
+    }
+  </script>
+
+</body>
+</html>
