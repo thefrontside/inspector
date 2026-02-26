@@ -24,6 +24,9 @@ global.around(api.Main, {
 
       try {
         if (args.includes("--suspend")) {
+          console.log(
+            "inspector attached and main() waiting to start; use 'play' button at /live to start execution",
+          );
           yield* pause();
         }
 
