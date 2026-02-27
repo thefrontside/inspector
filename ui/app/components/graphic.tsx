@@ -1,9 +1,22 @@
 import * as d3 from "d3";
 import type { Context } from "@b9g/crank";
 import type { Hierarchy } from "../data/types.ts";
+import { exportSvgElement, exportSvgElementToPng } from "./export-graphic.ts";
 
 type GraphicViewOptions = {
   orientation: "vertical" | "horizontal";
+};
+
+type SlAlertElement = HTMLElement & {
+  variant: "primary" | "success" | "neutral" | "warning" | "danger";
+  duration: number;
+  closable: boolean;
+  toast: () => Promise<void>;
+};
+
+type SlIconElement = HTMLElement & {
+  name: string;
+  slot: string;
 };
 
 // using an async function generator so we can call `scheduleRender` after yielding
@@ -18,6 +31,43 @@ export async function* Graphic(
   let orientation = "vertical" as GraphicViewOptions["orientation"];
   // track the currently selected id so scheduleRender can pass it into renderChart
   let currentSelectionId: string | undefined = selection?.id;
+
+  function showToast(kind: "success" | "danger", message: string) {
+    const alert = document.createElement("sl-alert") as SlAlertElement;
+    alert.variant = kind;
+    alert.closable = true;
+    alert.duration = 3000;
+
+    const icon = document.createElement("sl-icon") as SlIconElement;
+    icon.slot = "icon";
+    icon.name = kind === "success" ? "check2-circle" : "exclamation-octagon";
+
+    alert.append(icon, document.createTextNode(message));
+    document.body.append(alert);
+    void alert.toast();
+  }
+
+  const exportPng = async () => {
+    if (!svgEl) return;
+    try {
+      const { fileName } = await exportSvgElementToPng(svgEl, "effectionx-graph");
+      showToast("success", `PNG saved: ${fileName}`);
+    } catch (error) {
+      console.error("Export PNG failed", error);
+      showToast("danger", "PNG export failed");
+    }
+  };
+
+  const exportSvg = async () => {
+    if (!svgEl) return;
+    try {
+      const { fileName } = await exportSvgElement(svgEl, "effectionx-graph");
+      showToast("success", `SVG saved: ${fileName}`);
+    } catch (error) {
+      console.error("Export SVG failed", error);
+      showToast("danger", "SVG export failed");
+    }
+  };
 
   function resetZoom() {
     if (!svgEl) return;
@@ -116,6 +166,14 @@ export async function* Graphic(
           >
             Horizontal
           </sl-button>
+          <div style={{ marginLeft: "auto", display: "flex", gap: "8px" }}>
+            <sl-button size="small" variant="default" onclick={exportPng}>
+              Export PNG
+            </sl-button>
+            <sl-button size="small" variant="default" onclick={exportSvg}>
+              Export SVG
+            </sl-button>
+          </div>
         </div>
 
         <div copy={true}>

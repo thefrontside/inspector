@@ -21,3 +21,6 @@ dist/
 
 # Agent Shell
 /.agent-shell
+
+# playwright report files
+.playwright*
