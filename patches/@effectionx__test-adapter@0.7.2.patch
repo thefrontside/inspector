@@ -1,0 +1,13 @@
+diff --git a/dist/mod.js b/dist/mod.js
+index 86f0a490e93a71732435a47f2f2d83897f8b37dd..a841f38c31215d4ba47442d0135bb33d86b9856d 100644
+--- a/dist/mod.js
++++ b/dist/mod.js
+@@ -61,7 +61,7 @@ export function createTestAdapter(options = {}) {
+             scope = withResolvers();
+             let parent = adapter.parent
+                 ? yield* adapter.parent["@@init@@"]()
+-                : Ok(createScope()[0]);
++                : Ok([...createScope()][0]);
+             if (!parent.ok) {
+                 scope.resolve(parent);
+                 return yield* scope.operation;

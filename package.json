@@ -32,6 +32,8 @@
     "build": "pnpm run build:tsc && pnpm run build:ui",
     "build:tsc": "tsc -p tsconfig.build.json",
     "build:ui": "vite build ui",
+    "test:ui:dev": "playwright test -c playwright.dev.config.ts",
+    "test:ui:built": "playwright test -c playwright.built.config.ts",
     "test": "node --test",
     "check": "pnpm run \"/(typecheck$)|(lint$)|(fmt$)/\"",
     "typecheck": "tsc -b --noEmit",
@@ -53,9 +55,10 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@effectionx/bdd": "^0.4.2",
+    "@effectionx/bdd": "^0.4.3",
     "@nano-router/history": "^4.0.4",
     "@nano-router/router": "^4.0.4",
+    "@playwright/test": "^1.58.2",
     "@shoelace-style/shoelace": "^2.20.1",
     "@types/d3": "^7.4.3",
     "@types/node": "22",
@@ -74,5 +77,10 @@
   "peerDependencies": {
     "effection": "^4.1.0-alpha.3"
   },
-  "packageManager": "pnpm@9.15.9"
+  "packageManager": "pnpm@9.15.9",
+  "pnpm": {
+    "patchedDependencies": {
+      "@effectionx/test-adapter@0.7.2": "patches/@effectionx__test-adapter@0.7.2.patch"
+    }
+  }
 }

@@ -21,7 +21,7 @@ pnpm start
 
 This runs Vite and serves the Crank-based inspector UI. Open http://localhost:5173 (or whatever Vite prints).
 
-To run server with the example file, use"
+To run server with the example file, use:
 
 ```shell
 node --import tsx --import ./loader.ts examples/example.ts --suspend
@@ -33,6 +33,8 @@ This will run the loader with an example effection program. It serves both a liv
 
 - Run tests & checks (from repo root):
   - Run tests: `pnpm test`
+  - Run UI E2E (dev server): `pnpm run test:ui:dev`
+  - Run UI E2E (built server + SSE): `pnpm run test:ui:built`
   - Run type checks: `pnpm run check`
   - Run linter: `pnpm run lint`
   - Format: `pnpm run fmt`
