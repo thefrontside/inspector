@@ -28,6 +28,9 @@ importers:
       arktype:
         specifier: ^2.1.27
         version: 2.1.29
+      configliere:
+        specifier: ^0.2.3
+        version: 0.2.3
       d3:
         specifier: ^7.9.0
         version: 7.9.0
@@ -950,6 +953,10 @@ packages:
     peerDependencies:
       '@floating-ui/utils': ^0.2.5
 
+  configliere@0.2.3:
+    resolution: {integrity: sha512-yXhYYx89F+8UV4tJBP/N0Jb3SujLea3rp7p47fSAlj6wLl8Acve2pUZwcklgmb3ifJZvDGQWT9EiQmilEY1D9g==}
+    engines: {node: '>= 16'}
+
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
@@ -1422,6 +1429,9 @@ packages:
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
+
+  ts-case-convert@2.1.0:
+    resolution: {integrity: sha512-Ye79el/pHYXfoew6kqhMwCoxp4NWjKNcm2kBzpmEMIU9dd9aBmHNNFtZ+WTm0rz1ngyDmfqDXDlyUnBXayiD0w==}
 
   tsx@4.21.0:
     resolution: {integrity: sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw==}
@@ -2116,6 +2126,10 @@ snapshots:
     dependencies:
       '@floating-ui/utils': 0.2.10
 
+  configliere@0.2.3:
+    dependencies:
+      ts-case-convert: 2.1.0
+
   csstype@3.2.3: {}
 
   d3-array@3.2.4:
@@ -2652,6 +2666,8 @@ snapshots:
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
+
+  ts-case-convert@2.1.0: {}
 
   tsx@4.21.0:
     dependencies:
