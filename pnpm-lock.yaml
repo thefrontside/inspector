@@ -47,6 +47,9 @@ importers:
       '@effectionx/bdd':
         specifier: ^0.4.3
         version: 0.4.3(effection@4.1.0-alpha.5)
+      '@effectionx/context-api':
+        specifier: ^0.3.2
+        version: 0.3.2(effection@4.1.0-alpha.5)
       '@nano-router/history':
         specifier: ^4.0.4
         version: 4.0.4
@@ -121,6 +124,12 @@ packages:
 
   '@effectionx/bdd@0.4.3':
     resolution: {integrity: sha512-g/T43KTtrqq2WqlLUgJdaJUOGbzGXMYbA4OKhaiiGIqrx8vMh5UElz/kHI73ADgWm6x9ItbwJRnFjxy4a32k6w==}
+    engines: {node: '>= 22'}
+    peerDependencies:
+      effection: ^3 || ^4
+
+  '@effectionx/context-api@0.3.2':
+    resolution: {integrity: sha512-/x4If4tiiTrg9pcJr7Jrs3z5teorzWc+qLCWBTnD3+8YpJy+8xUQXA8d/0/UkvTgNAzYSg297nomB7YiPiwuKA==}
     engines: {node: '>= 22'}
     peerDependencies:
       effection: ^3 || ^4
@@ -1518,6 +1527,10 @@ snapshots:
   '@effectionx/bdd@0.4.3(effection@4.1.0-alpha.5)':
     dependencies:
       '@effectionx/test-adapter': 0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.5)
+      effection: 4.1.0-alpha.5
+
+  '@effectionx/context-api@0.3.2(effection@4.1.0-alpha.5)':
+    dependencies:
       effection: 4.1.0-alpha.5
 
   '@effectionx/signals@0.5.1(effection@4.1.0-alpha.5)':

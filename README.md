@@ -48,6 +48,43 @@ curl -s -X POST http://localhost:41000/play -H 'Content-Type: application/json' 
 
 You can also monitor player state with `/watchPlayerState`.
 
+## CLI client
+
+A companion executable (`inspector`) is included in the package.
+
+When the package is installed as a dev dependency the binary is available in
+`node_modules/.bin/inspector`; you can also invoke it directly with npx:
+
+```bash
+npx @effectionx/inspector [options] <command> [args]
+# or when installed as a dev dependency
+inspector [options] <command> [args]
+```
+
+Top level commands:
+
+- `ui`: start the inspector UI on a local port (default 41000)
+- `call`: invoke a protocol method directly. Every protocol method
+  is available as a subcommand under `call`. The shorthand `c` is aliased to `call`.
+  Additional options may be supplied after the method name, for instance `--out events.json`.
+- `run`: a helper for inspecting arbitrary CLI programs (unchanged from previous versions)
+- `help`: show this message
+
+Examples:
+
+```bash
+# query the default server
+inspector call getScopes
+
+# record output
+inspector call watchScopes --out=events.json
+
+# use the alias
+inspector c recordNodeMap
+```
+
+These raw `call` commands mirror the behaviour of the HTTP routes produced by the same code that powers the SSE server (see `lib/sse-server.ts`).
+
 ## Contributing
 
 See [the Contributing Guide](CONTRIBUTING.md).

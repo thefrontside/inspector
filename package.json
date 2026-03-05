@@ -10,6 +10,9 @@
     "type": "git",
     "url": "git+https://github.com/thefrontside/inspector.git"
   },
+  "bin": {
+    "inspector": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "ui/dist"
@@ -29,6 +32,8 @@
   },
   "scripts": {
     "start": "vite --host 0.0.0.0 ui",
+    "example": "node --experimental-strip-types --import ./loader.ts ./examples/example.ts",
+    "cli": "tsx ./cli.ts",
     "build": "pnpm run build:tsc && pnpm run build:ui",
     "build:tsc": "tsc -p tsconfig.build.json",
     "build:ui": "vite build ui",
@@ -56,6 +61,7 @@
   },
   "devDependencies": {
     "@effectionx/bdd": "^0.4.3",
+    "@effectionx/context-api": "^0.3.2",
     "@nano-router/history": "^4.0.4",
     "@nano-router/router": "^4.0.4",
     "@playwright/test": "^1.58.2",
