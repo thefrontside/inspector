@@ -81,6 +81,18 @@ inspector call watchScopes --out=events.json
 
 # use the alias
 inspector c recordNodeMap
+
+# inspect and run a node script (default command)
+inspector program.js
+
+# pass through node flags
+inspector --experimental-strip-types program.ts
+inspector --import=tsx program.ts
+
+# generate a recording, but also pause
+inspector --inspect-pause --inspect-record=recording.inspector.json --import=tsx program.ts
+# generate a recording, but begin execution immediately
+inspector --inspect-record=recording.inspector.json --import=tsx program.ts
 ```
 
 These raw `call` commands mirror the behaviour of the HTTP routes produced by the same code that powers the SSE server (see `lib/sse-server.ts`).

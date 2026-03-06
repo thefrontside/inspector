@@ -69,11 +69,27 @@ export function createSSEClient<M extends Methods>(
           *next() {
             let next = yield* subscription.next();
             if (next.done) {
-              throw new Error("connection closed");
-            }
+              // sometimes the server will simply close the stream without
+              // sending a `return` event (e.g. the pause/play interaction)
+              // or it may send a return with `data: undefined`. in those
+              // cases `next.value` may be undefined and attempting to access
+              // `.data` blows up. coerce to `undefined` and validate that.
+              let val: unknown;
+              if (next.value && typeof next.value.data !== "undefined") {
+                val = next.value.data === "undefined" ? undefined : JSON.parse(next.value.data);
+              } else {
+                val = undefined;
+              }
 
+              return {
+                done: true,
+                value: validateUnsafe(protocol.methods[name].returns, val),
+              };
+            }
             let { type, data } = next.value;
-            let parsed = JSON.parse(data);
+            // the server sometimes pushes `data` of `'undefined'` (a string)
+            // for example when the return value itself is `undefined`
+            let parsed = data === "undefined" ? undefined : JSON.parse(data);
             if (type === "yield") {
               return {
                 done: false,

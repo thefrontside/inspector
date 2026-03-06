@@ -57,12 +57,31 @@ export function useSSEServer<M extends Methods>(
                 let subscription = yield* handle.invoke({ name, args });
                 let next = yield* subscription.next();
                 while (!next.done) {
-                  yield* until(
-                    stream.push({
-                      event: "yield",
-                      data: JSON.stringify(next.value),
-                    }),
-                  );
+                  try {
+                    // pushing to a stream can throw if the client has
+                    // disconnected and the writable has already been
+                    // closed which happens as h3 handle signals and begins
+                    // cleaning up client connections which seems to close
+                    // the stream as we are in this loop
+                    yield* until(
+                      stream.push({
+                        event: "yield",
+                        data: JSON.stringify(next.value),
+                      }),
+                    );
+                  } catch (err: any) {
+                    // the client has probably disconnected; stop
+                    // emitting values and bail out entirely.
+                    if (err && err.code !== "ERR_INTERNAL_ASSERTION") {
+                      console.log("sse-server: push error", err);
+                      // exit the handler scope immediately
+                      // as the client has disconnected and no point in sending
+                      // the final return value
+                      return;
+                    } else {
+                      throw err;
+                    }
+                  }
                   next = yield* subscription.next();
                 }
                 let value = validateUnsafe(protocol.methods[name].returns, next.value);

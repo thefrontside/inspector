@@ -16,12 +16,19 @@ const inspectorProtocolEntries = (
           description: "write out the response to a file",
           ...field(type("string | undefined"), field.default(undefined)),
         },
+        host: {
+          description: "inspector base URL (overrides default)",
+          ...field(type("string"), field.default("http://localhost:41000")),
+        },
       }),
     };
     return base;
   },
   {} as Record<keyof typeof inspector.methods, {}>,
 );
+
+const protocolCommands = commands(inspectorProtocolEntries);
+export type ProtocolCommands = typeof protocolCommands;
 
 export const config = program({
   name: "inspector",
@@ -35,14 +42,22 @@ export const config = program({
       call: {
         description: "invoke a inspector protocol method directly (low level)",
         aliases: ["c"],
-        ...commands(inspectorProtocolEntries),
+        ...protocolCommands,
       },
       run: {
         description: "inspect a CLI program",
         ...object({
-          inspectWatchScopes: {
-            description: "track scopes and print them to STDERR",
+          inspectPause: {
+            description: "start program paused until resumed by inspector",
             ...field(type("boolean"), field.default(false)),
+          },
+          inspectRecord: {
+            description: "write inspector recording to the given file",
+            ...field(type("string | undefined"), field.default(undefined)),
+          },
+          host: {
+            description: "inspector base URL (overrides default)",
+            ...field(type("string"), field.default("http://localhost:41000")),
           },
         }),
       },

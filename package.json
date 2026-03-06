@@ -50,6 +50,7 @@
   "dependencies": {
     "@ark/util": "^0.56.0",
     "@b9g/crank": "^0.7.5",
+    "@effectionx/process": "^0.7.3",
     "@effectionx/stream-helpers": "^0.8.0",
     "@standard-schema/spec": "^1.0.0",
     "arktype": "^2.1.27",

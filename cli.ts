@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-import { main } from "effection";
-import { config, inspector } from "./config.ts";
-
-import { type Operation, suspend, until } from "effection";
-import { writeFile } from "node:fs/promises";
+import { each, type Operation, main, sleep, spawn, suspend, type Task, until } from "effection";
+import type { Program } from "configliere";
+import { config, inspector, type ProtocolCommands } from "./config.ts";
 import { createApi } from "@effectionx/context-api";
+import { exec } from "@effectionx/process";
+import { writeFile } from "node:fs/promises";
 import { createSSEClient } from "./lib/sse-client.ts";
 import { useSSEServer } from "./lib/sse-server.ts";
 
 interface Logger {
   info(message: string | object): Operation<void>;
-  error(message: string): Operation<void>;
+  error(message: string | object): Operation<void>;
   debug(message: string): Operation<void>;
 }
 
@@ -27,26 +27,119 @@ const loggerApi = createApi<Logger>("inspector.logger", {
 } satisfies Logger);
 const log = loggerApi.operations;
 
-type InspectorMethods = typeof inspector.methods;
-function* callMethod<Method extends keyof InspectorMethods>(config: {
-  name: Method;
-  // config type is wrong here?
-  config: boolean; // { out: string | undefined };
-  // argsList: InspectorMethods[Method]["args"],
-}) {
+export { loggerApi }; // exported for use in tests
+
+interface RunConfig {
+  inspectPause: boolean;
+  inspectRecord: string | undefined;
+  host: string;
+}
+
+function hasInspectorImport(args: string[]): boolean {
+  for (let index = 0; index < args.length; index++) {
+    let arg = args[index];
+    if (arg === "--import" && args[index + 1] === "@effectionx/inspector") {
+      return true;
+    }
+    if (arg.startsWith("--import=") && arg.slice("--import=".length) === "@effectionx/inspector") {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function buildNodeArguments(config: RunConfig, passthroughArgs: string[]): string[] {
+  let normalizedArgs = passthroughArgs[0] === "--" ? passthroughArgs.slice(1) : passthroughArgs;
+
+  let runtimeArgs = config.inspectPause ? ["--suspend"] : [];
+
+  let importArgs = hasInspectorImport(normalizedArgs) ? [] : ["--import", "@effectionx/inspector"];
+
+  return [...importArgs, ...normalizedArgs, ...runtimeArgs];
+}
+
+function* invokeWithRetry(name: "watchScopes" | "recordNodeMap", host: string) {
+  let handle = createSSEClient(inspector, { url: host });
+  let cause: unknown;
+
+  for (let attempt = 0; attempt < 200; attempt++) {
+    try {
+      return yield* handle.invoke({ name, args: [] });
+    } catch (error) {
+      cause = error;
+      yield* sleep(25);
+    }
+  }
+
+  throw cause instanceof Error ? cause : new Error("failed to connect to inspector SSE server");
+}
+
+function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<number> {
+  let args = buildNodeArguments(config, passthroughArgs);
+  let host = config.host;
+
+  let recordTask: Task<void> | undefined;
+  if (config.inspectRecord) {
+    recordTask = yield* spawn(function* () {
+      try {
+        let subscription = yield* invokeWithRetry("recordNodeMap", host);
+        let values: unknown[] = [];
+        let next = yield* subscription.next();
+
+        while (!next.done) {
+          values.push(next.value);
+          next = yield* subscription.next();
+        }
+
+        values.push(next.value);
+        yield* until(writeFile(config.inspectRecord!, JSON.stringify(values, null, 2)));
+      } catch (error) {
+        let message = error instanceof Error ? error.message : String(error);
+        yield* log.error(`failed to record NodeMap: ${message}`);
+      }
+    });
+  }
+
+  let child = yield* exec("node", { arguments: args });
+
+  yield* spawn(function* () {
+    for (let chunk of yield* each(child.stdout)) {
+      yield* log.info(chunk.toString());
+      yield* each.next();
+    }
+  });
+
+  yield* spawn(function* () {
+    for (let chunk of yield* each(child.stderr)) {
+      yield* log.error(chunk.toString());
+      yield* each.next();
+    }
+  });
+
+  let status = yield* child.join();
+
+  if (recordTask) {
+    yield* recordTask;
+  }
+
+  return status.code ?? 1;
+}
+
+function* callMethod(config: Program<ProtocolCommands>) {
   const {
     name,
-    // @ts-expect-error
-    config: { out },
+    // @ts-expect-error types presume config is boolean
+    config: { out, host },
   } = config;
   const argsList = [] as never[];
-  const handle = createSSEClient(inspector, { url: "http://localhost:41000" });
+  const handle = createSSEClient(inspector, { url: host });
   if (!(name in handle.protocol.methods)) {
     yield* log.error(`unknown command: ${name}`);
     return 1;
   }
   let results: unknown[] = [];
   let subscription = yield* handle.invoke({
+    // @ts-expect-error TODO still not refined enough, only a string
     name,
     args: argsList,
   });
@@ -71,47 +164,53 @@ function* callMethod<Method extends keyof InspectorMethods>(config: {
   }
 }
 
+// return values represent process exit codes for use in testing
+export function* cliOp(argv: string[]): Operation<number> {
+  let parser = config.createParser({
+    args: argv,
+    envs: [{ name: "ENV", value: process.env as Record<string, string> }],
+  });
+
+  switch (parser.type) {
+    case "help":
+    case "version":
+      yield* log.info(parser.print());
+      return 0;
+    case "main": {
+      let result = parser.parse();
+      if (result.ok) {
+        let { value: command, remainder } = result;
+        switch (command.name) {
+          case "help":
+            yield* log.info(command.config.text);
+            return 0;
+          case "ui": {
+            let port = 41000;
+            let address = yield* useSSEServer({ protocol: { methods: {} } } as any, { port });
+            yield* log.info(`serving inspector UI at ${address}`);
+            yield* suspend();
+            return 0;
+          }
+          case "call":
+            // @ts-expect-error TODO what type should this actually be?
+            yield* callMethod(command.config);
+            return 0;
+          case "run":
+            yield* runProgram(command.config, remainder.args ?? []);
+            return 0;
+        }
+      } else {
+        yield* log.error(result.error.message);
+        return 1;
+      }
+    }
+  }
+}
+
 // when executed as a script we delegate directly to Effection's `main`
-// which allows for importing functions here for testing
+// which allows the code above to be imported for testing
 if (import.meta.url === `file://${process.argv[1]}`) {
   await main(function* (args) {
-    let parser = config.createParser({
-      args,
-      envs: [{ name: "ENV", value: process.env as Record<string, string> }],
-    });
-
-    switch (parser.type) {
-      case "help":
-      case "version":
-        yield* log.info(parser.print());
-        break;
-      case "main":
-        let result = parser.parse();
-        if (result.ok) {
-          let { value: command } = result;
-          switch (command.name) {
-            case "help":
-              yield* log.info(command.config.text);
-              break;
-            case "ui":
-              let port = 41000;
-              let address = yield* useSSEServer(
-                { protocol: { methods: {} } } as any,
-                { port },
-              );
-              yield* log.info(`serving inspector UI at ${address}`);
-              yield* suspend();
-              break;
-            case "call":
-              yield* callMethod(command.config);
-              break;
-            case "run":
-              yield* log.info(command.config);
-              break;
-          }
-        } else {
-          yield* log.error(result.error.message);
-        }
-    }
+    yield* cliOp(args);
   });
 }
