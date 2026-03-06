@@ -48,12 +48,7 @@ describe("buildNodeArguments", () => {
       },
       ["script.js"],
     );
-    assert.deepEqual(args, [
-      "--import",
-      "@effectionx/inspector",
-      "script.js",
-      "--suspend",
-    ]);
+    assert.deepEqual(args, ["--import", "@effectionx/inspector", "script.js", "--suspend"]);
   });
 
   it("strips leading -- separator from passthrough arguments", function* () {
@@ -65,11 +60,6 @@ describe("buildNodeArguments", () => {
       },
       ["--", "--foo", "bar.js"],
     );
-    assert.deepEqual(args, [
-      "--import",
-      "@effectionx/inspector",
-      "--foo",
-      "bar.js",
-    ]);
+    assert.deepEqual(args, ["--import", "@effectionx/inspector", "--foo", "bar.js"]);
   });
 });

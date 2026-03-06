@@ -39,7 +39,9 @@ export function useSSEServer<M extends Methods>(
     for (let name of methodNames) {
       app.all(`/${String(name)}`, async (event) => {
         let { req } = event;
-        let stream = createEventStream(event);
+        // when the response ends for whatever reason, h3 by default closes the stream
+        // instead we opt to handle the close ourselves, and kill the task on that event
+        let stream = createEventStream(event, { autoclose: false });
 
         let task = scope.run(function* () {
           yield* useAttributes({
@@ -57,35 +59,21 @@ export function useSSEServer<M extends Methods>(
                 let subscription = yield* handle.invoke({ name, args });
                 let next = yield* subscription.next();
                 while (!next.done) {
-                  try {
-                    // pushing to a stream can throw if the client has
-                    // disconnected and the writable has already been
-                    // closed which happens as h3 handle signals and begins
-                    // cleaning up client connections which seems to close
-                    // the stream as we are in this loop
-                    yield* until(
-                      stream.push({
-                        event: "yield",
-                        data: JSON.stringify(next.value),
-                      }),
-                    );
-                  } catch (err: any) {
-                    // the client has probably disconnected; stop
-                    // emitting values and bail out entirely.
-                    if (err && err.code !== "ERR_INTERNAL_ASSERTION") {
-                      console.log("sse-server: push error", err);
-                      // exit the handler scope immediately
-                      // as the client has disconnected and no point in sending
-                      // the final return value
-                      return;
-                    } else {
-                      throw err;
-                    }
-                  }
+                  yield* until(
+                    stream.push({
+                      event: "yield",
+                      data: JSON.stringify(next.value),
+                    }),
+                  );
                   next = yield* subscription.next();
                 }
                 let value = validateUnsafe(protocol.methods[name].returns, next.value);
-                yield* until(stream.push({ event: "return", data: JSON.stringify(value) }));
+                yield* until(
+                  stream.push({
+                    event: "return",
+                    data: JSON.stringify(value),
+                  }),
+                );
               }),
             );
             yield* once(req.signal, "abort");
@@ -104,6 +92,11 @@ export function useSSEServer<M extends Methods>(
           }
         });
         inflight.add(task);
+
+        stream.onClosed(async () => {
+          await task.halt();
+          await stream.close();
+        });
 
         return await stream.send();
       });
