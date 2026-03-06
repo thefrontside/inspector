@@ -1,13 +1,11 @@
 import {
+  type Operation,
   createScope,
   ensure,
   once,
-  type Operation,
   race,
   resource,
-  scoped,
   spawn,
-  type Task,
   until,
   useAttributes,
   useScope,
@@ -31,7 +29,7 @@ export function useSSEServer<M extends Methods>(
   let { protocol } = handle;
   let methodNames = Object.keys(protocol.methods) as Array<keyof M>;
 
-  return resource(function*(provide) {
+  return resource(function* (provide) {
     yield* useAttributes({ name: "SSEServer", port });
     let [scope, destroy] = createScope(yield* useScope());
 
@@ -44,7 +42,7 @@ export function useSSEServer<M extends Methods>(
         // instead we opt to handle the close ourselves, and kill the task on that event
         let stream = createEventStream(event, { autoclose: false });
 
-        scope.run(function*() {
+        scope.run(function* () {
           yield* ensure(() => until(stream.close()));
           yield* useAttributes({
             name: "RequestHandler",
@@ -52,7 +50,7 @@ export function useSSEServer<M extends Methods>(
             pathname: event.url.pathname,
           });
 
-          let events = yield* spawn(function*() {
+          let events = yield* spawn(function* () {
             try {
               yield* useAttributes({ name: "EventStream" });
               let post = req.method.toUpperCase() === "POST";

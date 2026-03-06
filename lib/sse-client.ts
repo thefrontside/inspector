@@ -69,27 +69,17 @@ export function createSSEClient<M extends Methods>(
           *next() {
             let next = yield* subscription.next();
             if (next.done) {
-              // sometimes the server will simply close the stream without
-              // sending a `return` event (e.g. the pause/play interaction)
-              // or it may send a return with `data: undefined`. in those
-              // cases `next.value` may be undefined and attempting to access
-              // `.data` blows up. coerce to `undefined` and validate that.
-              let val: unknown;
-              if (next.value && typeof next.value.data !== "undefined") {
-                val = next.value.data === "undefined" ? undefined : JSON.parse(next.value.data);
-              } else {
-                val = undefined;
+              // TODO this should be a hard error, but we want to handle it better on the server side first
+              if (!next.value) {
+                // recordNodeMap returns an undefined when the recording finishes, so we treat that as a normal completion of the stream
+                return next;
               }
 
-              return {
-                done: true,
-                value: validateUnsafe(protocol.methods[name].returns, val),
-              };
+              throw new Error("connection closed");
             }
+
             let { type, data } = next.value;
-            // the server sometimes pushes `data` of `'undefined'` (a string)
-            // for example when the return value itself is `undefined`
-            let parsed = data === "undefined" ? undefined : JSON.parse(data);
+            let parsed = JSON.parse(data);
             if (type === "yield") {
               return {
                 done: false,

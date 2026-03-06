@@ -82,10 +82,6 @@ export const protocol = createProtocol({
   recordNodeMap: {
     args: schema.None,
     progress: schema.NodeMap,
-    // the server usually emits a final NodeMap when the recording finishes,
-    // but there are situations (early termination) where no
-    // return value is sent at all. allowing `undefined` at the protocol level
-    // keeps validation strict while still permitting these edge cases.
-    returns: $.type.or(schema.NodeMap, schema.Undef),
+    returns: schema.Undef,
   },
 });

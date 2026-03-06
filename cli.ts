@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { each, type Operation, main, sleep, spawn, suspend, type Task, until } from "effection";
+import { type Operation, each, main, sleep, spawn, suspend, until } from "effection";
 import type { Program } from "configliere";
 import { config, inspector, type ProtocolCommands } from "./config.ts";
 import { createApi } from "@effectionx/context-api";
@@ -58,11 +58,11 @@ export function buildNodeArguments(config: RunConfig, passthroughArgs: string[])
   return [...importArgs, ...normalizedArgs, ...runtimeArgs];
 }
 
-function* invokeWithRetry(name: "watchScopes" | "recordNodeMap", host: string) {
+export function* invokeWithRetry(name: "watchScopes" | "recordNodeMap", host: string) {
   let handle = createSSEClient(inspector, { url: host });
   let cause: unknown;
 
-  for (let attempt = 0; attempt < 200; attempt++) {
+  for (let attempt = 0; attempt < 50; attempt++) {
     try {
       return yield* handle.invoke({ name, args: [] });
     } catch (error) {
@@ -78,27 +78,9 @@ function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<nu
   let args = buildNodeArguments(config, passthroughArgs);
   let host = config.host;
 
-  let recordTask: Task<void> | undefined;
-  if (config.inspectRecord) {
-    recordTask = yield* spawn(function* () {
-      try {
-        let subscription = yield* invokeWithRetry("recordNodeMap", host);
-        let values: unknown[] = [];
-        let next = yield* subscription.next();
-
-        while (!next.done) {
-          values.push(next.value);
-          next = yield* subscription.next();
-        }
-
-        values.push(next.value);
-        yield* until(writeFile(config.inspectRecord!, JSON.stringify(values, null, 2)));
-      } catch (error) {
-        let message = error instanceof Error ? error.message : String(error);
-        yield* log.error(`failed to record NodeMap: ${message}`);
-      }
-    });
-  }
+  let recordTask = config.inspectRecord
+    ? yield* spawn(() => recordNodeMapToFile(host, config.inspectRecord!))
+    : undefined;
 
   let child = yield* exec("node", { arguments: args });
 
@@ -123,6 +105,27 @@ function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<nu
   }
 
   return status.code ?? 1;
+}
+
+function* recordNodeMapToFile(host: string, filePath: string): Operation<void> {
+  let values: unknown[] = [];
+  try {
+    let subscription = yield* invokeWithRetry("recordNodeMap", host);
+    while (true) {
+      let next = yield* subscription.next();
+      if (next.done) {
+        values.push(next.value);
+        break;
+      }
+      values.push(next.value);
+    }
+  } catch (error) {
+    let message = error instanceof Error ? error.message : String(error);
+    yield* log.error(`failed to record NodeMap: ${message}`);
+  } finally {
+    // always attempt to write whatever we have collected (possibly empty)
+    yield* until(writeFile(filePath, JSON.stringify(values, null, 2)));
+  }
 }
 
 function* callMethod(config: Program<ProtocolCommands>) {
