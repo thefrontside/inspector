@@ -3,6 +3,7 @@ import {
   ensure,
   once,
   type Operation,
+  race,
   resource,
   scoped,
   spawn,
@@ -50,44 +51,43 @@ export function useSSEServer<M extends Methods>(
             method: req.method,
             pathname: event.url.pathname,
           });
-          try {
-            yield* spawn(() =>
-              scoped(function*() {
-                yield* useAttributes({ name: "EventStream" });
-                let post = req.method.toUpperCase() === "POST";
-                let body: unknown = post ? yield* until(req.json()) : [];
-                let args = validateUnsafe(protocol.methods[name].args, body);
-                let subscription = yield* handle.invoke({ name, args });
-                let next = yield* subscription.next();
-                while (!next.done) {
-                  yield* until(
-                    stream.push({
-                      event: "yield",
-                      data: JSON.stringify(next.value),
-                    }),
-                  );
-                  next = yield* subscription.next();
-                }
-                let value = validateUnsafe(protocol.methods[name].returns, next.value);
+
+          let events = yield* spawn(function*() {
+            try {
+              yield* useAttributes({ name: "EventStream" });
+              let post = req.method.toUpperCase() === "POST";
+              let body: unknown = post ? yield* until(req.json()) : [];
+              let args = validateUnsafe(protocol.methods[name].args, body);
+              let subscription = yield* handle.invoke({ name, args });
+              let next = yield* subscription.next();
+              while (!next.done) {
                 yield* until(
                   stream.push({
-                    event: "return",
-                    data: JSON.stringify(value),
+                    event: "yield",
+                    data: JSON.stringify(next.value),
                   }),
                 );
-              }),
-            );
-            yield* once(req.signal, "abort");
-          } catch (cause) {
-            let error = cause instanceof Error ? cause : new Error("unknown", { cause });
-            let { name, message } = error;
-            yield* until(
-              stream.push({
-                event: "throw",
-                data: JSON.stringify({ name, message }),
-              }),
-            );
-          }
+                next = yield* subscription.next();
+              }
+              let value = validateUnsafe(protocol.methods[name].returns, next.value);
+              yield* until(
+                stream.push({
+                  event: "return",
+                  data: JSON.stringify(value),
+                }),
+              );
+            } catch (cause) {
+              let error = cause instanceof Error ? cause : new Error("unknown", { cause });
+              let { name, message } = error;
+              yield* until(
+                stream.push({
+                  event: "throw",
+                  data: JSON.stringify({ name, message }),
+                }),
+              );
+            }
+          });
+          yield* race([events, once(req.signal, "abort")]);
         });
 
         return await stream.send();
