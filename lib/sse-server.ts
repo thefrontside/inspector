@@ -1,4 +1,6 @@
 import {
+  createScope,
+  ensure,
   once,
   type Operation,
   resource,
@@ -28,13 +30,11 @@ export function useSSEServer<M extends Methods>(
   let { protocol } = handle;
   let methodNames = Object.keys(protocol.methods) as Array<keyof M>;
 
-  return resource(function* (provide) {
+  return resource(function*(provide) {
     yield* useAttributes({ name: "SSEServer", port });
-    let scope = yield* useScope();
+    let [scope, destroy] = createScope(yield* useScope());
 
     let app = new H3();
-
-    let inflight = new Set<Task<void>>();
 
     for (let name of methodNames) {
       app.all(`/${String(name)}`, async (event) => {
@@ -43,7 +43,8 @@ export function useSSEServer<M extends Methods>(
         // instead we opt to handle the close ourselves, and kill the task on that event
         let stream = createEventStream(event, { autoclose: false });
 
-        let task = scope.run(function* () {
+        scope.run(function*() {
+          yield* ensure(() => until(stream.close()));
           yield* useAttributes({
             name: "RequestHandler",
             method: req.method,
@@ -51,7 +52,7 @@ export function useSSEServer<M extends Methods>(
           });
           try {
             yield* spawn(() =>
-              scoped(function* () {
+              scoped(function*() {
                 yield* useAttributes({ name: "EventStream" });
                 let post = req.method.toUpperCase() === "POST";
                 let body: unknown = post ? yield* until(req.json()) : [];
@@ -86,16 +87,7 @@ export function useSSEServer<M extends Methods>(
                 data: JSON.stringify({ name, message }),
               }),
             );
-          } finally {
-            inflight.delete(task);
-            yield* until(stream.close());
           }
-        });
-        inflight.add(task);
-
-        stream.onClosed(async () => {
-          await task.halt();
-          await stream.close();
         });
 
         return await stream.send();
@@ -140,11 +132,7 @@ export function useSSEServer<M extends Methods>(
     try {
       yield* provide(`http://localhost:${port}`);
     } finally {
-      while (inflight.size > 0) {
-        for (let task of inflight) {
-          yield* task.halt();
-        }
-      }
+      yield* destroy();
       yield* until(server.close());
     }
   });
