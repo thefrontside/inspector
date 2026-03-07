@@ -73,7 +73,7 @@ export function createSSEClient<M extends Methods>(
             }
 
             let { type, data } = next.value;
-            let parsed = JSON.parse(data);
+            let parsed = data === "undefined" ? undefined : JSON.parse(data);
             if (type === "yield") {
               return {
                 done: false,
