@@ -69,17 +69,11 @@ export function createSSEClient<M extends Methods>(
           *next() {
             let next = yield* subscription.next();
             if (next.done) {
-              // TODO this should be a hard error, but we want to handle it better on the server side first
-              if (!next.value) {
-                // recordNodeMap returns an undefined when the recording finishes, so we treat that as a normal completion of the stream
-                return next;
-              }
-
               throw new Error("connection closed");
             }
 
             let { type, data } = next.value;
-            let parsed = JSON.parse(data);
+            let parsed = data === "undefined" ? undefined : JSON.parse(data);
             if (type === "yield") {
               return {
                 done: false,

@@ -111,13 +111,11 @@ function* recordNodeMapToFile(host: string, filePath: string): Operation<void> {
   let values: unknown[] = [];
   try {
     let subscription = yield* invokeWithRetry("recordNodeMap", host);
-    while (true) {
-      let next = yield* subscription.next();
-      if (next.done) {
-        values.push(next.value);
-        break;
-      }
+
+    let next = yield* subscription.next();
+    while (!next.done) {
       values.push(next.value);
+      next = yield* subscription.next();
     }
   } catch (error) {
     let message = error instanceof Error ? error.message : String(error);
@@ -153,9 +151,6 @@ function* callMethod(config: Program<ProtocolCommands>) {
     yield* log.info(JSON.stringify(next.value));
     next = yield* subscription.next();
   }
-  // final return value
-  results.push(next.value);
-  yield* log.info(JSON.stringify(next.value));
 
   if (out) {
     try {

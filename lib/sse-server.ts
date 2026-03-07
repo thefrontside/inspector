@@ -43,7 +43,10 @@ export function useSSEServer<M extends Methods>(
         let stream = createEventStream(event, { autoclose: false });
 
         scope.run(function* () {
-          yield* ensure(() => until(stream.close()));
+          yield* ensure(function* () {
+            yield* until(stream.flush());
+            yield* until(stream.close());
+          });
           yield* useAttributes({
             name: "RequestHandler",
             method: req.method,
@@ -51,6 +54,7 @@ export function useSSEServer<M extends Methods>(
           });
 
           let events = yield* spawn(function* () {
+            let finalized = false;
             try {
               yield* useAttributes({ name: "EventStream" });
               let post = req.method.toUpperCase() === "POST";
@@ -67,13 +71,16 @@ export function useSSEServer<M extends Methods>(
                 );
                 next = yield* subscription.next();
               }
-              let value = validateUnsafe(protocol.methods[name].returns, next.value);
+              let value = validateUnsafe(protocol.methods[name].returns, next?.value);
               yield* until(
                 stream.push({
                   event: "return",
                   data: JSON.stringify(value),
                 }),
               );
+              // return sent, we can consider the stream finalized
+              // and skip remaining steps in the finally block
+              finalized = true;
             } catch (cause) {
               let error = cause instanceof Error ? cause : new Error("unknown", { cause });
               let { name, message } = error;
@@ -83,6 +90,15 @@ export function useSSEServer<M extends Methods>(
                   data: JSON.stringify({ name, message }),
                 }),
               );
+            } finally {
+              if (!finalized) {
+                yield* until(
+                  stream.push({
+                    event: "return",
+                    data: "undefined",
+                  }),
+                );
+              }
             }
           });
           yield* race([events, once(req.signal, "abort")]);
