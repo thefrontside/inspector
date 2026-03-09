@@ -69,11 +69,11 @@ export function createSSEClient<M extends Methods>(
           *next() {
             let next = yield* subscription.next();
             if (next.done) {
-              throw new Error("connection closed");
+              throw new Error("connection closed unexpectedly");
             }
 
             let { type, data } = next.value;
-            let parsed = data === "undefined" ? undefined : JSON.parse(data);
+            let parsed = JSON.parse(data);
             if (type === "yield") {
               return {
                 done: false,

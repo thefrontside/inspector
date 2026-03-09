@@ -59,7 +59,7 @@ const $ = scope({
   NodeMap: "Record<string, ScopeNode>",
   Never: "never",
   None: "never[]",
-  Undef: "undefined",
+  Null: "null",
 });
 
 const schema = $.export();
@@ -72,7 +72,7 @@ export const protocol = createProtocol({
   watchScopes: {
     args: schema.None,
     progress: schema.ScopeEvent,
-    returns: schema.Undef,
+    returns: schema.Null,
   },
   getScopes: {
     args: schema.None,
@@ -82,6 +82,6 @@ export const protocol = createProtocol({
   recordNodeMap: {
     args: schema.None,
     progress: schema.NodeMap,
-    returns: schema.Undef,
+    returns: schema.Null,
   },
 });
