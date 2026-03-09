@@ -87,7 +87,7 @@ export const scope = createImplementation(protocol, function* (root) {
         stream,
         createSubject<ScopeEvent>({ type: "tree", value: readTree(root) }),
         updateNodeMap({}),
-        truncate()
+        truncate(),
       ),
   };
 }) as Inspector<typeof protocol.methods>;

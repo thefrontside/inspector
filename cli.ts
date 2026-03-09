@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { type Operation, each, main, sleep, spawn, suspend, until } from "effection";
+import { createApi } from "effection/experimental";
 import type { Program } from "configliere";
 import { config, inspector, type ProtocolCommands } from "./config.ts";
-import { createApi } from "@effectionx/context-api";
 import { exec } from "@effectionx/process";
 import { writeFile } from "node:fs/promises";
 import { createSSEClient } from "./lib/sse-client.ts";

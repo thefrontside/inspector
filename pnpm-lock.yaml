@@ -21,10 +21,10 @@ importers:
         version: 0.7.5
       '@effectionx/process':
         specifier: ^0.7.3
-        version: 0.7.3(effection@4.1.0-alpha.5)
+        version: 0.7.3(effection@4.1.0-alpha.7)
       '@effectionx/stream-helpers':
         specifier: ^0.8.0
-        version: 0.8.0(effection@4.1.0-alpha.5)
+        version: 0.8.0(effection@4.1.0-alpha.7)
       '@standard-schema/spec':
         specifier: ^1.0.0
         version: 1.1.0
@@ -49,10 +49,10 @@ importers:
     devDependencies:
       '@effectionx/bdd':
         specifier: ^0.4.3
-        version: 0.4.3(effection@4.1.0-alpha.5)
+        version: 0.4.3(effection@4.1.0-alpha.7)
       '@effectionx/context-api':
         specifier: ^0.3.2
-        version: 0.3.2(effection@4.1.0-alpha.5)
+        version: 0.3.2(effection@4.1.0-alpha.7)
       '@nano-router/history':
         specifier: ^4.0.4
         version: 4.0.4
@@ -72,8 +72,8 @@ importers:
         specifier: '22'
         version: 22.19.11
       effection:
-        specifier: 4.1.0-alpha.5
-        version: 4.1.0-alpha.5
+        specifier: 4.1.0-alpha.7
+        version: 4.1.0-alpha.7
       expect:
         specifier: ^30.2.0
         version: 30.2.0
@@ -1125,8 +1125,8 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  effection@4.1.0-alpha.5:
-    resolution: {integrity: sha512-UCYrU5wGaRYxhcUHx7eVeJ+Cwm/r7zsL484lswbGDVxKeOjqTARNcOxH0CWc4y9Xr5S1KjW0tsdOdgOdXE8wag==}
+  effection@4.1.0-alpha.7:
+    resolution: {integrity: sha512-ir7qM7vQXOo7eiuNxaD6FgwUetdy3XMB3dwtzUxp9ytiZl6abZUrXwM3vMqKWdMW4cW1KZzJqSEuXofJFscwFw==}
     engines: {node: '>= 16'}
 
   esbuild@0.27.3:
@@ -1569,47 +1569,47 @@ snapshots:
 
   '@ctrl/tinycolor@4.2.0': {}
 
-  '@effectionx/bdd@0.4.3(effection@4.1.0-alpha.5)':
+  '@effectionx/bdd@0.4.3(effection@4.1.0-alpha.7)':
     dependencies:
-      '@effectionx/test-adapter': 0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.5)
-      effection: 4.1.0-alpha.5
+      '@effectionx/test-adapter': 0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7)
+      effection: 4.1.0-alpha.7
 
-  '@effectionx/context-api@0.3.2(effection@4.1.0-alpha.5)':
+  '@effectionx/context-api@0.3.2(effection@4.1.0-alpha.7)':
     dependencies:
-      effection: 4.1.0-alpha.5
+      effection: 4.1.0-alpha.7
 
-  '@effectionx/node@0.2.2(effection@4.1.0-alpha.5)':
+  '@effectionx/node@0.2.2(effection@4.1.0-alpha.7)':
     dependencies:
-      effection: 4.1.0-alpha.5
+      effection: 4.1.0-alpha.7
 
-  '@effectionx/process@0.7.3(effection@4.1.0-alpha.5)':
+  '@effectionx/process@0.7.3(effection@4.1.0-alpha.7)':
     dependencies:
-      '@effectionx/node': 0.2.2(effection@4.1.0-alpha.5)
+      '@effectionx/node': 0.2.2(effection@4.1.0-alpha.7)
       cross-spawn: 7.0.6
       ctrlc-windows: 2.2.0
-      effection: 4.1.0-alpha.5
+      effection: 4.1.0-alpha.7
       shellwords-ts: 3.0.1
 
-  '@effectionx/signals@0.5.1(effection@4.1.0-alpha.5)':
+  '@effectionx/signals@0.5.1(effection@4.1.0-alpha.7)':
     dependencies:
-      effection: 4.1.0-alpha.5
+      effection: 4.1.0-alpha.7
       immutable: 5.1.4
 
-  '@effectionx/stream-helpers@0.8.0(effection@4.1.0-alpha.5)':
+  '@effectionx/stream-helpers@0.8.0(effection@4.1.0-alpha.7)':
     dependencies:
-      '@effectionx/signals': 0.5.1(effection@4.1.0-alpha.5)
-      '@effectionx/timebox': 0.4.1(effection@4.1.0-alpha.5)
-      effection: 4.1.0-alpha.5
+      '@effectionx/signals': 0.5.1(effection@4.1.0-alpha.7)
+      '@effectionx/timebox': 0.4.1(effection@4.1.0-alpha.7)
+      effection: 4.1.0-alpha.7
       immutable: 5.1.4
       remeda: 2.33.6
 
-  '@effectionx/test-adapter@0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.5)':
+  '@effectionx/test-adapter@0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7)':
     dependencies:
-      effection: 4.1.0-alpha.5
+      effection: 4.1.0-alpha.7
 
-  '@effectionx/timebox@0.4.1(effection@4.1.0-alpha.5)':
+  '@effectionx/timebox@0.4.1(effection@4.1.0-alpha.7)':
     dependencies:
-      effection: 4.1.0-alpha.5
+      effection: 4.1.0-alpha.7
 
   '@esbuild/aix-ppc64@0.27.3':
     optional: true
@@ -2368,7 +2368,7 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  effection@4.1.0-alpha.5: {}
+  effection@4.1.0-alpha.7: {}
 
   esbuild@0.27.3:
     optionalDependencies:

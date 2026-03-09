@@ -31,7 +31,7 @@ export function useSSEServer<M extends Methods>(
   let { protocol } = handle;
   let methodNames = Object.keys(protocol.methods) as Array<keyof M>;
 
-  return resource(function*(provide) {
+  return resource(function* (provide) {
     yield* useAttributes({ name: "SSEServer", port });
     let [scope, destroy] = createScope(yield* useScope());
 
@@ -44,8 +44,8 @@ export function useSSEServer<M extends Methods>(
         // instead we opt to handle the close ourselves, and kill the task on that event
         let stream = createEventStream(event, { autoclose: false });
 
-        scope.run(function*() {
-          yield* ensure(function*() {
+        scope.run(function* () {
+          yield* ensure(function* () {
             yield* until(stream.flush());
             yield* until(stream.close());
           });
@@ -58,9 +58,11 @@ export function useSSEServer<M extends Methods>(
           let post = req.method.toUpperCase() === "POST";
           let body: unknown = post ? yield* until(req.json()) : [];
           let args = validateUnsafe(protocol.methods[name].args, body);
-          let { value: subscription, destroy: flush } = yield* useExplicitlyManagedResource(handle.invoke({ name, args }));
+          let { value: subscription, destroy: flush } = yield* useExplicitlyManagedResource(
+            handle.invoke({ name, args }),
+          );
 
-          let events = yield* spawn(function*() {
+          let events = yield* spawn(function* () {
             try {
               yield* useAttributes({ name: "EventStream" });
 
@@ -103,7 +105,6 @@ export function useSSEServer<M extends Methods>(
           } finally {
             yield* flush();
           }
-
         });
 
         return await stream.send();
@@ -159,10 +160,12 @@ interface ExplicitlyManagedResource<T> {
   destroy: () => Operation<void>;
 }
 
-function* useExplicitlyManagedResource<T>(create: Operation<T>): Operation<ExplicitlyManagedResource<T>> {
+function* useExplicitlyManagedResource<T>(
+  create: Operation<T>,
+): Operation<ExplicitlyManagedResource<T>> {
   let handle = withResolvers<T>();
 
-  let task = yield* spawn(function*() {
+  let task = yield* spawn(function* () {
     let value = yield* create;
     handle.resolve(value);
     yield* suspend();

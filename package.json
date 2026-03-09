@@ -62,7 +62,6 @@
   },
   "devDependencies": {
     "@effectionx/bdd": "^0.4.3",
-    "@effectionx/context-api": "^0.3.2",
     "@nano-router/history": "^4.0.4",
     "@nano-router/router": "^4.0.4",
     "@playwright/test": "^1.58.2",
@@ -70,7 +69,7 @@
     "@types/d3": "^7.4.3",
     "@types/node": "22",
     "d3": "^7.9.0",
-    "effection": "4.1.0-alpha.5",
+    "effection": "4.1.0-alpha.7",
     "expect": "^30.2.0",
     "lightningcss": "^1.31.1",
     "oxfmt": "^0.34.0",
@@ -82,7 +81,7 @@
     "vite-plugin-static-copy": "^3.2.0"
   },
   "peerDependencies": {
-    "effection": "^4.1.0-alpha.3"
+    "effection": "^4.1.0-alpha.7"
   },
   "packageManager": "pnpm@9.15.9",
   "pnpm": {

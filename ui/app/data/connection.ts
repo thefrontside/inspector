@@ -51,26 +51,23 @@ export interface Connection<T, TClose> extends Stream<ConnectionState<T, TClose>
 
 export function createConnection<T, TClose>(stream: Stream<T, TClose>): Connection<T, TClose> {
   let initial: ConnectionState<T, TClose> = { type: "pending" };
-  let connection = resource<Yielded<Connection<T, TClose>>>(function*(provide) {
+  let connection = resource<Yielded<Connection<T, TClose>>>(function* (provide) {
     let queue = createQueue<ConnectionState<T, TClose>, never>();
 
     //    queue.add(initial);
 
     let latest: IteratorYieldResult<T> | undefined = undefined;
 
-    yield* spawn(function*() {
+    yield* spawn(function* () {
       try {
-        yield* scoped(function*() {
+        yield* scoped(function* () {
           let subscription = yield* stream;
           let next = yield* subscription.next();
 
           while (!next.done) {
-
-
             latest = next;
             queue.add({ type: "live", latest: latest.value });
             next = yield* subscription.next();
-
           }
           if (!latest) {
             queue.add({
@@ -84,7 +81,7 @@ export function createConnection<T, TClose>(stream: Stream<T, TClose>): Connecti
               type: "closed",
               latest: latest.value,
               result: Ok(next.value),
-            })
+            });
           }
         });
       } catch (cause) {
