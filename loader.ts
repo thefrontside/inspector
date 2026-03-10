@@ -19,7 +19,7 @@ global.around(api.Main, {
         let address = yield* useSSEServer(handle, { port: 41000 });
 
         let { version } = packageJSON;
-        console.log(
+        process.stderr.write(
           `effection inspector@${version} running at ${address}/live\n` +
             `inspect the running program using \`npx @effectionx/inspector call *\` or other CLI commands`,
         );
@@ -28,7 +28,7 @@ global.around(api.Main, {
       try {
         // pause indicated by environment variable rather than CLI argument
         if (process.env.INSPECT_PAUSE === "1") {
-          console.log(
+          process.stderr.write(
             "inspector attached and main() waiting to start; use 'play' button at /live to start execution",
           );
           yield* pause();
@@ -37,7 +37,7 @@ global.around(api.Main, {
         yield* body(args);
       } finally {
         yield* detach();
-        console.log("detached, inspector shut down");
+        process.stderr.write("detached, inspector shut down");
       }
     });
   },
