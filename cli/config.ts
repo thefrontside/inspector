@@ -59,6 +59,12 @@ export const config = program({
             description: "inspector base URL (overrides default)",
             ...field(type("string"), field.default("http://localhost:41000")),
           },
+          runtime: {
+            description:
+              "which JavaScript runtime to launch (node, deno, bun).\n" +
+              "If omitted we infer from the executable that invoked the CLI",
+            ...field(type("string"), field.default("node")),
+          },
         }),
       },
     },

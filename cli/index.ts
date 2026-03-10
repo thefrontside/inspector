@@ -1,13 +1,5 @@
 #!/usr/bin/env node
-import {
-  type Operation,
-  each,
-  main,
-  sleep,
-  spawn,
-  suspend,
-  until,
-} from "effection";
+import { type Operation, each, main, sleep, spawn, suspend, until } from "effection";
 import type { Program } from "configliere";
 import { config, inspector, type ProtocolCommands } from "./config.ts";
 import { exec } from "@effectionx/process";
@@ -15,12 +7,14 @@ import { writeFile } from "node:fs/promises";
 import { createSSEClient } from "../lib/sse-client.ts";
 import { useSSEServer } from "../lib/sse-server.ts";
 import { log } from "./logger.ts";
-import { RunConfig, buildNodeArguments } from "./build-run-args.ts";
+import {
+  RunConfig,
+  buildRuntimeArguments,
+  buildRunEnvironment,
+  resolveRuntime,
+} from "./build-run-args.ts";
 
-export function* invokeWithRetry(
-  name: "watchScopes" | "recordNodeMap",
-  host: string,
-) {
+export function* invokeWithRetry(name: "watchScopes" | "recordNodeMap", host: string) {
   let handle = createSSEClient(inspector, { url: host });
   let cause: unknown;
 
@@ -33,23 +27,22 @@ export function* invokeWithRetry(
     }
   }
 
-  throw cause instanceof Error
-    ? cause
-    : new Error("failed to connect to inspector SSE server");
+  throw cause instanceof Error ? cause : new Error("failed to connect to inspector SSE server");
 }
 
-function* runProgram(
-  config: RunConfig,
-  passthroughArgs: string[],
-): Operation<number> {
-  let args = buildNodeArguments(config, passthroughArgs);
+function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<number> {
+  let runtime = resolveRuntime(config);
+  let args = buildRuntimeArguments(config, passthroughArgs);
   let host = config.host;
 
   let recordTask = config.inspectRecord
     ? yield* spawn(() => recordNodeMapToFile(host, config.inspectRecord!))
     : undefined;
 
-  let child = yield* exec("node", { arguments: args });
+  let commandArgs = args;
+  let env = buildRunEnvironment(config);
+
+  let child = yield* exec(runtime, { arguments: commandArgs, env });
 
   yield* spawn(function* () {
     for (let chunk of yield* each(child.stdout)) {
@@ -151,10 +144,7 @@ export function* cliOp(argv: string[]): Operation<number> {
             return 0;
           case "ui": {
             let port = 41000;
-            let address = yield* useSSEServer(
-              { protocol: { methods: {} } } as any,
-              { port },
-            );
+            let address = yield* useSSEServer({ protocol: { methods: {} } } as any, { port });
             yield* log.info(`serving inspector UI at ${address}`);
             yield* suspend();
             return 0;

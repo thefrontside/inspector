@@ -26,7 +26,8 @@ global.around(api.Main, {
       });
 
       try {
-        if (args.includes("--suspend")) {
+        // pause indicated by environment variable rather than CLI argument
+        if (process.env.INSPECT_PAUSE === "1") {
           console.log(
             "inspector attached and main() waiting to start; use 'play' button at /live to start execution",
           );

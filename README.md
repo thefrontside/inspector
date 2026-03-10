@@ -15,6 +15,8 @@ inspector [options] <command> [args]
 
 Use `npx @effectionx/inspector help` to explore available commands. Typically you will run to inspector in "live" mode or "record" more.
 
+Under the hood the CLI chooses which binary to execute based on the `--runtime` option or, if you omit that, it will guess from the process that started the CLI, either `node`, `deno`, or `bun`.
+
 These raw `call` commands mirror the behaviour of the HTTP routes produced by the same code that powers the SSE server (see `lib/sse-server.ts`).
 
 ### Live
@@ -27,20 +29,6 @@ inspector --inspect-pause --experimental-strip-types program.ts
 ```
 
 When started directly with the loader, the inspector will launch a small SSE server (default port: 41000) and serve the UI at `http://localhost:41000`. You will need to "play" or continue execution of your program when you use `--inspect-pause`. This gives you time to load the UI, and press the play button or issue the "play" call, e.g. `npx @effectionx/inspector call play`.
-
-Under the hood, it is running your program with the following.
-
-Node:
-
-```bash
-node --import @effectionx/inspector ./your-app.js --suspend
-```
-
-Deno:
-
-```bash
-deno run --preload npm:@effectionx/inspector ./your-app.ts --suspend
-```
 
 ### Recording ✅
 
@@ -69,10 +57,15 @@ inspector call watchScopes --out=events.json
 # use the alias
 inspector c recordNodeMap
 
-# inspect and run a node script (default command)
+# inspect and run a script (node assumed by default)
 inspector program.js
 
-# pass through node flags
+# override runtime explicitly
+inspector --runtime deno --inspect-pause program.ts
+# or when using bun:
+inspector --runtime bun program.js
+
+# pass through runtime flags
 inspector --experimental-strip-types program.ts
 inspector --import=tsx program.ts
 
@@ -80,6 +73,12 @@ inspector --import=tsx program.ts
 inspector --inspect-pause --inspect-record=recording.inspector.json --import=tsx program.ts
 # generate a recording, but begin execution immediately
 inspector --inspect-record=recording.inspector.json --import=tsx program.ts
+```
+
+Pause behaviour is communicated to the loader via the `INSPECT_PAUSE` environment variable, and using `--inspect-pause` sets that for you. When running the program with the CLI, the program is run through the loader with the environment variable passed, e.g.:
+
+```bash
+INSPECT_PAUSE=1 node --import @effectionx/inspector ./your-app.js
 ```
 
 ## Contributing
