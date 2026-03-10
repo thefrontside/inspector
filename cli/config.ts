@@ -1,8 +1,8 @@
 import { commands, field, object, program, help } from "configliere";
-import packageJSON from "./package.json" with { type: "json" };
+import packageJSON from "../package.json" with { type: "json" };
 import { type } from "arktype";
-import { scope, player } from "./lib/protocols.ts";
-import { combine } from "./mod.ts";
+import { scope, player } from "../lib/protocols.ts";
+import { combine } from "../mod.ts";
 
 export const inspector = combine.protocols(scope.protocol, player.protocol);
 const inspectorProtocolEntries = (

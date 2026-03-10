@@ -1,6 +1,6 @@
 import { describe, it } from "@effectionx/bdd";
 import assert from "node:assert/strict";
-import { buildNodeArguments } from "../cli.ts";
+import { buildNodeArguments } from "../cli/build-run-args.ts";
 
 describe("buildNodeArguments", () => {
   it("basic", function* () {
@@ -48,7 +48,12 @@ describe("buildNodeArguments", () => {
       },
       ["script.js"],
     );
-    assert.deepEqual(args, ["--import", "@effectionx/inspector", "script.js", "--suspend"]);
+    assert.deepEqual(args, [
+      "--import",
+      "@effectionx/inspector",
+      "script.js",
+      "--suspend",
+    ]);
   });
 
   it("strips leading -- separator from passthrough arguments", function* () {
@@ -60,6 +65,11 @@ describe("buildNodeArguments", () => {
       },
       ["--", "--foo", "bar.js"],
     );
-    assert.deepEqual(args, ["--import", "@effectionx/inspector", "--foo", "bar.js"]);
+    assert.deepEqual(args, [
+      "--import",
+      "@effectionx/inspector",
+      "--foo",
+      "bar.js",
+    ]);
   });
 });

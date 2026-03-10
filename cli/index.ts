@@ -1,64 +1,26 @@
 #!/usr/bin/env node
-import { type Operation, each, main, sleep, spawn, suspend, until } from "effection";
-import { createApi } from "effection/experimental";
+import {
+  type Operation,
+  each,
+  main,
+  sleep,
+  spawn,
+  suspend,
+  until,
+} from "effection";
 import type { Program } from "configliere";
 import { config, inspector, type ProtocolCommands } from "./config.ts";
 import { exec } from "@effectionx/process";
 import { writeFile } from "node:fs/promises";
-import { createSSEClient } from "./lib/sse-client.ts";
-import { useSSEServer } from "./lib/sse-server.ts";
+import { createSSEClient } from "../lib/sse-client.ts";
+import { useSSEServer } from "../lib/sse-server.ts";
+import { log } from "./logger.ts";
+import { RunConfig, buildNodeArguments } from "./build-run-args.ts";
 
-interface Logger {
-  info(message: string | object): Operation<void>;
-  error(message: string | object): Operation<void>;
-  debug(message: string): Operation<void>;
-}
-
-const loggerApi = createApi<Logger>("inspector.logger", {
-  *info(message) {
-    console.log(message);
-  },
-  *error(message) {
-    console.error(message);
-  },
-  *debug(message) {
-    console.debug(message);
-  },
-} satisfies Logger);
-const log = loggerApi.operations;
-
-export { loggerApi }; // exported for use in tests
-
-interface RunConfig {
-  inspectPause: boolean;
-  inspectRecord: string | undefined;
-  host: string;
-}
-
-function hasInspectorImport(args: string[]): boolean {
-  for (let index = 0; index < args.length; index++) {
-    let arg = args[index];
-    if (arg === "--import" && args[index + 1] === "@effectionx/inspector") {
-      return true;
-    }
-    if (arg.startsWith("--import=") && arg.slice("--import=".length) === "@effectionx/inspector") {
-      return true;
-    }
-  }
-  return false;
-}
-
-export function buildNodeArguments(config: RunConfig, passthroughArgs: string[]): string[] {
-  let normalizedArgs = passthroughArgs[0] === "--" ? passthroughArgs.slice(1) : passthroughArgs;
-
-  let runtimeArgs = config.inspectPause ? ["--suspend"] : [];
-
-  let importArgs = hasInspectorImport(normalizedArgs) ? [] : ["--import", "@effectionx/inspector"];
-
-  return [...importArgs, ...normalizedArgs, ...runtimeArgs];
-}
-
-export function* invokeWithRetry(name: "watchScopes" | "recordNodeMap", host: string) {
+export function* invokeWithRetry(
+  name: "watchScopes" | "recordNodeMap",
+  host: string,
+) {
   let handle = createSSEClient(inspector, { url: host });
   let cause: unknown;
 
@@ -71,10 +33,15 @@ export function* invokeWithRetry(name: "watchScopes" | "recordNodeMap", host: st
     }
   }
 
-  throw cause instanceof Error ? cause : new Error("failed to connect to inspector SSE server");
+  throw cause instanceof Error
+    ? cause
+    : new Error("failed to connect to inspector SSE server");
 }
 
-function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<number> {
+function* runProgram(
+  config: RunConfig,
+  passthroughArgs: string[],
+): Operation<number> {
   let args = buildNodeArguments(config, passthroughArgs);
   let host = config.host;
 
@@ -184,7 +151,10 @@ export function* cliOp(argv: string[]): Operation<number> {
             return 0;
           case "ui": {
             let port = 41000;
-            let address = yield* useSSEServer({ protocol: { methods: {} } } as any, { port });
+            let address = yield* useSSEServer(
+              { protocol: { methods: {} } } as any,
+              { port },
+            );
             yield* log.info(`serving inspector UI at ${address}`);
             yield* suspend();
             return 0;
