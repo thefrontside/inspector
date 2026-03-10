@@ -18,7 +18,7 @@ export default defineConfig({
     // use "forever" example program that sleeps indefinitely so that
     // the loader process never exits.
     command:
-      "pnpm run build && node --import tsx --import ./dist/loader.js examples/forever.ts --suspend",
+      "pnpm run build && node --experimental-strip-types --import ./dist/loader.js examples/forever.ts --suspend",
     url: "http://127.0.0.1:41000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

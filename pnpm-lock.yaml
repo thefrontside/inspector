@@ -86,9 +86,6 @@ importers:
       parse-sse:
         specifier: ^0.1.0
         version: 0.1.0
-      tsx:
-        specifier: ^4.21.0
-        version: 4.21.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -2414,6 +2411,7 @@ snapshots:
   get-tsconfig@4.13.6:
     dependencies:
       resolve-pkg-maps: 1.0.0
+    optional: true
 
   glob-parent@5.1.2:
     dependencies:
@@ -2670,7 +2668,8 @@ snapshots:
 
   remeda@2.33.6: {}
 
-  resolve-pkg-maps@1.0.0: {}
+  resolve-pkg-maps@1.0.0:
+    optional: true
 
   robust-predicates@3.0.2: {}
 
@@ -2752,6 +2751,7 @@ snapshots:
       get-tsconfig: 4.13.6
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   typescript@5.9.3: {}
 
