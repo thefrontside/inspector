@@ -9,8 +9,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "node",
+          inspectHost: "http://localhost",
+          inspectRuntime: "node",
         },
         ["program.js"],
       );
@@ -22,8 +22,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "node",
+          inspectHost: "http://localhost",
+          inspectRuntime: "node",
         },
         ["--import", "@effectionx/inspector", "foo.js"],
       );
@@ -35,8 +35,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "node",
+          inspectHost: "http://localhost",
+          inspectRuntime: "node",
         },
         ["--import=@effectionx/inspector", "foo.js"],
       );
@@ -48,8 +48,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "node",
+          inspectHost: "http://localhost",
+          inspectRuntime: "node",
         },
         ["--import=@effectionx/inspector-preview", "foo.js"],
       );
@@ -59,8 +59,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "node",
+          inspectHost: "http://localhost",
+          inspectRuntime: "node",
         },
         ["--import", "@effectionx/inspector-beta", "foo.js"],
       );
@@ -72,8 +72,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "node",
+          inspectHost: "http://localhost",
+          inspectRuntime: "node",
         },
         ["--", "--foo", "bar.js"],
       );
@@ -87,8 +87,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "deno",
+          inspectHost: "http://localhost",
+          inspectRuntime: "deno",
         },
         ["program.ts"],
       );
@@ -100,8 +100,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "deno",
+          inspectHost: "http://localhost",
+          inspectRuntime: "deno",
         },
         ["--preload", "npm:@effectionx/inspector", "foo.ts"],
       );
@@ -113,8 +113,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "deno",
+          inspectHost: "http://localhost",
+          inspectRuntime: "deno",
         },
         ["--preload=npm:@effectionx/inspector", "foo.ts"],
       );
@@ -128,8 +128,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "deno",
+          inspectHost: "http://localhost",
+          inspectRuntime: "deno",
         },
         ["--preload=https://esm.sh/pr/@effectionx/inspector@next", "foo.ts"],
       );
@@ -143,8 +143,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "deno",
+          inspectHost: "http://localhost",
+          inspectRuntime: "deno",
         },
         ["--preload", "npm:@effectionx/inspector-beta", "foo.ts"],
       );
@@ -156,8 +156,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "deno",
+          inspectHost: "http://localhost",
+          inspectRuntime: "deno",
         },
         ["--", "--foo", "bar.ts"],
       );
@@ -171,8 +171,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "bun",
+          inspectHost: "http://localhost",
+          inspectRuntime: "bun",
         },
         ["program.js"],
       );
@@ -184,8 +184,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "bun",
+          inspectHost: "http://localhost",
+          inspectRuntime: "bun",
         },
         ["--require", "@effectionx/inspector", "foo.js"],
       );
@@ -195,8 +195,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "bun",
+          inspectHost: "http://localhost",
+          inspectRuntime: "bun",
         },
         ["-r", "@effectionx/inspector", "foo.js"],
       );
@@ -208,8 +208,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "bun",
+          inspectHost: "http://localhost",
+          inspectRuntime: "bun",
         },
         ["--require", "@effectionx/inspector-preview", "foo.js"],
       );
@@ -219,8 +219,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "bun",
+          inspectHost: "http://localhost",
+          inspectRuntime: "bun",
         },
         ["-r", "@effectionx/inspector-beta", "foo.js"],
       );
@@ -232,8 +232,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: false,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "bun",
+          inspectHost: "http://localhost",
+          inspectRuntime: "bun",
         },
         ["--", "--foo", "bar.js"],
       );
@@ -246,8 +246,8 @@ describe("buildRuntimeArguments", () => {
       let env = buildRunEnvironment({
         inspectPause: true,
         inspectRecord: undefined,
-        host: "http://localhost",
-        runtime: "node",
+        inspectHost: "http://localhost",
+        inspectRuntime: "node",
       });
       assert.equal(env.INSPECT_PAUSE, "1");
 
@@ -255,8 +255,8 @@ describe("buildRuntimeArguments", () => {
       let envWithoutPause = buildRunEnvironment({
         inspectPause: false,
         inspectRecord: undefined,
-        host: "http://localhost",
-        runtime: "node",
+        inspectHost: "http://localhost",
+        inspectRuntime: "node",
       });
       assert.equal(envWithoutPause.INSPECT_PAUSE, undefined);
     });
@@ -267,8 +267,8 @@ describe("buildRuntimeArguments", () => {
         {
           inspectPause: true,
           inspectRecord: undefined,
-          host: "http://localhost",
-          runtime: "node",
+          inspectHost: "http://localhost",
+          inspectRuntime: "node",
         },
         ["script.js"],
       );

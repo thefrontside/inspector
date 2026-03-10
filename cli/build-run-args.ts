@@ -3,8 +3,8 @@ export type Runtime = "node" | "deno" | "bun";
 export interface RunConfig {
   inspectPause: boolean;
   inspectRecord: string | undefined;
-  host: string;
-  runtime?: string;
+  inspectHost: string;
+  inspectRuntime?: string;
 }
 
 function hasInspectorImport(args: string[]): boolean {
@@ -142,8 +142,8 @@ export function buildRunEnvironment(
  * "deno" or "bun" we return the corresponding runtime.
  */
 export function resolveRuntime(config: RunConfig): Runtime {
-  if (config.runtime) {
-    return config.runtime as Runtime;
+  if (config.inspectRuntime) {
+    return config.inspectRuntime as Runtime;
   }
   let exec = process.execPath;
   if (exec.includes("deno")) {

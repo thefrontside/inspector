@@ -33,7 +33,7 @@ export function* invokeWithRetry(name: "watchScopes" | "recordNodeMap", host: st
 function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<number> {
   let runtime = resolveRuntime(config);
   let args = buildRuntimeArguments(config, passthroughArgs);
-  let host = config.host;
+  let host = config.inspectHost;
 
   let recordTask = config.inspectRecord
     ? yield* spawn(() => recordNodeMapToFile(host, config.inspectRecord!))

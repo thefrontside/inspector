@@ -55,11 +55,11 @@ export const config = program({
             description: "write inspector recording to the given file",
             ...field(type("string | undefined"), field.default(undefined)),
           },
-          host: {
+          inspectHost: {
             description: "inspector base URL (overrides default)",
-            ...field(type("string"), field.default("http://localhost:41000")),
+            ...field(type("string.url"), field.default("http://localhost:41000")),
           },
-          runtime: {
+          inspectRuntime: {
             description:
               "which JavaScript runtime to launch (node, deno, bun).\n" +
               "If omitted we infer from the executable that invoked the CLI",
