@@ -1,4 +1,4 @@
-import { createSignal, each, resource, spawn, Subscription, type Stream } from "effection";
+import { createSignal, each, resource, spawn, type Subscription, type Stream } from "effection";
 
 export function truncate(): <T, TClose>(source: Stream<T, TClose>) => Stream<T, null> {
   return <T, TClose>(source: Stream<T, TClose>) =>

@@ -8,7 +8,7 @@ import { createSSEClient } from "../lib/sse-client.ts";
 import { useSSEServer } from "../lib/sse-server.ts";
 import { log } from "./logger.ts";
 import {
-  RunConfig,
+  type RunConfig,
   buildRuntimeArguments,
   buildRunEnvironment,
   resolveRuntime,
