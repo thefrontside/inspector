@@ -1,9 +1,6 @@
 import { describe, it } from "@effectionx/bdd";
 import assert from "node:assert/strict";
-import {
-  buildRuntimeArguments,
-  buildRunEnvironment,
-} from "../cli/build-run-args.ts";
+import { buildRuntimeArguments, buildRunEnvironment } from "../cli/build-run-args.ts";
 
 describe("buildRuntimeArguments", () => {
   describe("node runtime", () => {
@@ -17,11 +14,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["program.js"],
       );
-      assert.deepEqual(args, [
-        "--import",
-        "@effectionx/inspector",
-        "program.js",
-      ]);
+      assert.deepEqual(args, ["--import", "@effectionx/inspector", "program.js"]);
     });
 
     it("does not duplicate import if already present", function* () {
@@ -60,10 +53,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["--import=@effectionx/inspector-preview", "foo.js"],
       );
-      assert.deepEqual(args, [
-        "--import=@effectionx/inspector-preview",
-        "foo.js",
-      ]);
+      assert.deepEqual(args, ["--import=@effectionx/inspector-preview", "foo.js"]);
 
       args = buildRuntimeArguments(
         {
@@ -74,11 +64,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["--import", "@effectionx/inspector-beta", "foo.js"],
       );
-      assert.deepEqual(args, [
-        "--import",
-        "@effectionx/inspector-beta",
-        "foo.js",
-      ]);
+      assert.deepEqual(args, ["--import", "@effectionx/inspector-beta", "foo.js"]);
     });
 
     it("strips leading -- separator from passthrough arguments", function* () {
@@ -91,12 +77,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["--", "--foo", "bar.js"],
       );
-      assert.deepEqual(args, [
-        "--import",
-        "@effectionx/inspector",
-        "--foo",
-        "bar.js",
-      ]);
+      assert.deepEqual(args, ["--import", "@effectionx/inspector", "--foo", "bar.js"]);
     });
   });
 
@@ -111,12 +92,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["program.ts"],
       );
-      assert.deepEqual(args, [
-        "run",
-        "--preload",
-        "npm:@effectionx/inspector",
-        "program.ts",
-      ]);
+      assert.deepEqual(args, ["run", "--preload", "npm:@effectionx/inspector", "program.ts"]);
     });
 
     it("does not duplicate preload option", function* () {
@@ -129,12 +105,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["--preload", "npm:@effectionx/inspector", "foo.ts"],
       );
-      assert.deepEqual(args, [
-        "run",
-        "--preload",
-        "npm:@effectionx/inspector",
-        "foo.ts",
-      ]);
+      assert.deepEqual(args, ["run", "--preload", "npm:@effectionx/inspector", "foo.ts"]);
     });
 
     it("handles preload= style option", function* () {
@@ -147,11 +118,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["--preload=npm:@effectionx/inspector", "foo.ts"],
       );
-      assert.deepEqual(args, [
-        "run",
-        "--preload=npm:@effectionx/inspector",
-        "foo.ts",
-      ]);
+      assert.deepEqual(args, ["run", "--preload=npm:@effectionx/inspector", "foo.ts"]);
     });
 
     it("treats preload options containing '@effectionx/inspector' as present", function* () {
@@ -181,12 +148,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["--preload", "npm:@effectionx/inspector-beta", "foo.ts"],
       );
-      assert.deepEqual(args, [
-        "run",
-        "--preload",
-        "npm:@effectionx/inspector-beta",
-        "foo.ts",
-      ]);
+      assert.deepEqual(args, ["run", "--preload", "npm:@effectionx/inspector-beta", "foo.ts"]);
     });
 
     it("strips leading -- separator", function* () {
@@ -199,13 +161,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["--", "--foo", "bar.ts"],
       );
-      assert.deepEqual(args, [
-        "run",
-        "--preload",
-        "npm:@effectionx/inspector",
-        "--foo",
-        "bar.ts",
-      ]);
+      assert.deepEqual(args, ["run", "--preload", "npm:@effectionx/inspector", "--foo", "bar.ts"]);
     });
   });
 
@@ -220,11 +176,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["program.js"],
       );
-      assert.deepEqual(args, [
-        "--require",
-        "@effectionx/inspector",
-        "program.js",
-      ]);
+      assert.deepEqual(args, ["--require", "@effectionx/inspector", "program.js"]);
     });
 
     it("does not duplicate require flag", function* () {
@@ -261,11 +213,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["--require", "@effectionx/inspector-preview", "foo.js"],
       );
-      assert.deepEqual(args, [
-        "--require",
-        "@effectionx/inspector-preview",
-        "foo.js",
-      ]);
+      assert.deepEqual(args, ["--require", "@effectionx/inspector-preview", "foo.js"]);
 
       args = buildRuntimeArguments(
         {
@@ -289,12 +237,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["--", "--foo", "bar.js"],
       );
-      assert.deepEqual(args, [
-        "--require",
-        "@effectionx/inspector",
-        "--foo",
-        "bar.js",
-      ]);
+      assert.deepEqual(args, ["--require", "@effectionx/inspector", "--foo", "bar.js"]);
     });
   });
 
@@ -329,11 +272,7 @@ describe("buildRuntimeArguments", () => {
         },
         ["script.js"],
       );
-      assert.deepEqual(args, [
-        "--import",
-        "@effectionx/inspector",
-        "script.js",
-      ]);
+      assert.deepEqual(args, ["--import", "@effectionx/inspector", "script.js"]);
     });
   });
 });

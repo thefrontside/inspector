@@ -14,10 +14,7 @@ function hasInspectorImport(args: string[]): boolean {
     // package name anywhere we consider it covered.  this allows preview
     // builds or scoped variants to propagate without forcing us to blindly
     // prepend another copy.
-    if (
-      arg === "--import" &&
-      args[index + 1]?.includes("@effectionx/inspector")
-    ) {
+    if (arg === "--import" && args[index + 1]?.includes("@effectionx/inspector")) {
       return true;
     }
     if (
@@ -33,10 +30,7 @@ function hasInspectorImport(args: string[]): boolean {
 function hasInspectorPreload(args: string[]): boolean {
   for (let index = 0; index < args.length; index++) {
     let arg = args[index];
-    if (
-      arg === "--preload" &&
-      args[index + 1]?.includes("@effectionx/inspector")
-    ) {
+    if (arg === "--preload" && args[index + 1]?.includes("@effectionx/inspector")) {
       return true;
     }
     if (
@@ -52,10 +46,7 @@ function hasInspectorPreload(args: string[]): boolean {
 function hasInspectorRequire(args: string[]): boolean {
   for (let index = 0; index < args.length; index++) {
     let arg = args[index];
-    if (
-      arg === "--require" &&
-      args[index + 1]?.includes("@effectionx/inspector")
-    ) {
+    if (arg === "--require" && args[index + 1]?.includes("@effectionx/inspector")) {
       return true;
     }
     if (
@@ -77,12 +68,8 @@ function hasInspectorRequire(args: string[]): boolean {
  * caller is responsible for prefixing with the runtime itself (e.g. "node",
  * "deno", "bun").
  */
-export function buildRuntimeArguments(
-  config: RunConfig,
-  passthroughArgs: string[],
-): string[] {
-  let normalizedArgs =
-    passthroughArgs[0] === "--" ? passthroughArgs.slice(1) : passthroughArgs;
+export function buildRuntimeArguments(config: RunConfig, passthroughArgs: string[]): string[] {
+  let normalizedArgs = passthroughArgs[0] === "--" ? passthroughArgs.slice(1) : passthroughArgs;
   // the configuration parser gives us a plain string; narrow to our known
   // set for switch handling.  Anything unexpected falls through to the
   // default case below which simply forwards the arguments.
