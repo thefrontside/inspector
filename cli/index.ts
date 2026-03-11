@@ -36,7 +36,7 @@ function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<nu
   let commandArgs = args;
   let env = buildRunEnvironment(config);
 
-  let child = yield* exec(runtime, { arguments: commandArgs, env });
+  let ready = withResolvers<void>();
 
   yield* spawn(function* () {
     for (let chunk of yield* each(child.stdout)) {
@@ -47,24 +47,36 @@ function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<nu
 
   yield* spawn(function* () {
     for (let chunk of yield* each(child.stderr)) {
+      if (chunk.toString().includes("effection inspector")) {
+        ready.resolve();
+      }
       yield* log.error(chunk.toString());
       yield* each.next();
     }
   });
 
-  let status = yield* child.join();
+  yield* spawn(function* () {
+    yield* sleep(15000);
+    ready.reject(new Error("timeout waiting for program to start"));
+  });
 
-  if (recordTask) {
-    yield* recordTask;
-  }
+  yield* spawn(function* () {
+    yield* ready.operation;
+    if (config.inspectRecord) {
+      yield* recordNodeMapToFile(host, config.inspectRecord);
+    }
+  });
+
+  let status = yield* child.join();
 
   return status.code ?? 1;
 }
 
 function* recordNodeMapToFile(host: string, filePath: string): Operation<void> {
+  let handle = createSSEClient(inspector, { url: host });
   let values: unknown[] = [];
   try {
-    let subscription = yield* invokeWithRetry("recordNodeMap", host);
+    let subscription = yield* handle.invoke({ name: "recordNodeMap", args: [] });
 
     let next = yield* subscription.next();
     while (!next.done) {

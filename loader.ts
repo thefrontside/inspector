@@ -16,7 +16,8 @@ global.around(api.Main, {
       yield* useAttributes({ name: "Main", args: args.join(" ") });
 
       let detach = yield* attach(global, inspector, function* (handle) {
-        let address = yield* useSSEServer(handle, { port: 41000 });
+        let port = process.env.INSPECT_PORT ? Number(process.env.INSPECT_PORT) : 41000;
+        let address = yield* useSSEServer(handle, { port });
 
         let { version } = packageJSON;
         process.stderr.write(
