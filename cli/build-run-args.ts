@@ -1,11 +1,6 @@
-export type Runtime = "node" | "deno" | "bun";
+import { type RunConfig } from "./config.ts";
 
-export interface RunConfig {
-  inspectPause: boolean;
-  inspectRecord: string | undefined;
-  inspectHost: string;
-  inspectRuntime?: string;
-}
+export type Runtime = "node" | "deno" | "bun";
 
 function hasInspectorImport(args: string[]): boolean {
   for (let index = 0; index < args.length; index++) {

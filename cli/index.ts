@@ -1,18 +1,12 @@
 #!/usr/bin/env node
 import { type Operation, each, main, sleep, spawn, suspend, until } from "effection";
-import type { Program } from "configliere";
-import { config, inspector, type ProtocolCommands } from "./config.ts";
+import { config, inspector, type RunConfig, type ProtocolCommandConfig } from "./config.ts";
 import { exec } from "@effectionx/process";
 import { writeFile } from "node:fs/promises";
 import { createSSEClient } from "../lib/sse-client.ts";
 import { useSSEServer } from "../lib/sse-server.ts";
 import { log } from "./logger.ts";
-import {
-  type RunConfig,
-  buildRuntimeArguments,
-  buildRunEnvironment,
-  resolveRuntime,
-} from "./build-run-args.ts";
+import { buildRuntimeArguments, buildRunEnvironment, resolveRuntime } from "./build-run-args.ts";
 
 export function* invokeWithRetry(name: "watchScopes" | "recordNodeMap", host: string) {
   let handle = createSSEClient(inspector, { url: host });
@@ -86,10 +80,9 @@ function* recordNodeMapToFile(host: string, filePath: string): Operation<void> {
   }
 }
 
-function* callMethod(config: Program<ProtocolCommands>) {
+function* callMethod(config: ProtocolCommandConfig) {
   const {
     name,
-    // @ts-expect-error types presume config is boolean
     config: { out, host },
   } = config;
   const argsList = [] as never[];
@@ -100,7 +93,6 @@ function* callMethod(config: Program<ProtocolCommands>) {
   }
   let results: unknown[] = [];
   let subscription = yield* handle.invoke({
-    // @ts-expect-error TODO still not refined enough, only a string
     name,
     args: argsList,
   });
@@ -122,10 +114,9 @@ function* callMethod(config: Program<ProtocolCommands>) {
   }
 }
 
-// return values represent process exit codes for use in testing
-export function* cliOp(argv: string[]): Operation<number> {
-  let parser = config.createParser({
-    args: argv,
+await main(function* () {
+  const parser = config.createParser({
+    args: process.argv.slice(2),
     envs: [{ name: "ENV", value: process.env as Record<string, string> }],
   });
 
@@ -133,42 +124,41 @@ export function* cliOp(argv: string[]): Operation<number> {
     case "help":
     case "version":
       yield* log.info(parser.print());
-      return 0;
+      break;
     case "main": {
-      let result = parser.parse();
+      const result = parser.parse();
       if (result.ok) {
         let { value: command, remainder } = result;
         switch (command.name) {
           case "help":
             yield* log.info(command.config.text);
-            return 0;
+            break;
           case "ui": {
             let port = 41000;
             let address = yield* useSSEServer({ protocol: { methods: {} } } as any, { port });
             yield* log.info(`serving inspector UI at ${address}`);
             yield* suspend();
-            return 0;
+            break;
           }
           case "call":
-            // @ts-expect-error TODO what type should this actually be?
             yield* callMethod(command.config);
-            return 0;
+            break;
           case "run":
             yield* runProgram(command.config, remainder.args ?? []);
-            return 0;
+            break;
+          default:
+            // An exhaustiveness check using 'never' can be added here
+            const _exhaustiveCheck: never = command;
+            break;
         }
       } else {
         yield* log.error(result.error.message);
-        return 1;
       }
+      break;
     }
+    default:
+      // An exhaustiveness check using 'never' can be added here
+      const _exhaustiveCheck: never = parser;
+      break;
   }
-}
-
-// when executed as a script we delegate directly to Effection's `main`
-// which allows the code above to be imported for testing
-if (import.meta.url === `file://${process.argv[1]}`) {
-  await main(function* (args) {
-    yield* cliOp(args);
-  });
-}
+});
