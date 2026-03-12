@@ -57,6 +57,7 @@
     "configliere": "^0.2.3",
     "d3": "^7.9.0",
     "h3": "2.0.1-rc.14",
+    "parse-sse": "^0.1.0",
     "remeda": "^2",
     "zod": "^4.1.13"
   },
@@ -74,7 +75,6 @@
     "lightningcss": "^1.31.1",
     "oxfmt": "^0.34.0",
     "oxlint": "^1.49.0",
-    "parse-sse": "^0.1.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-static-copy": "^3.2.0"
