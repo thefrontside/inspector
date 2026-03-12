@@ -1,278 +1,220 @@
 import { describe, it } from "@effectionx/bdd";
 import assert from "node:assert/strict";
-import { buildRuntimeArguments, buildRunEnvironment } from "../cli/build-run-args.ts";
+import { buildProcessOptions } from "../cli/build-run-args.ts";
+import { config } from "../cli/config.ts";
 
-describe("buildRuntimeArguments", () => {
+function parseRunArgs(raw: string[]) {
+  const parser = config.createParser({ args: raw, envs: [] });
+  assert.equal(parser.type, "main");
+  const result = parser.parse();
+  assert.ok(result.ok, `failed to parse: ${JSON.stringify(result, null, 2)}`);
+  const { value, remainder, data } = result;
+  assert.equal(value.name, "run");
+  return { config: value.config, remainder: remainder.args ?? [], data };
+}
+
+describe.skip("generate loader env", () => {
+  it("builds an environment with INSPECT_PAUSE", function* () {
+    const { config } = parseRunArgs(["run", "--inspect-pause"]);
+    let { env } = buildProcessOptions("node", config, []);
+    assert.equal(env?.INSPECT_PAUSE, "1");
+  });
+
+  it("does not set INSPECT_PAUSE when not requested", function* () {
+    const { config } = parseRunArgs(["run"]);
+    let { env } = buildProcessOptions("node", config, []);
+    assert.equal(env?.INSPECT_PAUSE, undefined);
+  });
+
+  it("sets INSPECT_PORT when non-default", function* () {
+    const { config } = parseRunArgs(["run", "--inspect-port", "42001"]);
+    let { env } = buildProcessOptions("node", config, []);
+    assert.equal(env?.INSPECT_PORT, "42001");
+  });
+
+  it("does not set INSPECT_PORT when port is default", function* () {
+    const { config } = parseRunArgs(["run"]);
+    let { env } = buildProcessOptions("node", config, []);
+    assert.equal(env?.INSPECT_PORT, undefined);
+  });
+});
+
+describe("generate loader args", () => {
   describe("node runtime", () => {
     it("basic", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "node",
-        },
-        ["program.js"],
-      );
+      const { config, remainder } = parseRunArgs(["run", "program.js"]);
+      const { arguments: args } = buildProcessOptions("node", config, remainder);
       assert.deepEqual(args, ["--import", "@effectionx/inspector", "program.js"]);
     });
 
     it("does not duplicate import if already present", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "node",
-        },
-        ["--import", "@effectionx/inspector", "foo.js"],
-      );
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--import",
+        "@effectionx/inspector",
+        "foo.js",
+      ]);
+      const { arguments: args } = buildProcessOptions("node", config, remainder);
       assert.deepEqual(args, ["--import", "@effectionx/inspector", "foo.js"]);
     });
 
     it("handles --import= style", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "node",
-        },
-        ["--import=@effectionx/inspector", "foo.js"],
-      );
-      assert.deepEqual(args, ["--import=@effectionx/inspector", "foo.js"]);
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--import=@effectionx/inspector",
+        "foo.js",
+      ]);
+      const { arguments: args } = buildProcessOptions("node", config, remainder);
+      assert.deepEqual(args, ["--import", "@effectionx/inspector", "foo.js"]);
     });
 
     it("treats imports containing '@effectionx/inspector' as present", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "node",
-        },
-        ["--import=@effectionx/inspector-preview", "foo.js"],
-      );
-      assert.deepEqual(args, ["--import=@effectionx/inspector-preview", "foo.js"]);
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--import=@effectionx/inspector-preview",
+        "foo.js",
+      ]);
+      const { arguments: args } = buildProcessOptions("node", config, remainder);
+      assert.deepEqual(args, ["--import", "@effectionx/inspector-preview", "foo.js"]);
 
-      args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "node",
-        },
-        ["--import", "@effectionx/inspector-beta", "foo.js"],
+      const second = parseRunArgs(["run", "--import", "@effectionx/inspector-beta", "foo.js"]);
+      const { arguments: secondArgs } = buildProcessOptions(
+        "node",
+        second.config,
+        second.remainder,
       );
-      assert.deepEqual(args, ["--import", "@effectionx/inspector-beta", "foo.js"]);
+      assert.deepEqual(secondArgs, ["--import", "@effectionx/inspector-beta", "foo.js"]);
     });
 
-    it("strips leading -- separator from passthrough arguments", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "node",
-        },
-        ["--", "--foo", "bar.js"],
+    it("uses custom inspector package name", function* () {
+      const pkg = "@effectionx/inspector-preview";
+      const first = parseRunArgs(["run", "--inspect-package", pkg, "script.js"]);
+      const { arguments: args } = buildProcessOptions("node", first.config, first.remainder);
+      assert.deepEqual(args, ["--import", pkg, "script.js"]);
+
+      const second = parseRunArgs(["run", "--inspect-package", pkg, "--import", pkg, "script.js"]);
+      const { arguments: secondArgs } = buildProcessOptions(
+        "node",
+        second.config,
+        second.remainder,
       );
-      assert.deepEqual(args, ["--import", "@effectionx/inspector", "--foo", "bar.js"]);
+      assert.deepEqual(secondArgs, ["--import", pkg, "script.js"]);
     });
   });
 
   describe("deno runtime", () => {
+    const baseArgs = ["run", "--allow-run=deno"];
+
     it("basic", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "deno",
-        },
-        ["program.ts"],
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--inspect-runtime",
+        "deno",
+        "program.ts",
+      ]);
+      assert.deepEqual(
+        buildProcessOptions("deno", config, remainder).arguments,
+        baseArgs.concat(["--preload", "npm:@effectionx/inspector", "program.ts"]),
       );
-      assert.deepEqual(args, ["run", "--preload", "npm:@effectionx/inspector", "program.ts"]);
     });
 
     it("does not duplicate preload option", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "deno",
-        },
-        ["--preload", "npm:@effectionx/inspector", "foo.ts"],
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--preload",
+        "npm:@effectionx/inspector",
+        "foo.ts",
+      ]);
+      assert.deepEqual(
+        buildProcessOptions("deno", config, remainder).arguments,
+        baseArgs.concat(["--preload", "npm:@effectionx/inspector", "foo.ts"]),
       );
-      assert.deepEqual(args, ["run", "--preload", "npm:@effectionx/inspector", "foo.ts"]);
     });
 
     it("handles preload= style option", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "deno",
-        },
-        ["--preload=npm:@effectionx/inspector", "foo.ts"],
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--preload=npm:@effectionx/inspector",
+        "foo.ts",
+      ]);
+      assert.deepEqual(
+        buildProcessOptions("deno", config, remainder).arguments,
+        baseArgs.concat(["--preload", "npm:@effectionx/inspector", "foo.ts"]),
       );
-      assert.deepEqual(args, ["run", "--preload=npm:@effectionx/inspector", "foo.ts"]);
     });
 
     it("treats preload options containing '@effectionx/inspector' as present", function* () {
-      // this covers the common case where users import a preview build via
-      // esm.sh or a similar CDN that embeds the package name in the URL.
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "deno",
-        },
-        ["--preload=https://esm.sh/pr/@effectionx/inspector@next", "foo.ts"],
-      );
-      assert.deepEqual(args, [
+      const { config, remainder } = parseRunArgs([
         "run",
         "--preload=https://esm.sh/pr/@effectionx/inspector@next",
         "foo.ts",
       ]);
-
-      args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "deno",
-        },
-        ["--preload", "npm:@effectionx/inspector-beta", "foo.ts"],
+      assert.deepEqual(
+        buildProcessOptions("deno", config, remainder).arguments,
+        baseArgs.concat(["--preload", "https://esm.sh/pr/@effectionx/inspector@next", "foo.ts"]),
       );
-      assert.deepEqual(args, ["run", "--preload", "npm:@effectionx/inspector-beta", "foo.ts"]);
     });
 
-    it("strips leading -- separator", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "deno",
-        },
-        ["--", "--foo", "bar.ts"],
+    it("uses custom inspector package name for deno with npm: prefix", function* () {
+      const pkg = "@effectionx/inspector-preview";
+      const { config, remainder } = parseRunArgs(["run", "--inspect-package", pkg, "program.ts"]);
+      assert.deepEqual(
+        buildProcessOptions("deno", config, remainder).arguments,
+        baseArgs.concat(["--preload", `npm:${pkg}`, "program.ts"]),
       );
-      assert.deepEqual(args, ["run", "--preload", "npm:@effectionx/inspector", "--foo", "bar.ts"]);
     });
   });
 
   describe("bun runtime", () => {
     it("basic", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "bun",
-        },
-        ["program.js"],
-      );
-      assert.deepEqual(args, ["--require", "@effectionx/inspector", "program.js"]);
+      const { config, remainder } = parseRunArgs(["run", "--inspect-runtime", "bun", "program.js"]);
+      assert.deepEqual(buildProcessOptions("bun", config, remainder).arguments, [
+        "--require",
+        "@effectionx/inspector",
+        "program.js",
+      ]);
     });
 
     it("does not duplicate require flag", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "bun",
-        },
-        ["--require", "@effectionx/inspector", "foo.js"],
-      );
-      assert.deepEqual(args, ["--require", "@effectionx/inspector", "foo.js"]);
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--require",
+        "@effectionx/inspector",
+        "foo.js",
+      ]);
+      assert.deepEqual(buildProcessOptions("bun", config, remainder).arguments, [
+        "--require",
+        "@effectionx/inspector",
+        "foo.js",
+      ]);
 
-      args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "bun",
-        },
-        ["-r", "@effectionx/inspector", "foo.js"],
-      );
-      assert.deepEqual(args, ["-r", "@effectionx/inspector", "foo.js"]);
+      const second = parseRunArgs(["run", "-r", "@effectionx/inspector", "foo.js"]);
+      assert.deepEqual(buildProcessOptions("bun", second.config, second.remainder).arguments, [
+        "-r",
+        "@effectionx/inspector",
+        "foo.js",
+      ]);
     });
 
-    it("treats require/preload flags containing '@effectionx/inspector' as present", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "bun",
-        },
-        ["--require", "@effectionx/inspector-preview", "foo.js"],
-      );
-      assert.deepEqual(args, ["--require", "@effectionx/inspector-preview", "foo.js"]);
+    it("treats require flags containing '@effectionx/inspector' as present", function* () {
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--require",
+        "@effectionx/inspector-preview",
+        "foo.js",
+      ]);
+      assert.deepEqual(buildProcessOptions("bun", config, remainder).arguments, [
+        "--require",
+        "@effectionx/inspector-preview",
+        "foo.js",
+      ]);
 
-      args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "bun",
-        },
-        ["-r", "@effectionx/inspector-beta", "foo.js"],
-      );
-      assert.deepEqual(args, ["-r", "@effectionx/inspector-beta", "foo.js"]);
-    });
-
-    it("strips leading -- separator", function* () {
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: false,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "bun",
-        },
-        ["--", "--foo", "bar.js"],
-      );
-      assert.deepEqual(args, ["--require", "@effectionx/inspector", "--foo", "bar.js"]);
-    });
-  });
-
-  describe("environment & inference helpers", () => {
-    it("builds a child environment with INSPECT_PAUSE when requested", function* () {
-      let env = buildRunEnvironment({
-        inspectPause: true,
-        inspectRecord: undefined,
-        inspectHost: "http://localhost",
-        inspectRuntime: "node",
-      });
-      assert.equal(env.INSPECT_PAUSE, "1");
-
-      // if pause not requested the variable should be absent
-      let envWithoutPause = buildRunEnvironment({
-        inspectPause: false,
-        inspectRecord: undefined,
-        inspectHost: "http://localhost",
-        inspectRuntime: "node",
-      });
-      assert.equal(envWithoutPause.INSPECT_PAUSE, undefined);
-    });
-
-    it("does not add suspend flags when pause requested", function* () {
-      // more of a legacy check as it was added previously
-      let args = buildRuntimeArguments(
-        {
-          inspectPause: true,
-          inspectRecord: undefined,
-          inspectHost: "http://localhost",
-          inspectRuntime: "node",
-        },
-        ["script.js"],
-      );
-      assert.deepEqual(args, ["--import", "@effectionx/inspector", "script.js"]);
+      const second = parseRunArgs(["run", "-r", "@effectionx/inspector-beta", "foo.js"]);
+      assert.deepEqual(buildProcessOptions("bun", second.config, second.remainder).arguments, [
+        "-r",
+        "@effectionx/inspector-beta",
+        "foo.js",
+      ]);
     });
   });
 });

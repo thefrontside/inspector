@@ -1,41 +1,21 @@
 #!/usr/bin/env node
-import { type Operation, each, main, sleep, spawn, suspend, until } from "effection";
-import { config, inspector, type RunConfig, type ProtocolCommandConfig } from "./config.ts";
+import { type Operation, each, main, sleep, spawn, suspend, until, withResolvers } from "effection";
+import { inspector, type ProtocolCommandConfig, config, type RunConfig } from "./config.ts";
 import { exec } from "@effectionx/process";
+import process from "node:process";
 import { writeFile } from "node:fs/promises";
 import { createSSEClient } from "../lib/sse-client.ts";
 import { useSSEServer } from "../lib/sse-server.ts";
 import { log } from "./logger.ts";
-import { buildRuntimeArguments, buildRunEnvironment, resolveRuntime } from "./build-run-args.ts";
+import { resolveRuntime, buildProcessOptions } from "./build-run-args.ts";
 
-export function* invokeWithRetry(name: "watchScopes" | "recordNodeMap", host: string) {
-  let handle = createSSEClient(inspector, { url: host });
-  let cause: unknown;
-
-  for (let attempt = 0; attempt < 50; attempt++) {
-    try {
-      return yield* handle.invoke({ name, args: [] });
-    } catch (error) {
-      cause = error;
-      yield* sleep(25);
-    }
-  }
-
-  throw cause instanceof Error ? cause : new Error("failed to connect to inspector SSE server");
-}
-
-function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<number> {
+function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<number | undefined> {
   let runtime = resolveRuntime(config);
-  let args = buildRuntimeArguments(config, passthroughArgs);
-  let host = config.inspectHost;
+  let host = `http://localhost:${config.inspectPort}`;
 
-  let recordTask = config.inspectRecord
-    ? yield* spawn(() => recordNodeMapToFile(host, config.inspectRecord!))
-    : undefined;
+  let processOptions = buildProcessOptions(runtime, config, passthroughArgs);
 
-  let commandArgs = args;
-  let env = buildRunEnvironment(config);
-
+  let child = yield* exec(runtime, processOptions);
   let ready = withResolvers<void>();
 
   yield* spawn(function* () {
@@ -69,7 +49,7 @@ function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<nu
 
   let status = yield* child.join();
 
-  return status.code ?? 1;
+  return status.code;
 }
 
 function* recordNodeMapToFile(host: string, filePath: string): Operation<void> {
@@ -128,7 +108,7 @@ function* callMethod(config: ProtocolCommandConfig) {
 
 await main(function* () {
   const parser = config.createParser({
-    args: process.argv.slice(2),
+    args: process.argv.slice(2).filter((arg) => arg !== "--"),
     envs: [{ name: "ENV", value: process.env as Record<string, string> }],
   });
 

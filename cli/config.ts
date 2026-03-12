@@ -1,16 +1,9 @@
-import {
-  commands,
-  field,
-  object,
-  program,
-  help,
-  type CommandsParser,
-  type ObjectParser,
-} from "configliere";
+import { commands, field, object, program, help } from "configliere";
 import packageJSON from "../package.json" with { type: "json" };
 import { type } from "arktype";
 import { scope, player } from "../lib/protocols.ts";
 import { combine } from "../mod.ts";
+import type { ParsedConfig } from "./types.ts";
 
 export const inspector = combine.protocols(scope.protocol, player.protocol);
 
@@ -39,30 +32,44 @@ const inspectorProtocolEntries = (
 }, {} as InspectorProtocolCommandBase);
 
 const protocolCommands = commands(inspectorProtocolEntries);
-export type ParsedConfig<T extends CommandsParser | ObjectParser<any>> = Extract<
-  ReturnType<T["parse"]>,
-  { ok: true }
->["value"];
+
 export type ProtocolCommandConfig = ParsedConfig<typeof protocolCommands>;
 
 const runBase = object({
-  inspectPause: {
-    description: "start program paused until resumed by inspector",
-    ...field(type("boolean"), field.default(false)),
-  },
   inspectRecord: {
     description: "write inspector recording to the given file",
     ...field(type("string | undefined"), field.default(undefined)),
-  },
-  inspectHost: {
-    description: "inspector base URL (overrides default)",
-    ...field(type("string.url"), field.default("http://localhost:41000")),
   },
   inspectRuntime: {
     description:
       "which JavaScript runtime to launch (node, deno, bun).\n" +
       "If omitted we infer from the executable that invoked the CLI",
-    ...field(type("string"), field.default("node")),
+    ...field(type("'node'|'deno'|'bun'"), field.default("node")),
+  },
+  inspectPause: {
+    description: "start program paused until resumed by inspector",
+    ...field(type("boolean"), field.default(false)),
+  },
+  inspectPort: {
+    description: "port number to give to the inspector loader",
+    ...field(type("number"), field.default(41000)),
+  },
+  inspectPackage: {
+    description: "package spec to preload/import/require (defaults to @effectionx/inspector)",
+    ...field(type("string"), field.default("@effectionx/inspector")),
+  },
+  import: {
+    description: "tracking loader passed in from the user",
+    ...field(type("string[] | undefined"), field.array(), field.default(undefined)),
+  },
+  preload: {
+    description: "tracking loader passed in from the user",
+    ...field(type("string[] | undefined"), field.array(), field.default(undefined)),
+  },
+  require: {
+    description: "tracking loader passed in from the user",
+    aliases: ["r"],
+    ...field(type("string[] | undefined"), field.array(), field.default(undefined)),
   },
 });
 

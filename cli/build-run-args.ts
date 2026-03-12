@@ -1,131 +1,83 @@
-import { type RunConfig } from "./config.ts";
+import type { ExecOptions } from "@effectionx/process";
+import process from "node:process";
+import type { RunConfig } from "./config.ts";
 
 export type Runtime = "node" | "deno" | "bun";
 
-function hasInspectorImport(args: string[]): boolean {
-  for (let index = 0; index < args.length; index++) {
-    let arg = args[index];
-    // if the user already supplied an import that *includes* the inspector
-    // package name anywhere we consider it covered.  this allows preview
-    // builds or scoped variants to propagate without forcing us to blindly
-    // prepend another copy.
-    if (arg === "--import" && args[index + 1]?.includes("@effectionx/inspector")) {
-      return true;
-    }
-    if (
-      arg.startsWith("--import=") &&
-      arg.slice("--import=".length).includes("@effectionx/inspector")
-    ) {
-      return true;
-    }
-  }
-  return false;
+function hasLoaderSpecified(packageName: string) {
+  return (args: string[] | undefined) => {
+    return !!args && args.some((imp) => imp.includes(packageName));
+  };
 }
 
-function hasInspectorPreload(args: string[]): boolean {
-  for (let index = 0; index < args.length; index++) {
-    let arg = args[index];
-    if (arg === "--preload" && args[index + 1]?.includes("@effectionx/inspector")) {
-      return true;
-    }
-    if (
-      arg.startsWith("--preload=") &&
-      arg.slice("--preload=".length).includes("@effectionx/inspector")
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function hasInspectorRequire(args: string[]): boolean {
-  for (let index = 0; index < args.length; index++) {
-    let arg = args[index];
-    if (arg === "--require" && args[index + 1]?.includes("@effectionx/inspector")) {
-      return true;
-    }
-    if (
-      arg.startsWith("--require=") &&
-      arg.slice("--require=".length).includes("@effectionx/inspector")
-    ) {
-      return true;
-    }
-    // bun also supports the short form -r
-    if (arg === "-r" && args[index + 1]?.includes("@effectionx/inspector")) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Build the command‑line arguments passed to the selected runtime.  The
- * caller is responsible for prefixing with the runtime itself (e.g. "node",
- * "deno", "bun").
- */
-export function buildRuntimeArguments(config: RunConfig, passthroughArgs: string[]): string[] {
-  let normalizedArgs = passthroughArgs[0] === "--" ? passthroughArgs.slice(1) : passthroughArgs;
-  // the configuration parser gives us a plain string; narrow to our known
-  // set for switch handling.  Anything unexpected falls through to the
-  // default case below which simply forwards the arguments.
-  let runtime = resolveRuntime(config);
-  let args: string[] = [];
-
-  switch (runtime) {
-    case "node":
-      if (!hasInspectorImport(normalizedArgs)) {
-        args.push("--import", "@effectionx/inspector");
-      }
-      args.push(...normalizedArgs);
-      break;
-
-    case "deno":
-      // deno requires the `run` subcommand, and uses `--preload` for the loader
-      args.push("run");
-      if (!hasInspectorPreload(normalizedArgs)) {
-        args.push("--preload", "npm:@effectionx/inspector");
-      }
-      args.push(...normalizedArgs);
-      break;
-
-    case "bun":
-      // bun is largely node‑compatible but uses `--require`/`-r` for preloading.
-      if (!hasInspectorRequire(normalizedArgs)) {
-        args.push("--require", "@effectionx/inspector");
-      }
-      args.push(...normalizedArgs);
-      break;
-
-    default:
-      // unknown runtime, just forward everything
-      args.push(...normalizedArgs);
-  }
-
-  return args;
-}
-
-/**
- * Construct the environment object used when spawning the inspected process.
- *
- * By default we inherit the parent environment and add `INSPECT_PAUSE=1` when
- * the user requested a paused start.  This avoids needing a runtime-specific
- * command-line switch and works uniformly across node/deno/bun.
- */
-export function buildRunEnvironment(
+export function buildProcessOptions(
+  runtime: Runtime,
   config: RunConfig,
-  baseEnv: NodeJS.ProcessEnv = process.env,
-): Record<string, string> {
-  let env: Record<string, string> = {};
-  for (let key in baseEnv) {
-    let val = baseEnv[key];
-    if (val !== undefined) {
-      env[key] = val;
-    }
-  }
+  passthroughArgs: string[],
+): ExecOptions {
+  let env = { ...process.env } as Record<string, string>;
+
   if (config.inspectPause) {
     env.INSPECT_PAUSE = "1";
   }
-  return env;
+  if (config.inspectPort && config.inspectPort !== 41000) {
+    env.INSPECT_PORT = String(config.inspectPort);
+  }
+
+  const args = [] as string[];
+  if (runtime === "deno") {
+    // deno requires the `run` subcommand and permissions
+    args.push("run", "--allow-run=deno");
+  }
+
+  // we make the assumption that if the user is setting the loader they know which
+  // environment is being used and that it is properly passed, e.g. uses `--import` for node
+
+  const hasLoader = hasLoaderSpecified(config.inspectPackage);
+  switch (runtime) {
+    case "node":
+      if (config.preload) {
+        throw new Error("preload is not supported for node runtime; use --import instead");
+      }
+      if (!(hasLoader(config.import) || hasLoader(config.require))) {
+        args.push("--import", config.inspectPackage);
+      } else {
+        const direct = [...(config.import ?? []), ...(config.require ?? [])].flatMap((d) => [
+          "--import",
+          d,
+        ]);
+        args.push(...direct);
+      }
+      break;
+    case "deno":
+      if (config.import || config.require) {
+        throw new Error("preload is not supported for deno runtime; use --preload instead");
+      }
+      if (!hasLoader(config.preload)) {
+        args.push("--preload", `npm:${config.inspectPackage}`);
+      } else {
+        const direct = [...(config.preload ?? [])].flatMap((d) => ["--preload", d]);
+        args.push(...direct);
+      }
+      break;
+    case "bun":
+      if (config.import || config.preload) {
+        throw new Error("preload is not supported for bun runtime; use --require instead");
+      }
+      if (!hasLoader(config.require)) {
+        args.push("--require", config.inspectPackage);
+      } else {
+        const direct = [...(config.require ?? [])].flatMap((d) => ["--require", d]);
+        args.push(...direct);
+      }
+      break;
+  }
+
+  if (passthroughArgs) {
+    args.push(...passthroughArgs.filter((arg) => arg !== "--"));
+  }
+
+  return { arguments: args, env };
 }
 
 /**
