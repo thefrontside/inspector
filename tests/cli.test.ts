@@ -190,7 +190,7 @@ describe("generate loader args", () => {
 
       const second = parseRunArgs(["run", "-r", "@effectionx/inspector", "foo.js"]);
       assert.deepEqual(buildProcessOptions("bun", second.config, second.remainder).arguments, [
-        "-r",
+        "--require",
         "@effectionx/inspector",
         "foo.js",
       ]);
@@ -211,7 +211,7 @@ describe("generate loader args", () => {
 
       const second = parseRunArgs(["run", "-r", "@effectionx/inspector-beta", "foo.js"]);
       assert.deepEqual(buildProcessOptions("bun", second.config, second.remainder).arguments, [
-        "-r",
+        "--require",
         "@effectionx/inspector-beta",
         "foo.js",
       ]);

@@ -68,7 +68,7 @@ const runBase = object({
   },
   require: {
     description: "tracking loader passed in from the user",
-    aliases: ["r"],
+    aliases: ["-r"],
     ...field(type("string[] | undefined"), field.array(), field.default(undefined)),
   },
 });
