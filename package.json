@@ -10,6 +10,9 @@
     "type": "git",
     "url": "git+https://github.com/thefrontside/inspector.git"
   },
+  "bin": {
+    "inspector": "./dist/cli/index.js"
+  },
   "files": [
     "dist",
     "ui/dist"
@@ -29,6 +32,8 @@
   },
   "scripts": {
     "start": "vite --host 0.0.0.0 ui",
+    "example": "node --experimental-strip-types --import ./loader.ts ./examples/spawn-children.ts",
+    "cli": "node --experimental-strip-types ./cli/index.ts",
     "build": "pnpm run build:tsc && pnpm run build:ui",
     "build:tsc": "tsc -p tsconfig.build.json",
     "build:ui": "vite build ui",
@@ -45,11 +50,14 @@
   "dependencies": {
     "@ark/util": "^0.56.0",
     "@b9g/crank": "^0.7.5",
+    "@effectionx/process": "^0.7.3",
     "@effectionx/stream-helpers": "^0.8.0",
     "@standard-schema/spec": "^1.0.0",
     "arktype": "^2.1.27",
+    "configliere": "^0.2.3",
     "d3": "^7.9.0",
     "h3": "2.0.1-rc.14",
+    "parse-sse": "^0.1.0",
     "remeda": "^2",
     "zod": "^4.1.13"
   },
@@ -62,19 +70,17 @@
     "@types/d3": "^7.4.3",
     "@types/node": "22",
     "d3": "^7.9.0",
-    "effection": "4.1.0-alpha.5",
+    "effection": "4.1.0-alpha.7",
     "expect": "^30.2.0",
     "lightningcss": "^1.31.1",
     "oxfmt": "^0.34.0",
     "oxlint": "^1.49.0",
-    "parse-sse": "^0.1.0",
-    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-static-copy": "^3.2.0"
   },
   "peerDependencies": {
-    "effection": "^4.1.0-alpha.3"
+    "effection": "^4.1.0-alpha.7"
   },
   "packageManager": "pnpm@9.15.9",
   "pnpm": {

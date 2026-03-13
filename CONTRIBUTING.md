@@ -24,7 +24,7 @@ This runs Vite and serves the Crank-based inspector UI. Open http://localhost:51
 To run server with the example file, use:
 
 ```shell
-node --import tsx --import ./loader.ts examples/example.ts --suspend
+node --experimental-strip-types --import ./loader.ts examples/spawn-children.ts --suspend
 ```
 
 This will run the loader with an example effection program. It serves both a live stream of data, and also the built files for the UI. If you are working on the UI on the `/live` integration, you may need to use both of these dev servers, and `localhost:5173` appropriately proxies to port `:41000`. If you have run a `pnpm run build`, then you can directly visit http://localhost:41000.

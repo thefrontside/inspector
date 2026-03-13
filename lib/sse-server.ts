@@ -1,13 +1,16 @@
 import {
-  once,
   type Operation,
+  createScope,
+  ensure,
+  once,
+  race,
   resource,
-  scoped,
   spawn,
-  type Task,
+  suspend,
   until,
   useAttributes,
   useScope,
+  withResolvers,
 } from "effection";
 import type { Handle, Methods } from "./types.ts";
 import { validateUnsafe } from "./validate.ts";
@@ -30,61 +33,79 @@ export function useSSEServer<M extends Methods>(
 
   return resource(function* (provide) {
     yield* useAttributes({ name: "SSEServer", port });
-    let scope = yield* useScope();
+    let [scope, destroy] = createScope(yield* useScope());
 
     let app = new H3();
-
-    let inflight = new Set<Task<void>>();
 
     for (let name of methodNames) {
       app.all(`/${String(name)}`, async (event) => {
         let { req } = event;
-        let stream = createEventStream(event);
+        // when the response ends for whatever reason, h3 by default closes the stream
+        // instead we opt to handle the close ourselves, and kill the task on that event
+        let stream = createEventStream(event, { autoclose: false });
 
-        let task = scope.run(function* () {
+        scope.run(function* () {
+          yield* ensure(function* () {
+            yield* until(stream.flush());
+            yield* until(stream.close());
+          });
           yield* useAttributes({
             name: "RequestHandler",
             method: req.method,
             pathname: event.url.pathname,
           });
-          try {
-            yield* spawn(() =>
-              scoped(function* () {
-                yield* useAttributes({ name: "EventStream" });
-                let post = req.method.toUpperCase() === "POST";
-                let body: unknown = post ? yield* until(req.json()) : [];
-                let args = validateUnsafe(protocol.methods[name].args, body);
-                let subscription = yield* handle.invoke({ name, args });
-                let next = yield* subscription.next();
-                while (!next.done) {
-                  yield* until(
-                    stream.push({
-                      event: "yield",
-                      data: JSON.stringify(next.value),
-                    }),
-                  );
-                  next = yield* subscription.next();
+
+          let post = req.method.toUpperCase() === "POST";
+          let body: unknown = post ? yield* until(req.json()) : [];
+          let args = validateUnsafe(protocol.methods[name].args, body);
+          let { value: subscription, destroy: flush } = yield* useExplicitlyManagedResource(
+            handle.invoke({ name, args }),
+          );
+
+          let events = yield* spawn(function* () {
+            try {
+              yield* useAttributes({ name: "EventStream" });
+
+              let next = yield* subscription.next();
+              while (!next.done) {
+                if (req.signal.aborted) {
+                  break;
                 }
-                let value = validateUnsafe(protocol.methods[name].returns, next.value);
-                yield* until(stream.push({ event: "return", data: JSON.stringify(value) }));
-              }),
-            );
-            yield* once(req.signal, "abort");
-          } catch (cause) {
-            let error = cause instanceof Error ? cause : new Error("unknown", { cause });
-            let { name, message } = error;
-            yield* until(
-              stream.push({
-                event: "throw",
-                data: JSON.stringify({ name, message }),
-              }),
-            );
+                yield* until(
+                  stream.push({
+                    event: "yield",
+                    data: JSON.stringify(next.value),
+                  }),
+                );
+                next = yield* subscription.next();
+              }
+              let value = validateUnsafe(protocol.methods[name].returns, next?.value);
+              yield* until(
+                stream.push({
+                  event: "return",
+                  data: JSON.stringify(value),
+                }),
+              );
+              // return sent, we can consider the stream finalized
+              // and skip remaining steps in the finally block
+            } catch (cause) {
+              let error = cause instanceof Error ? cause : new Error("unknown", { cause });
+              let { name, message } = error;
+              yield* until(
+                stream.push({
+                  event: "throw",
+                  data: JSON.stringify({ name, message }),
+                }),
+              );
+            }
+          });
+
+          try {
+            yield* race([events, once(req.signal, "abort")]);
           } finally {
-            inflight.delete(task);
-            yield* until(stream.close());
+            yield* flush();
           }
         });
-        inflight.add(task);
 
         return await stream.send();
       });
@@ -128,12 +149,30 @@ export function useSSEServer<M extends Methods>(
     try {
       yield* provide(`http://localhost:${port}`);
     } finally {
-      while (inflight.size > 0) {
-        for (let task of inflight) {
-          yield* task.halt();
-        }
-      }
+      yield* destroy();
       yield* until(server.close());
     }
   });
+}
+
+interface ExplicitlyManagedResource<T> {
+  value: T;
+  destroy: () => Operation<void>;
+}
+
+function* useExplicitlyManagedResource<T>(
+  create: Operation<T>,
+): Operation<ExplicitlyManagedResource<T>> {
+  let handle = withResolvers<T>();
+
+  let task = yield* spawn(function* () {
+    let value = yield* create;
+    handle.resolve(value);
+    yield* suspend();
+  });
+
+  return {
+    value: yield* handle.operation,
+    destroy: task.halt,
+  };
 }
