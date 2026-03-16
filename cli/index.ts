@@ -1,7 +1,17 @@
 #!/usr/bin/env node
-import { type Operation, each, main, sleep, spawn, suspend, until, withResolvers } from "effection";
+import {
+  type Operation,
+  each,
+  main,
+  resource,
+  sleep,
+  spawn,
+  suspend,
+  until,
+  withResolvers,
+} from "effection";
 import { inspector, type ProtocolCommandConfig, config, type RunConfig } from "./config.ts";
-import { exec } from "@effectionx/process";
+import { exec, type Process } from "@effectionx/process";
 import process from "node:process";
 import { writeFile } from "node:fs/promises";
 import { createSSEClient } from "../lib/sse-client.ts";
@@ -9,47 +19,59 @@ import { useSSEServer } from "../lib/sse-server.ts";
 import { log } from "./logger.ts";
 import { resolveRuntime, buildProcessOptions } from "./build-run-args.ts";
 
-function* runProgram(config: RunConfig, passthroughArgs: string[]): Operation<number | undefined> {
-  let runtime = resolveRuntime(config);
-  let host = `http://localhost:${config.inspectPort}`;
+function runProgram(config: RunConfig, passthroughArgs: string[]) {
+  return resource<number | undefined>(function* (provide) {
+    let child: Process;
+    try {
+      let runtime = resolveRuntime(config);
+      let host = `http://localhost:${config.inspectPort}`;
 
-  let processOptions = buildProcessOptions(runtime, config, passthroughArgs);
+      let processOptions = buildProcessOptions(runtime, config, passthroughArgs);
 
-  let child = yield* exec(runtime, processOptions);
-  let ready = withResolvers<void>();
+      let ready = withResolvers<void>();
+      let childSpawned = withResolvers<void>();
+      yield* spawn(function* () {
+        yield* ready.operation;
+        if (config.inspectRecord) {
+          yield* recordNodeMapToFile(host, config.inspectRecord);
+        }
+      });
 
-  yield* spawn(function* () {
-    for (let chunk of yield* each(child.stdout)) {
-      yield* log.info(chunk.toString());
-      yield* each.next();
+      yield* spawn(function* () {
+        yield* childSpawned.operation;
+        console.log(`started program with PID ${child.pid}, waiting for inspector to be ready...`);
+        for (let chunk of yield* each(child.stdout)) {
+          yield* log.info(chunk.toString());
+          yield* each.next();
+        }
+      });
+
+      yield* spawn(function* () {
+        yield* childSpawned.operation;
+        for (let chunk of yield* each(child.stderr)) {
+          if (chunk.toString().includes("effection inspector")) {
+            ready.resolve();
+          }
+          yield* log.error(chunk.toString());
+          yield* each.next();
+        }
+      });
+
+      child = yield* exec(runtime, processOptions);
+      childSpawned.resolve();
+
+      yield* spawn(function* () {
+        yield* sleep(15000);
+        ready.reject(new Error("timeout waiting for program to start"));
+      });
+
+      let status = yield* child.join();
+
+      yield* provide(status.code);
+    } finally {
+      // runProgram() exiting
     }
   });
-
-  yield* spawn(function* () {
-    for (let chunk of yield* each(child.stderr)) {
-      if (chunk.toString().includes("effection inspector")) {
-        ready.resolve();
-      }
-      yield* log.error(chunk.toString());
-      yield* each.next();
-    }
-  });
-
-  yield* spawn(function* () {
-    yield* sleep(15000);
-    ready.reject(new Error("timeout waiting for program to start"));
-  });
-
-  yield* spawn(function* () {
-    yield* ready.operation;
-    if (config.inspectRecord) {
-      yield* recordNodeMapToFile(host, config.inspectRecord);
-    }
-  });
-
-  let status = yield* child.join();
-
-  return status.code;
 }
 
 function* recordNodeMapToFile(host: string, filePath: string): Operation<void> {
@@ -81,7 +103,6 @@ function* callMethod(config: ProtocolCommandConfig) {
   const handle = createSSEClient(inspector, { url: host });
   if (!(name in handle.protocol.methods)) {
     yield* log.error(`unknown command: ${name}`);
-    return 1;
   }
   let results: unknown[] = [];
   let subscription = yield* handle.invoke({
@@ -107,50 +128,54 @@ function* callMethod(config: ProtocolCommandConfig) {
 }
 
 await main(function* () {
-  const parser = config.createParser({
-    args: process.argv.slice(2).filter((arg) => arg !== "--"),
-    envs: [{ name: "ENV", value: process.env as Record<string, string> }],
-  });
+  try {
+    const parser = config.createParser({
+      args: process.argv.slice(2).filter((arg) => arg !== "--"),
+      envs: [{ name: "ENV", value: process.env as Record<string, string> }],
+    });
 
-  switch (parser.type) {
-    case "help":
-    case "version":
-      yield* log.info(parser.print());
-      break;
-    case "main": {
-      const result = parser.parse();
-      if (result.ok) {
-        let { value: command, remainder } = result;
-        switch (command.name) {
-          case "help":
-            yield* log.info(command.config.text);
-            break;
-          case "ui": {
-            let port = 41000;
-            let address = yield* useSSEServer({ protocol: { methods: {} } } as any, { port });
-            yield* log.info(`serving inspector UI at ${address}`);
-            yield* suspend();
-            break;
+    switch (parser.type) {
+      case "help":
+      case "version":
+        yield* log.info(parser.print());
+        break;
+      case "main": {
+        const result = parser.parse();
+        if (result.ok) {
+          let { value: command, remainder } = result;
+          switch (command.name) {
+            case "help":
+              yield* log.info(command.config.text);
+              break;
+            case "ui": {
+              let port = 41000;
+              let address = yield* useSSEServer({ protocol: { methods: {} } } as any, { port });
+              yield* log.info(`serving inspector UI at ${address}`);
+              yield* suspend();
+              break;
+            }
+            case "call":
+              yield* callMethod(command.config);
+              break;
+            case "run":
+              yield* runProgram(command.config, remainder.args ?? []);
+              break;
+            default:
+              // An exhaustiveness check using 'never' can be added here
+              const _exhaustiveCheck: never = command;
+              break;
           }
-          case "call":
-            yield* callMethod(command.config);
-            break;
-          case "run":
-            yield* runProgram(command.config, remainder.args ?? []);
-            break;
-          default:
-            // An exhaustiveness check using 'never' can be added here
-            const _exhaustiveCheck: never = command;
-            break;
+        } else {
+          yield* log.error(result.error.message);
         }
-      } else {
-        yield* log.error(result.error.message);
+        break;
       }
-      break;
+      default:
+        // An exhaustiveness check using 'never' can be added here
+        const _exhaustiveCheck: never = parser;
+        break;
     }
-    default:
-      // An exhaustiveness check using 'never' can be added here
-      const _exhaustiveCheck: never = parser;
-      break;
+  } finally {
+    // "inspector exiting"
   }
 });
