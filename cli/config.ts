@@ -60,16 +60,16 @@ const runBase = object({
   },
   import: {
     description: "tracking loader passed in from the user",
-    ...field(type("string[] | undefined"), field.array(), field.default(undefined)),
+    ...field(type("string[]"), field.array(), field.default([])),
   },
   preload: {
     description: "tracking loader passed in from the user",
-    ...field(type("string[] | undefined"), field.array(), field.default(undefined)),
+    ...field(type("string[]"), field.array(), field.default([])),
   },
   require: {
     description: "tracking loader passed in from the user",
     aliases: ["-r"],
-    ...field(type("string[] | undefined"), field.array(), field.default(undefined)),
+    ...field(type("string[]"), field.array(), field.default([])),
   },
 });
 

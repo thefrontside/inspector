@@ -13,7 +13,7 @@ function parseRunArgs(raw: string[]) {
   return { config: value.config, remainder: remainder.args ?? [], data };
 }
 
-describe.skip("generate loader env", () => {
+describe("generate loader env", () => {
   it("builds an environment with INSPECT_PAUSE", function* () {
     const { config } = parseRunArgs(["run", "--inspect-pause"]);
     let { env } = buildProcessOptions("node", config, []);
@@ -100,6 +100,37 @@ describe("generate loader args", () => {
       );
       assert.deepEqual(secondArgs, ["--import", pkg, "script.js"]);
     });
+
+    it("handles multiple import options passing through", function* () {
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--import",
+        "@effectionx/inspector",
+        "--import",
+        "other-loader.js",
+        "foo.js",
+      ]);
+      const { arguments: args } = buildProcessOptions("node", config, remainder);
+      assert.deepEqual(args, [
+        "--import",
+        "@effectionx/inspector",
+        "--import",
+        "other-loader.js",
+        "foo.js",
+      ]);
+    });
+
+    it("handles only other import option passing through", function* () {
+      const { config, remainder } = parseRunArgs(["run", "--import", "other-loader.js", "foo.js"]);
+      const { arguments: args } = buildProcessOptions("node", config, remainder);
+      assert.deepEqual(args, [
+        "--import",
+        "@effectionx/inspector",
+        "--import",
+        "other-loader.js",
+        "foo.js",
+      ]);
+    });
   });
 
   describe("deno runtime", () => {
@@ -163,6 +194,43 @@ describe("generate loader args", () => {
         baseArgs.concat(["--preload", `npm:${pkg}`, "program.ts"]),
       );
     });
+
+    it("handles multiple preload options passing through", function* () {
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--preload",
+        "@effectionx/inspector",
+        "--preload",
+        "other-loader.js",
+        "foo.js",
+      ]);
+      const { arguments: args } = buildProcessOptions("deno", config, remainder);
+      assert.deepEqual(
+        args,
+        baseArgs.concat([
+          "--preload",
+          "@effectionx/inspector",
+          "--preload",
+          "other-loader.js",
+          "foo.js",
+        ]),
+      );
+    });
+
+    it("handles only other preload option passing through", function* () {
+      const { config, remainder } = parseRunArgs(["run", "--preload", "other-loader.js", "foo.js"]);
+      const { arguments: args } = buildProcessOptions("deno", config, remainder);
+      assert.deepEqual(
+        args,
+        baseArgs.concat([
+          "--preload",
+          `npm:@effectionx/inspector`,
+          "--preload",
+          "other-loader.js",
+          "foo.js",
+        ]),
+      );
+    });
   });
 
   describe("bun runtime", () => {
@@ -213,6 +281,37 @@ describe("generate loader args", () => {
       assert.deepEqual(buildProcessOptions("bun", second.config, second.remainder).arguments, [
         "--require",
         "@effectionx/inspector-beta",
+        "foo.js",
+      ]);
+    });
+
+    it("handles multiple require options passing through", function* () {
+      const { config, remainder } = parseRunArgs([
+        "run",
+        "--require",
+        "@effectionx/inspector",
+        "--require",
+        "other-loader.js",
+        "foo.js",
+      ]);
+      const { arguments: args } = buildProcessOptions("bun", config, remainder);
+      assert.deepEqual(args, [
+        "--require",
+        "@effectionx/inspector",
+        "--require",
+        "other-loader.js",
+        "foo.js",
+      ]);
+    });
+
+    it("handles only other require option passing through", function* () {
+      const { config, remainder } = parseRunArgs(["run", "--require", "other-loader.js", "foo.js"]);
+      const { arguments: args } = buildProcessOptions("bun", config, remainder);
+      assert.deepEqual(args, [
+        "--require",
+        "@effectionx/inspector",
+        "--require",
+        "other-loader.js",
         "foo.js",
       ]);
     });

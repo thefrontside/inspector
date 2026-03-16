@@ -35,42 +35,59 @@ export function buildProcessOptions(
 
   const hasLoader = hasLoaderSpecified(config.inspectPackage);
   switch (runtime) {
-    case "node":
-      if (config.preload) {
+    case "node": {
+      console.dir(config);
+      if (config.preload.length) {
         throw new Error("preload is not supported for node runtime; use --import instead");
       }
-      if (!(hasLoader(config.import) || hasLoader(config.require))) {
+
+      // gather any imports or requires the user provided
+      const provided = [...config.import, ...config.require];
+
+      // if the inspector loader isn't already in the list, prepend it
+      if (!hasLoader(provided)) {
         args.push("--import", config.inspectPackage);
-      } else {
-        const direct = [...(config.import ?? []), ...(config.require ?? [])].flatMap((d) => [
-          "--import",
-          d,
-        ]);
+      }
+
+      // always forward the explicit arguments the user gave
+      if (provided.length > 0) {
+        const direct = provided.flatMap((d) => ["--import", d]);
         args.push(...direct);
       }
       break;
-    case "deno":
-      if (config.import || config.require) {
+    }
+    case "deno": {
+      if (config.import.length || config.require.length) {
         throw new Error("preload is not supported for deno runtime; use --preload instead");
       }
-      if (!hasLoader(config.preload)) {
+
+      const provided = [...config.preload];
+      if (!hasLoader(provided)) {
         args.push("--preload", `npm:${config.inspectPackage}`);
-      } else {
-        const direct = [...(config.preload ?? [])].flatMap((d) => ["--preload", d]);
+      }
+
+      if (provided.length > 0) {
+        const direct = provided.flatMap((d) => ["--preload", d]);
         args.push(...direct);
       }
       break;
-    case "bun":
-      if (config.import || config.preload) {
+    }
+    case "bun": {
+      if (config.import.length || config.preload.length) {
         throw new Error("preload is not supported for bun runtime; use --require instead");
       }
-      if (!hasLoader(config.require)) {
+
+      const provided = [...config.require];
+      if (!hasLoader(provided)) {
         args.push("--require", config.inspectPackage);
-      } else {
-        const direct = [...(config.require ?? [])].flatMap((d) => ["--require", d]);
+      }
+
+      if (provided.length > 0) {
+        const direct = provided.flatMap((d) => ["--require", d]);
         args.push(...direct);
       }
       break;
+    }
   }
 
   if (passthroughArgs) {

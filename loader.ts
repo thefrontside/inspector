@@ -23,7 +23,6 @@ if (config.ok) {
 
         let detach = yield* attach(global, inspector, function* (handle) {
           let address = yield* useSSEServer(handle, { port: config.value.inspectPort });
-
           let { version } = packageJSON;
           process.stderr.write(
             `effection inspector@${version} running at ${address}/live\n` +
