@@ -1,4 +1,4 @@
-import { commands, field, object, program, help } from "configliere";
+import { commands, field, object, program, help, cli } from "configliere";
 import packageJSON from "../package.json" with { type: "json" };
 import { type } from "arktype";
 import { scope, player } from "../lib/protocols.ts";
@@ -36,6 +36,10 @@ const protocolCommands = commands(inspectorProtocolEntries);
 export type ProtocolCommandConfig = ParsedConfig<typeof protocolCommands>;
 
 const runBase = object({
+  entrypoint: {
+    description: "entrypoint file",
+    ...field(type("string"), cli.argument()),
+  },
   inspectRecord: {
     description: "write inspector recording to the given file",
     ...field(type("string | undefined"), field.default(undefined)),

@@ -15,27 +15,32 @@ function parseRunArgs(raw: string[]) {
 
 describe("generate loader env", () => {
   it("builds an environment with INSPECT_PAUSE", function* () {
-    const { config } = parseRunArgs(["run", "--inspect-pause"]);
+    const { config } = parseRunArgs(["run", "--inspect-pause", "file.js"]);
     let { env } = buildProcessOptions("node", config, []);
     assert.equal(env?.INSPECT_PAUSE, "1");
   });
 
   it("does not set INSPECT_PAUSE when not requested", function* () {
-    const { config } = parseRunArgs(["run"]);
+    const { config } = parseRunArgs(["run", "file.js"]);
     let { env } = buildProcessOptions("node", config, []);
     assert.equal(env?.INSPECT_PAUSE, undefined);
   });
 
   it("sets INSPECT_PORT when non-default", function* () {
-    const { config } = parseRunArgs(["run", "--inspect-port", "42001"]);
+    const { config } = parseRunArgs(["run", "--inspect-port", "42001", "file.js"]);
     let { env } = buildProcessOptions("node", config, []);
     assert.equal(env?.INSPECT_PORT, "42001");
   });
 
   it("does not set INSPECT_PORT when port is default", function* () {
-    const { config } = parseRunArgs(["run"]);
+    const { config } = parseRunArgs(["run", "file.js"]);
     let { env } = buildProcessOptions("node", config, []);
     assert.equal(env?.INSPECT_PORT, undefined);
+  });
+
+  it("throws on no entrypoint", function* () {
+    // note that the CLI should prevent this from happening
+    assert.throws(() => parseRunArgs([]));
   });
 });
 
@@ -129,6 +134,28 @@ describe("generate loader args", () => {
         "--import",
         "other-loader.js",
         "foo.js",
+      ]);
+    });
+
+    it("direct handling of npx", function* () {
+      const { config, remainder } = parseRunArgs(
+        [
+          "npx",
+          "@effectionx/inspector",
+          "--inspect-record",
+          "out.json",
+          "--import=tsx",
+          "./example/concurrency-example.ts",
+        ].slice(2), // as passed,
+        // but also `npx @effectionx/inspector` is translated to `node .bin**` both of which we drop
+      );
+      const { arguments: args } = buildProcessOptions("node", config, remainder);
+      assert.deepEqual(args, [
+        "--import",
+        "@effectionx/inspector",
+        "--import",
+        "tsx",
+        "./example/concurrency-example.ts",
       ]);
     });
   });

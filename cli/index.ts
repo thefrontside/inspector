@@ -39,7 +39,6 @@ function runProgram(config: RunConfig, passthroughArgs: string[]) {
 
       yield* spawn(function* () {
         yield* childSpawned.operation;
-        console.log(`started program with PID ${child.pid}, waiting for inspector to be ready...`);
         for (let chunk of yield* each(child.stdout)) {
           yield* log.info(chunk.toString());
           yield* each.next();
@@ -158,6 +157,15 @@ await main(function* () {
               yield* callMethod(command.config);
               break;
             case "run":
+              if (!command.config.entrypoint) {
+                const configForGettingHelp = config.createParser({ args: ["--help"] });
+                if (configForGettingHelp.type !== "help") {
+                  yield* log.error("failed to run, refer to help command");
+                  break;
+                }
+                const helpText = configForGettingHelp.print();
+                yield* log.info(helpText);
+              }
               yield* runProgram(command.config, remainder.args ?? []);
               break;
             default:

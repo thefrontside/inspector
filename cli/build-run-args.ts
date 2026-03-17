@@ -15,6 +15,9 @@ export function buildProcessOptions(
   config: RunConfig,
   passthroughArgs: string[],
 ): ExecOptions {
+  if (!config.entrypoint) {
+    throw new Error("entrypoint file is required");
+  }
   let env = { ...process.env } as Record<string, string>;
 
   if (config.inspectPause) {
@@ -94,6 +97,7 @@ export function buildProcessOptions(
     args.push(...passthroughArgs.filter((arg) => arg !== "--"));
   }
 
+  args.push(config.entrypoint);
   return { arguments: args, env };
 }
 
