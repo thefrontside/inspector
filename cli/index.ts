@@ -148,8 +148,9 @@ await main(function* () {
               yield* log.info(command.config.text);
               break;
             case "ui": {
-              let port = 41000;
-              let address = yield* useSSEServer({ protocol: { methods: {} } } as any, { port });
+              let address = yield* useSSEServer({ protocol: { methods: {} } } as any, {
+                port: command.config.inspectPort,
+              });
               yield* log.info(`serving inspector UI at ${address}`);
               yield* suspend();
               break;

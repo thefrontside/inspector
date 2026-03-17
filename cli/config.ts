@@ -88,6 +88,12 @@ export const config = program({
       help,
       ui: {
         description: "start up the inspector UI",
+        ...object({
+          inspectPort: {
+            description: "port number to give to the inspector loader",
+            ...field(type("number"), field.default(41000)),
+          },
+        }),
       },
       call: {
         description: "invoke a inspector protocol method directly (low level)",
