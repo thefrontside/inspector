@@ -11,7 +11,7 @@ import {
   withResolvers,
 } from "effection";
 import { inspector, type ProtocolCommandConfig, config, type RunConfig } from "./config.ts";
-import { exec, type Process } from "@effectionx/process";
+import { exec } from "@effectionx/process";
 import process from "node:process";
 import { writeFile } from "node:fs/promises";
 import { createSSEClient } from "../lib/sse-client.ts";
