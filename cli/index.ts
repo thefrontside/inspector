@@ -30,12 +30,6 @@ function runProgram(config: RunConfig, passthroughArgs: string[]) {
 
       let ready = withResolvers<void>();
       let childSpawned = withResolvers<void>();
-      yield* spawn(function* () {
-        yield* ready.operation;
-        if (config.inspectRecord) {
-          yield* recordNodeMapToFile(host, config.inspectRecord);
-        }
-      });
 
       yield* spawn(function* () {
         yield* childSpawned.operation;
@@ -65,6 +59,13 @@ function runProgram(config: RunConfig, passthroughArgs: string[]) {
       });
 
       let status = yield* child.join();
+      // TODO when should this spawn? too early and it shuts down too late
+      yield* spawn(function* () {
+        yield* ready.operation;
+        if (config.inspectRecord) {
+          yield* recordNodeMapToFile(host, config.inspectRecord);
+        }
+      });
 
       yield* provide(status.code);
     } finally {
@@ -157,7 +158,7 @@ await main(function* () {
               yield* callMethod(command.config);
               break;
             case "run":
-              if (!command.config.entrypoint) {
+              if (!remainder.args || (remainder.args && remainder.args.length === 0)) {
                 const configForGettingHelp = config.createParser({ args: ["--help"] });
                 if (configForGettingHelp.type !== "help") {
                   yield* log.error("failed to run, refer to help command");
@@ -165,8 +166,9 @@ await main(function* () {
                 }
                 const helpText = configForGettingHelp.print();
                 yield* log.info(helpText);
+              } else {
+                yield* runProgram(command.config, remainder.args);
               }
-              yield* runProgram(command.config, remainder.args ?? []);
               break;
             default:
               // An exhaustiveness check using 'never' can be added here

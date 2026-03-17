@@ -15,9 +15,6 @@ export function buildProcessOptions(
   config: RunConfig,
   passthroughArgs: string[],
 ): ExecOptions {
-  if (!config.entrypoint) {
-    throw new Error("entrypoint file is required");
-  }
   let env = { ...process.env } as Record<string, string>;
 
   if (config.inspectPause) {
@@ -39,7 +36,6 @@ export function buildProcessOptions(
   const hasLoader = hasLoaderSpecified(config.inspectPackage);
   switch (runtime) {
     case "node": {
-      console.dir(config);
       if (config.preload.length) {
         throw new Error("preload is not supported for node runtime; use --import instead");
       }
@@ -97,7 +93,6 @@ export function buildProcessOptions(
     args.push(...passthroughArgs.filter((arg) => arg !== "--"));
   }
 
-  args.push(config.entrypoint);
   return { arguments: args, env };
 }
 
