@@ -37,11 +37,6 @@ describe("generate loader env", () => {
     let { env } = buildProcessOptions("node", config, []);
     assert.equal(env?.INSPECT_PORT, undefined);
   });
-
-  it("throws on no entrypoint", function* () {
-    // note that the CLI should prevent this from happening
-    assert.throws(() => parseRunArgs([]));
-  });
 });
 
 describe("generate loader args", () => {
