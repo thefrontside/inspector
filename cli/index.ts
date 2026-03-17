@@ -21,7 +21,6 @@ import { resolveRuntime, buildProcessOptions } from "./build-run-args.ts";
 
 function runProgram(config: RunConfig, passthroughArgs: string[]) {
   return resource<number | undefined>(function* (provide) {
-    let child: Process;
     try {
       let runtime = resolveRuntime(config);
       let host = `http://localhost:${config.inspectPort}`;
@@ -50,7 +49,13 @@ function runProgram(config: RunConfig, passthroughArgs: string[]) {
         }
       });
 
-      child = yield* exec(runtime, processOptions);
+      yield* spawn(function* () {
+        yield* ready.operation;
+        if (config.inspectRecord) {
+          yield* recordNodeMapToFile(host, config.inspectRecord);
+        }
+      });
+      let child = yield* exec(runtime, processOptions);
       childSpawned.resolve();
 
       yield* spawn(function* () {
@@ -59,13 +64,6 @@ function runProgram(config: RunConfig, passthroughArgs: string[]) {
       });
 
       let status = yield* child.join();
-      // TODO when should this spawn? too early and it shuts down too late
-      yield* spawn(function* () {
-        yield* ready.operation;
-        if (config.inspectRecord) {
-          yield* recordNodeMapToFile(host, config.inspectRecord);
-        }
-      });
 
       yield* provide(status.code);
     } finally {
@@ -87,7 +85,7 @@ function* recordNodeMapToFile(host: string, filePath: string): Operation<void> {
     }
   } catch (error) {
     let message = error instanceof Error ? error.message : String(error);
-    yield* log.error(`failed to record NodeMap: ${message}`);
+    yield* log.error(`record NodeMap interrupted: ${message}`);
   } finally {
     // always attempt to write whatever we have collected (possibly empty)
     yield* until(writeFile(filePath, JSON.stringify(values, null, 2)));
