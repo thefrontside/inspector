@@ -32,7 +32,7 @@ importers:
         specifier: ^2.1.27
         version: 2.1.29
       configliere:
-        specifier: ^0.2.3
+        specifier: ~0.2.3
         version: 0.2.3
       h3:
         specifier: 2.0.1-rc.14
