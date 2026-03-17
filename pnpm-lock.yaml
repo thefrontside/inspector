@@ -34,9 +34,6 @@ importers:
       configliere:
         specifier: ^0.2.3
         version: 0.2.3
-      d3:
-        specifier: ^7.9.0
-        version: 7.9.0
       h3:
         specifier: 2.0.1-rc.14
         version: 2.0.1-rc.14
@@ -46,9 +43,6 @@ importers:
       remeda:
         specifier: ^2
         version: 2.33.6
-      zod:
-        specifier: ^4.1.13
-        version: 4.3.6
     devDependencies:
       '@effectionx/bdd':
         specifier: ^0.4.3
@@ -71,6 +65,9 @@ importers:
       '@types/node':
         specifier: '22'
         version: 22.19.11
+      d3:
+        specifier: ^7.9.0
+        version: 7.9.0
       effection:
         specifier: 4.1.0-alpha.7
         version: 4.1.0-alpha.7
@@ -1534,9 +1531,6 @@ packages:
     engines: {node: '>= 8'}
     hasBin: true
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
-
 snapshots:
 
   '@ark/schema@0.56.0':
@@ -2782,5 +2776,3 @@ snapshots:
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
-
-  zod@4.3.6: {}
