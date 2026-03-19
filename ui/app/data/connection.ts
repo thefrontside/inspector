@@ -7,6 +7,7 @@ import {
   type Result,
   type Stream,
   type Yielded,
+  Ok,
 } from "effection";
 
 /**
@@ -62,6 +63,7 @@ export function createConnection<T, TClose>(stream: Stream<T, TClose>): Connecti
         yield* scoped(function* () {
           let subscription = yield* stream;
           let next = yield* subscription.next();
+
           while (!next.done) {
             latest = next;
             queue.add({ type: "live", latest: latest.value });
@@ -73,6 +75,12 @@ export function createConnection<T, TClose>(stream: Stream<T, TClose>): Connecti
               error: new Error("connection closed before returning anything", {
                 cause: next.value,
               }),
+            });
+          } else {
+            queue.add({
+              type: "closed",
+              latest: latest.value,
+              result: Ok(next.value),
             });
           }
         });

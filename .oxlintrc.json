@@ -3,6 +3,7 @@
   "plugins": null,
   "categories": {},
   "rules": {
+    "typescript/consistent-type-imports": ["error", { "fixStyle": "inline-type-imports" }],
     "require-yield": "off",
     "no-unused-vars": [
       "error",

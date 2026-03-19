@@ -1,52 +1,85 @@
 # inspector
 
-Helpers to inspect an effection tree.
+Helpers to inspect an effection tree. These utilities can be used through `npx` or similar or installed as a dev dependency.
 
 ## Running
+
+When the package is installed as a dev dependency the binary is available in
+`node_modules/.bin/inspector`; you can also invoke it directly with npx:
+
+```bash
+npx @effectionx/inspector [options] <command> [args]
+# or when installed as a dev dependency
+inspector [options] <command> [args]
+```
+
+Use `npx @effectionx/inspector help` to explore available commands. Typically you will run to inspector in "live" mode or "record" more.
+
+Under the hood the CLI chooses which binary to execute based on the `--runtime` option or, if you omit that, it will guess from the process that started the CLI, either `node`, `deno`, or `bun`.
+
+These raw `call` commands mirror the behaviour of the HTTP routes produced by the same code that powers the SSE server (see `lib/sse-server.ts`).
 
 ### Live
 
 Start your application with the inspector loader so it runs alongside your app.
 
-Node:
-
-```bash
-node --import @effectionx/inspector ./your-app.js --suspend
+```shell
+# generate a recording, but also pause
+inspector --inspect-pause --experimental-strip-types program.ts
 ```
 
-Deno:
-
-```bash
-deno run --preload npm:@effectionx/inspector ./your-app.ts --suspend
-```
-
-When started this way the inspector will launch a small SSE server (default port: 41000) and serve the UI at `http://localhost:41000`.
+When started directly with the loader, the inspector will launch a small SSE server (default port: 41000) and serve the UI at `http://localhost:41000`. You will need to "play" or continue execution of your program when you use `--inspect-pause`. This gives you time to load the UI, and press the play button or issue the "play" call, e.g. `npx @effectionx/inspector call play`.
 
 ### Recording ✅
 
-The UI supports loading saved recordings useful for review and sharing. From the Home screen click `Load Recording` > `Browse files` and choose a `.json` or `.effection` file. A recording is a JSON array of NodeMap snapshots. The inspector accepts `.json` and `.effection` files.
+The UI supports loading saved recordings useful for review and sharing. From the Home screen click `Load Recording` > `Browse files` and choose the `.json` or `.effection` file. A recording is a JSON array of NodeMap snapshots. The inspector accepts `.json` and `.effection` files.
 
 #### Creating a recording from a live session:
 
-You can capture the SSE stream from a running inspector and save the emitted data. Start by using [the instructions for running the process live](#live).
+You can capture the SSE stream from a running inspector and save the emitted data. It is run similarly with an additional `--inspect-record` argument.
 
-```bash
-# Start capturing and it will close once your effection process closes
-curl -sN -X POST http://localhost:41000/recordNodeMap \
-  -H "Accept: text/event-stream" -d '[]' \
-  | jq -R -s 'split("\n") | map(select(startswith("data: "))) | map(.[6:] | fromjson)' \
-  > recording.json
+```shell
+# generate a recording, but also pause
+inspector --inspect-record=output.json --experimental-strip-types program.ts
 ```
 
-If you started the inspected process with `--suspend`, click the red Play button in the inspector header (next to the `live` badge) to resume execution — the UI issues the appropriate POST for you.
+If you started the inspected process with `--inspect-pause`, click the play button or issue the "play" call, e.g. `npx @effectionx/inspector call play`.
 
-If you prefer the command line, the same request can be made manually:
+## CLI Examples
 
 ```bash
-curl -s -X POST http://localhost:41000/play -H 'Content-Type: application/json' -d '[]'
+# query the default server
+inspector call getScopes
+
+# record output
+inspector call watchScopes --out=events.json
+
+# use the alias
+inspector c recordNodeMap
+
+# inspect and run a script (node assumed by default)
+inspector program.js
+
+# override runtime explicitly
+inspector --runtime deno --inspect-pause program.ts
+# or when using bun:
+inspector --runtime bun program.js
+
+# pass through runtime flags
+inspector --experimental-strip-types program.ts
+inspector --import=tsx program.ts
+
+# generate a recording, but also pause
+inspector --inspect-pause --inspect-record=recording.inspector.json --import=tsx program.ts
+# generate a recording, but begin execution immediately
+inspector --inspect-record=recording.inspector.json --import=tsx program.ts
 ```
 
-You can also monitor player state with `/watchPlayerState`.
+Pause behaviour is communicated to the loader via the `INSPECT_PAUSE` environment variable, and using `--inspect-pause` sets that for you. When running the program with the CLI, the program is run through the loader with the environment variable passed, e.g.:
+
+```bash
+INSPECT_PAUSE=1 node --import @effectionx/inspector ./your-app.js
+```
 
 ## Contributing
 

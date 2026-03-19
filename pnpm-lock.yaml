@@ -19,31 +19,34 @@ importers:
       '@b9g/crank':
         specifier: ^0.7.5
         version: 0.7.5
+      '@effectionx/process':
+        specifier: ^0.7.3
+        version: 0.7.3(effection@4.1.0-alpha.7)
       '@effectionx/stream-helpers':
         specifier: ^0.8.0
-        version: 0.8.0(effection@4.1.0-alpha.5)
+        version: 0.8.0(effection@4.1.0-alpha.7)
       '@standard-schema/spec':
         specifier: ^1.0.0
         version: 1.1.0
       arktype:
         specifier: ^2.1.27
         version: 2.1.29
-      d3:
-        specifier: ^7.9.0
-        version: 7.9.0
+      configliere:
+        specifier: ~0.2.3
+        version: 0.2.3
       h3:
         specifier: 2.0.1-rc.14
         version: 2.0.1-rc.14
+      parse-sse:
+        specifier: ^0.1.0
+        version: 0.1.0
       remeda:
         specifier: ^2
         version: 2.33.6
-      zod:
-        specifier: ^4.1.13
-        version: 4.3.6
     devDependencies:
       '@effectionx/bdd':
         specifier: ^0.4.3
-        version: 0.4.3(effection@4.1.0-alpha.5)
+        version: 0.4.3(effection@4.1.0-alpha.7)
       '@nano-router/history':
         specifier: ^4.0.4
         version: 4.0.4
@@ -62,9 +65,12 @@ importers:
       '@types/node':
         specifier: '22'
         version: 22.19.11
+      d3:
+        specifier: ^7.9.0
+        version: 7.9.0
       effection:
-        specifier: 4.1.0-alpha.5
-        version: 4.1.0-alpha.5
+        specifier: 4.1.0-alpha.7
+        version: 4.1.0-alpha.7
       expect:
         specifier: ^30.2.0
         version: 30.2.0
@@ -77,12 +83,6 @@ importers:
       oxlint:
         specifier: ^1.49.0
         version: 1.49.0(oxlint-tsgolint@0.14.2)
-      parse-sse:
-        specifier: ^0.1.0
-        version: 0.1.0
-      tsx:
-        specifier: ^4.21.0
-        version: 4.21.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -118,6 +118,18 @@ packages:
 
   '@effectionx/bdd@0.4.3':
     resolution: {integrity: sha512-g/T43KTtrqq2WqlLUgJdaJUOGbzGXMYbA4OKhaiiGIqrx8vMh5UElz/kHI73ADgWm6x9ItbwJRnFjxy4a32k6w==}
+    engines: {node: '>= 22'}
+    peerDependencies:
+      effection: ^3 || ^4
+
+  '@effectionx/node@0.2.2':
+    resolution: {integrity: sha512-bUwnCqzBsVERGzKZRTc6XMZ6yDLkRPgcxSvM6eAkuc2D5A7L0+nSu4J/x60y6geSYrAVv2UZBgAktukNtB6LxA==}
+    engines: {node: '>= 22'}
+    peerDependencies:
+      effection: ^3 || ^4
+
+  '@effectionx/process@0.7.3':
+    resolution: {integrity: sha512-ic+cv9aNeq0UgF+SO61jd8nYLiF3jFT2c6n+nOYstc4pmtUez70yFb0H5Rzppu21wql5QYCbQayVrRRUa5YRQQ==}
     engines: {node: '>= 22'}
     peerDependencies:
       effection: ^3 || ^4
@@ -950,8 +962,19 @@ packages:
     peerDependencies:
       '@floating-ui/utils': ^0.2.5
 
+  configliere@0.2.3:
+    resolution: {integrity: sha512-yXhYYx89F+8UV4tJBP/N0Jb3SujLea3rp7p47fSAlj6wLl8Acve2pUZwcklgmb3ifJZvDGQWT9EiQmilEY1D9g==}
+    engines: {node: '>= 16'}
+
+  cross-spawn@7.0.6:
+    resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
+    engines: {node: '>= 8'}
+
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  ctrlc-windows@2.2.0:
+    resolution: {integrity: sha512-t9y568r+T8FUuBaqKK60YGFJdj3b3ktdJW9WXIT3CuBdQhAOYdSZu75jFUN0Ay4Yz5HHicVQqAYCwcnqhOn23g==}
 
   d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
@@ -1087,8 +1110,8 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  effection@4.1.0-alpha.5:
-    resolution: {integrity: sha512-UCYrU5wGaRYxhcUHx7eVeJ+Cwm/r7zsL484lswbGDVxKeOjqTARNcOxH0CWc4y9Xr5S1KjW0tsdOdgOdXE8wag==}
+  effection@4.1.0-alpha.7:
+    resolution: {integrity: sha512-ir7qM7vQXOo7eiuNxaD6FgwUetdy3XMB3dwtzUxp9ytiZl6abZUrXwM3vMqKWdMW4cW1KZzJqSEuXofJFscwFw==}
     engines: {node: '>= 16'}
 
   esbuild@0.27.3:
@@ -1177,6 +1200,9 @@ packages:
   is-number@7.0.0:
     resolution: {integrity: sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==}
     engines: {node: '>=0.12.0'}
+
+  isexe@2.0.0:
+    resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
   jest-diff@30.2.0:
     resolution: {integrity: sha512-dQHFo3Pt4/NLlG5z4PxZ/3yZTZ1C7s9hveiOj+GCN+uT109NC2QgsoVZsVOAvbJ3RgKkvyLGXZV9+piDpWbm6A==}
@@ -1324,6 +1350,10 @@ packages:
     resolution: {integrity: sha512-8bObUwtEuLp2Z1gP6iRVMBzmEqaU5ohmofa3WmZVFfFZFKRP/+c03y8NVYzzXmQMotQ6mDS5Mnyk6tT1gKOTcQ==}
     engines: {node: '>=20'}
 
+  path-key@3.1.1:
+    resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
+    engines: {node: '>=8'}
+
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -1390,6 +1420,17 @@ packages:
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
+  shebang-command@2.0.0:
+    resolution: {integrity: sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==}
+    engines: {node: '>=8'}
+
+  shebang-regex@3.0.0:
+    resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
+    engines: {node: '>=8'}
+
+  shellwords-ts@3.0.1:
+    resolution: {integrity: sha512-GabK4ApLMqHFRGlpgNqg8dmtHTnYHt0WUUJkIeMd3QaDrUUBEDXHSSNi3I0PzMimg8W+I0EN4TshQxsnHv1cwg==}
+
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
@@ -1422,6 +1463,9 @@ packages:
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
+
+  ts-case-convert@2.1.0:
+    resolution: {integrity: sha512-Ye79el/pHYXfoew6kqhMwCoxp4NWjKNcm2kBzpmEMIU9dd9aBmHNNFtZ+WTm0rz1ngyDmfqDXDlyUnBXayiD0w==}
 
   tsx@4.21.0:
     resolution: {integrity: sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw==}
@@ -1482,8 +1526,10 @@ packages:
       yaml:
         optional: true
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+  which@2.0.2:
+    resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
+    engines: {node: '>= 8'}
+    hasBin: true
 
 snapshots:
 
@@ -1505,31 +1551,43 @@ snapshots:
 
   '@ctrl/tinycolor@4.2.0': {}
 
-  '@effectionx/bdd@0.4.3(effection@4.1.0-alpha.5)':
+  '@effectionx/bdd@0.4.3(effection@4.1.0-alpha.7)':
     dependencies:
-      '@effectionx/test-adapter': 0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.5)
-      effection: 4.1.0-alpha.5
+      '@effectionx/test-adapter': 0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7)
+      effection: 4.1.0-alpha.7
 
-  '@effectionx/signals@0.5.1(effection@4.1.0-alpha.5)':
+  '@effectionx/node@0.2.2(effection@4.1.0-alpha.7)':
     dependencies:
-      effection: 4.1.0-alpha.5
+      effection: 4.1.0-alpha.7
+
+  '@effectionx/process@0.7.3(effection@4.1.0-alpha.7)':
+    dependencies:
+      '@effectionx/node': 0.2.2(effection@4.1.0-alpha.7)
+      cross-spawn: 7.0.6
+      ctrlc-windows: 2.2.0
+      effection: 4.1.0-alpha.7
+      shellwords-ts: 3.0.1
+
+  '@effectionx/signals@0.5.1(effection@4.1.0-alpha.7)':
+    dependencies:
+      effection: 4.1.0-alpha.7
       immutable: 5.1.4
 
-  '@effectionx/stream-helpers@0.8.0(effection@4.1.0-alpha.5)':
+  '@effectionx/stream-helpers@0.8.0(effection@4.1.0-alpha.7)':
     dependencies:
-      '@effectionx/signals': 0.5.1(effection@4.1.0-alpha.5)
-      '@effectionx/timebox': 0.4.1(effection@4.1.0-alpha.5)
-      effection: 4.1.0-alpha.5
+      '@effectionx/signals': 0.5.1(effection@4.1.0-alpha.7)
+      '@effectionx/timebox': 0.4.1(effection@4.1.0-alpha.7)
+      effection: 4.1.0-alpha.7
       immutable: 5.1.4
       remeda: 2.33.6
 
-  '@effectionx/test-adapter@0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.5)':
+  '@effectionx/test-adapter@0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7)':
     dependencies:
-      effection: 4.1.0-alpha.5
+      effection: 4.1.0-alpha.7
 
-  '@effectionx/timebox@0.4.1(effection@4.1.0-alpha.5)':
+  '@effectionx/timebox@0.4.1(effection@4.1.0-alpha.7)':
     dependencies:
-      effection: 4.1.0-alpha.5
+      effection: 4.1.0-alpha.7
 
   '@esbuild/aix-ppc64@0.27.3':
     optional: true
@@ -2116,7 +2174,19 @@ snapshots:
     dependencies:
       '@floating-ui/utils': 0.2.10
 
+  configliere@0.2.3:
+    dependencies:
+      ts-case-convert: 2.1.0
+
+  cross-spawn@7.0.6:
+    dependencies:
+      path-key: 3.1.1
+      shebang-command: 2.0.0
+      which: 2.0.2
+
   csstype@3.2.3: {}
+
+  ctrlc-windows@2.2.0: {}
 
   d3-array@3.2.4:
     dependencies:
@@ -2276,7 +2346,7 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  effection@4.1.0-alpha.5: {}
+  effection@4.1.0-alpha.7: {}
 
   esbuild@0.27.3:
     optionalDependencies:
@@ -2335,6 +2405,7 @@ snapshots:
   get-tsconfig@4.13.6:
     dependencies:
       resolve-pkg-maps: 1.0.0
+    optional: true
 
   glob-parent@5.1.2:
     dependencies:
@@ -2368,6 +2439,8 @@ snapshots:
       is-extglob: 2.1.1
 
   is-number@7.0.0: {}
+
+  isexe@2.0.0: {}
 
   jest-diff@30.2.0:
     dependencies:
@@ -2549,6 +2622,8 @@ snapshots:
 
   parse-sse@0.1.0: {}
 
+  path-key@3.1.1: {}
+
   picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
@@ -2587,7 +2662,8 @@ snapshots:
 
   remeda@2.33.6: {}
 
-  resolve-pkg-maps@1.0.0: {}
+  resolve-pkg-maps@1.0.0:
+    optional: true
 
   robust-predicates@3.0.2: {}
 
@@ -2628,6 +2704,14 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
+  shebang-command@2.0.0:
+    dependencies:
+      shebang-regex: 3.0.0
+
+  shebang-regex@3.0.0: {}
+
+  shellwords-ts@3.0.1: {}
+
   slash@3.0.0: {}
 
   source-map-js@1.2.1: {}
@@ -2653,12 +2737,15 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
+  ts-case-convert@2.1.0: {}
+
   tsx@4.21.0:
     dependencies:
       esbuild: 0.27.3
       get-tsconfig: 4.13.6
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   typescript@5.9.3: {}
 
@@ -2686,4 +2773,6 @@ snapshots:
       lightningcss: 1.31.1
       tsx: 4.21.0
 
-  zod@4.3.6: {}
+  which@2.0.2:
+    dependencies:
+      isexe: 2.0.0
