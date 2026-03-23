@@ -1,16 +1,18 @@
 import { describe, it } from "@effectionx/bdd";
 import assert from "node:assert/strict";
-import { buildProcessOptions } from "../cli/build-run-args.ts";
+import { buildProcessOptions } from "../cli/commands/build-run-args.ts";
 import { config } from "../cli/config.ts";
 
 function parseRunArgs(raw: string[]) {
-  const parser = config.createParser({ args: raw, envs: [] });
-  assert.equal(parser.type, "main");
-  const result = parser.parse();
-  assert.ok(result.ok, `failed to parse: ${JSON.stringify(result, null, 2)}`);
-  const { value, remainder, data } = result;
+  const parser = config.parse({ args: raw, envs: [] });
+  assert(parser.ok && !parser.value.help && !parser.value.version);
+  const app = parser.value.config({ methods: {} });
+  const result = app.parse();
+  assert.ok(result.ok, `failed to parse: ${JSON.stringify(app, null, 2)}`);
+  const { value, remainder } = result;
   assert.equal(value.name, "run");
-  return { config: value.config, remainder: remainder.args ?? [], data };
+  assert(!value.help);
+  return { config: value.config, remainder: remainder.args ?? [] };
 }
 
 describe("generate loader env", () => {

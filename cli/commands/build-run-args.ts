@@ -1,6 +1,6 @@
 import type { ExecOptions } from "@effectionx/process";
 import process from "node:process";
-import type { RunConfig } from "./config.ts";
+import type { RunType } from "./run.ts";
 
 export type Runtime = "node" | "deno" | "bun";
 
@@ -12,7 +12,7 @@ function hasLoaderSpecified(packageName: string) {
 
 export function buildProcessOptions(
   runtime: Runtime,
-  config: RunConfig,
+  config: RunType["config"],
   passthroughArgs: string[],
 ): ExecOptions {
   let env = { ...process.env } as Record<string, string>;
@@ -104,7 +104,7 @@ export function buildProcessOptions(
  * hence the default is still "node".  If the executable name contains
  * "deno" or "bun" we return the corresponding runtime.
  */
-export function resolveRuntime(config: RunConfig): Runtime {
+export function resolveRuntime(config: RunType["config"]): Runtime {
   if (config.inspectRuntime) {
     return config.inspectRuntime as Runtime;
   }
