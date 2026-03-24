@@ -1,190 +1,84 @@
 #!/usr/bin/env node
-import {
-  type Operation,
-  each,
-  main,
-  resource,
-  sleep,
-  spawn,
-  suspend,
-  until,
-  withResolvers,
-} from "effection";
-import { inspector, type ProtocolCommandConfig, config, type RunConfig } from "./config.ts";
-import { exec } from "@effectionx/process";
+import { main, suspend } from "effection";
+import { config } from "./config.ts";
+import { call } from "./commands/call.ts";
+import { run } from "./commands/run.ts";
 import process from "node:process";
-import { writeFile } from "node:fs/promises";
-import { createSSEClient } from "../lib/sse-client.ts";
 import { useSSEServer } from "../lib/sse-server.ts";
 import { log } from "./logger.ts";
-import { resolveRuntime, buildProcessOptions } from "./build-run-args.ts";
-
-function runProgram(config: RunConfig, passthroughArgs: string[]) {
-  return resource<number | undefined>(function* (provide) {
-    try {
-      let runtime = resolveRuntime(config);
-      let host = `http://localhost:${config.inspectPort}`;
-
-      let processOptions = buildProcessOptions(runtime, config, passthroughArgs);
-
-      let ready = withResolvers<void>();
-      let childSpawned = withResolvers<void>();
-
-      yield* spawn(function* () {
-        yield* childSpawned.operation;
-        for (let chunk of yield* each(child.stdout)) {
-          yield* log.info(chunk.toString());
-          yield* each.next();
-        }
-      });
-
-      yield* spawn(function* () {
-        yield* childSpawned.operation;
-        for (let chunk of yield* each(child.stderr)) {
-          if (chunk.toString().includes("effection inspector")) {
-            ready.resolve();
-          }
-          yield* log.error(chunk.toString());
-          yield* each.next();
-        }
-      });
-
-      yield* spawn(function* () {
-        yield* ready.operation;
-        if (config.inspectRecord) {
-          yield* recordNodeMapToFile(host, config.inspectRecord);
-        }
-      });
-      let child = yield* exec(runtime, processOptions);
-      childSpawned.resolve();
-
-      yield* spawn(function* () {
-        yield* sleep(15000);
-        ready.reject(new Error("timeout waiting for program to start"));
-      });
-
-      let status = yield* child.join();
-
-      yield* provide(status.code);
-    } finally {
-      // runProgram() exiting
-    }
-  });
-}
-
-function* recordNodeMapToFile(host: string, filePath: string): Operation<void> {
-  let handle = createSSEClient(inspector, { url: host });
-  let values: unknown[] = [];
-  try {
-    let subscription = yield* handle.invoke({ name: "recordNodeMap", args: [] });
-
-    let next = yield* subscription.next();
-    while (!next.done) {
-      values.push(next.value);
-      next = yield* subscription.next();
-    }
-  } catch (error) {
-    let message = error instanceof Error ? error.message : String(error);
-    yield* log.error(`record NodeMap interrupted: ${message}`);
-  } finally {
-    // always attempt to write whatever we have collected (possibly empty)
-    yield* until(writeFile(filePath, JSON.stringify(values, null, 2)));
-  }
-}
-
-function* callMethod(config: ProtocolCommandConfig) {
-  const {
-    name,
-    config: { out, host },
-  } = config;
-  const argsList = [] as never[];
-  const handle = createSSEClient(inspector, { url: host });
-  if (!(name in handle.protocol.methods)) {
-    yield* log.error(`unknown command: ${name}`);
-  }
-  let results: unknown[] = [];
-  let subscription = yield* handle.invoke({
-    name,
-    args: argsList,
-  });
-  let next = yield* subscription.next();
-  // log progress values and collect everything, including final return
-  while (!next.done) {
-    results.push(next.value);
-    yield* log.info(JSON.stringify(next.value));
-    next = yield* subscription.next();
-  }
-
-  if (out) {
-    try {
-      yield* until(writeFile(out, JSON.stringify(results, null, 2)));
-    } catch (e) {
-      let msg = e instanceof Error ? e.message : String(e);
-      yield* log.error(`failed to write ${out}: ${msg}`);
-    }
-  }
-}
+import { player, scope } from "../lib/protocols.ts";
+import { combine } from "../lib/combine.ts";
 
 await main(function* () {
-  try {
-    const parser = config.createParser({
-      args: process.argv.slice(2).filter((arg) => arg !== "--"),
-      envs: [{ name: "ENV", value: process.env as Record<string, string> }],
-    });
+  const parser = config.parse({
+    args: process.argv.slice(2).filter((arg) => arg !== "--"),
+    envs: [{ name: "ENV", value: process.env as Record<string, string> }],
+  });
+  if (!parser.ok) {
+    yield* log.info(parser.error);
+    return;
+  }
 
-    switch (parser.type) {
-      case "help":
-      case "version":
-        yield* log.info(parser.print());
-        break;
-      case "main": {
-        const result = parser.parse();
-        if (result.ok) {
-          let { value: command, remainder } = result;
-          switch (command.name) {
-            case "help":
-              yield* log.info(command.config.text);
-              break;
-            case "ui": {
-              let address = yield* useSSEServer({ protocol: { methods: {} } } as any, {
-                port: command.config.inspectPort,
-              });
-              yield* log.info(`serving inspector UI at ${address}`);
-              yield* suspend();
-              break;
-            }
-            case "call":
-              yield* callMethod(command.config);
-              break;
-            case "run":
-              if (!remainder.args || (remainder.args && remainder.args.length === 0)) {
-                const configForGettingHelp = config.createParser({ args: ["--help"] });
-                if (configForGettingHelp.type !== "help") {
-                  yield* log.error("failed to run, refer to help command");
-                  break;
-                }
-                const helpText = configForGettingHelp.print();
-                yield* log.info(helpText);
-              } else {
-                yield* runProgram(command.config, remainder.args);
-              }
-              break;
-            default:
-              // An exhaustiveness check using 'never' can be added here
-              const _exhaustiveCheck: never = command;
-              break;
-          }
-        } else {
-          yield* log.error(result.error.message);
-        }
-        break;
-      }
-      default:
-        // An exhaustiveness check using 'never' can be added here
-        const _exhaustiveCheck: never = parser;
-        break;
+  let program = parser.value;
+
+  // TODO: load protocol dynamically
+  let protocol = combine.protocols(scope.protocol, player.protocol);
+
+  // get phase 2 parser
+  let app = program.config(protocol);
+
+  // parse second phase
+  let result = app.parse();
+
+  if (!result.ok) {
+    yield* log.error(result.error);
+    return;
+  }
+
+  if (program.help) {
+    yield* log.info(app.help());
+    return;
+  }
+
+  const command = result.value;
+
+  if (command.help) {
+    yield* log.info(command.text);
+    return;
+  }
+
+  switch (command.name) {
+    case "ui": {
+      let address = yield* useSSEServer({ protocol: { methods: {} } } as any, {
+        port: command.config.inspectPort,
+      });
+      yield* log.info(`serving inspector UI at ${address}`);
+      yield* suspend();
+      break;
     }
-  } finally {
-    // "inspector exiting"
+    case "call": {
+      let method = command.config;
+      if (method.help) {
+        yield* log.info(method.text);
+      } else {
+        yield* call(method.config);
+      }
+      break;
+    }
+
+    case "run": {
+      let { remainder } = result;
+
+      if (!remainder.args || (remainder.args && remainder.args.length === 0)) {
+        yield* log.info(app.help({ args: ["run", "--help"] }));
+      } else {
+        yield* run(command.config, remainder.args);
+      }
+      break;
+    }
+    default:
+      // An exhaustiveness check using 'never' can be added here
+      //const _exhaustiveCheck: never = command;
+      break;
   }
 });
