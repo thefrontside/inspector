@@ -23,8 +23,11 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "paths": {
+      "~lib/*": ["../lib/*"]
+    }
   },
-  "include": ["src", "app"],
+  "include": ["src"],
   "exclude": ["dist"]
 }

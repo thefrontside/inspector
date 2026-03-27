@@ -1,6 +1,6 @@
 import { map } from "@effectionx/stream-helpers";
 import type { Hierarchy } from "./types.ts";
-import type { Transform, NodeMap } from "../../../lib/update-node-map.ts";
+import type { Transform, NodeMap } from "~lib/update-node-map.ts";
 
 export type HierarchyMap = Record<string, Hierarchy>;
 

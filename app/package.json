@@ -1,0 +1,26 @@
+{
+  "name": "@inspector/app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/mount.ts"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --host 0.0.0.0"
+  },
+  "dependencies": {
+    "@b9g/crank": "^0.7.5",
+    "@nano-router/history": "^4.0.4",
+    "@nano-router/router": "^4.0.4",
+    "@shoelace-style/shoelace": "^2.20.1",
+    "d3": "^7.9.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "lightningcss": "^1.31.1",
+    "vite": "^7.3.1",
+    "vite-plugin-static-copy": "^3.2.0"
+  }
+}

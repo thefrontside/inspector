@@ -1,12 +1,17 @@
-import type { Context } from "@b9g/crank";
-import { router } from "../src/router.ts";
+import type { Context, Element } from "@b9g/crank";
+import { type Router, RouterKey } from "./router.ts";
 import { Layout } from "./layout.tsx";
 import { Home } from "./home.tsx";
 import { Live } from "./live.tsx";
 import { Demo } from "./demo.tsx";
 import { Recording } from "./recording.tsx";
 
-export async function* App(this: Context): AsyncGenerator<Element> {
+export async function* App(
+  this: Context,
+  { router }: { router: Router },
+): AsyncGenerator<Element> {
+  this.provide(RouterKey, router);
+
   let route = router.route;
   router.listen(() =>
     this.refresh(() => {

@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./ui/tests",
+  testDir: "./app/tests",
   testMatch: "**/*.e2e.spec.ts",
   fullyParallel: true,
   use: {
@@ -17,7 +17,7 @@ export default defineConfig({
   webServer: {
     // using a different port than the default Vite port to
     // avoid conflicts with the dev server when running tests locally
-    command: "pnpm exec vite --host 127.0.0.1 --port 4173 ui",
+    command: "pnpm exec vite --host 127.0.0.1 --port 4173 app",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,

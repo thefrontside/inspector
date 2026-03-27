@@ -1,6 +1,6 @@
-import type { Context } from "@b9g/crank";
+import type { Context, Element } from "@b9g/crank";
 import { Layout } from "./layout.tsx";
-import { router } from "../src/router.ts";
+import { RouterKey } from "./router.ts";
 import layoutStyles from "./layout.module.css";
 import homeStyles from "./home.module.css";
 
@@ -86,7 +86,7 @@ export async function* Home(this: Context): AsyncGenerator<Element> {
     const input = e.currentTarget as HTMLInputElement;
     const file = input.files?.[0];
     if (file) {
-      router.navigate({ route: "recording", state: { file } });
+      this.consume(RouterKey).navigate({ route: "recording", state: { file } });
     }
   };
 

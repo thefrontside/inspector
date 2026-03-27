@@ -15,7 +15,7 @@
   },
   "files": [
     "dist",
-    "ui/dist"
+    "app/dist"
   ],
   "type": "module",
   "sideEffects": true,
@@ -31,12 +31,12 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "start": "vite --host 0.0.0.0 ui",
+    "start": "pnpm -C app dev",
     "example": "node --experimental-strip-types --import ./loader.ts ./examples/spawn-children.ts",
     "cli": "node --experimental-strip-types ./cli/index.ts",
     "build": "pnpm run build:tsc && pnpm run build:ui",
     "build:tsc": "tsc -p tsconfig.build.json",
-    "build:ui": "vite build ui",
+    "build:ui": "pnpm -C app build",
     "test:ui:dev": "playwright test -c playwright.dev.config.ts",
     "test:ui:built": "playwright test -c playwright.built.config.ts",
     "test": "node --test",
@@ -49,7 +49,6 @@
   },
   "dependencies": {
     "@ark/util": "^0.56.0",
-    "@b9g/crank": "^0.7.5",
     "@effectionx/process": "^0.7.3",
     "@effectionx/stream-helpers": "^0.8.0",
     "@standard-schema/spec": "^1.0.0",
@@ -61,21 +60,14 @@
   },
   "devDependencies": {
     "@effectionx/bdd": "^0.4.3",
-    "@nano-router/history": "^4.0.4",
-    "@nano-router/router": "^4.0.4",
     "@playwright/test": "^1.58.2",
-    "@shoelace-style/shoelace": "^2.20.1",
-    "@types/d3": "^7.4.3",
     "@types/node": "22",
-    "d3": "^7.9.0",
     "effection": "4.1.0-alpha.7",
     "expect": "^30.2.0",
-    "lightningcss": "^1.31.1",
     "oxfmt": "^0.34.0",
     "oxlint": "^1.49.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vite-plugin-static-copy": "^3.2.0"
+    "vite": "^7.3.1"
   },
   "peerDependencies": {
     "effection": "^4.1.0-alpha.7"

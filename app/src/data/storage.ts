@@ -2,7 +2,7 @@ import { filter, map } from "@effectionx/stream-helpers";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { createSignal, each, on, resource, spawn, type Stream } from "effection";
 import { pipe } from "remeda";
-import { validateUnsafe } from "../../../lib/validate";
+import { validateUnsafe } from "~lib/validate";
 
 export interface LocalStorage<T> extends Stream<T, never> {
   value: T;

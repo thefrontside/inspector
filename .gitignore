@@ -3,6 +3,7 @@
 
 /deno.lock
 node_modules/
+**/node_modules/
 
 # TypeScript build outputs
 dist/

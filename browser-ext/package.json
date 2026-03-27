@@ -1,0 +1,22 @@
+{
+  "name": "@effectionx/inspector-extension",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "zip": "wxt zip"
+  },
+  "dependencies": {
+    "@b9g/crank": "^0.7.5",
+    "@inspector/app": "workspace:*",
+    "@nano-router/history": "^4.0.4",
+    "@shoelace-style/shoelace": "^2.20.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite-plugin-static-copy": "^3.2.0",
+    "wxt": "^0.20.5"
+  }
+}

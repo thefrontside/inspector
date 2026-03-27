@@ -39,6 +39,7 @@ export function useSSEServer<M extends Methods>(
 
     for (let name of methodNames) {
       app.all(`/${String(name)}`, async (event) => {
+        let halted = false;
         let { req } = event;
         // when the response ends for whatever reason, h3 by default closes the stream
         // instead we opt to handle the close ourselves, and kill the task on that event
@@ -104,14 +105,19 @@ export function useSSEServer<M extends Methods>(
             yield* race([events, once(req.signal, "abort")]);
           } finally {
             yield* flush();
+            halted = true;
           }
         });
 
-        return await stream.send();
+        return await stream.send().catch((error) => {
+          if (!halted) {
+            throw error;
+          }
+        });
       });
     }
 
-    const UI_DIRNAME = "ui";
+    const UI_DIRNAME = "app";
     const ROOT_DIR = join(import.meta.dirname, "..");
     const PUBLIC_DIR = join(
       ...(ROOT_DIR.endsWith("dist")

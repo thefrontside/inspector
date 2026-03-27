@@ -1,17 +1,17 @@
-import type { Context } from "@b9g/crank";
+import type { Context, Element } from "@b9g/crank";
 import { pipe } from "remeda";
 
-import { updateNodeMap } from "../../lib/update-node-map.ts";
+import { updateNodeMap } from "~lib/update-node-map.ts";
 import { stratify } from "./data/stratify.ts";
-import { createSSEClient } from "../../lib/sse-client.ts";
+import { createSSEClient } from "~lib/sse-client.ts";
 
-import { combine } from "../../lib/combine.ts";
+import { combine } from "~lib/combine.ts";
 import { StructureInspector } from "./components/structure-inspector.tsx";
 import { createConnection, type ConnectionState } from "./data/connection.ts";
 import { Toolbar } from "./toolbar.tsx";
 import styles from "./live.module.css";
 import { createCrankScope } from "./lib/crank-scope.ts";
-import { player, scope } from "../../lib/protocols.ts";
+import { player, scope } from "~lib/protocols.ts";
 
 const protocol = combine.protocols(scope.protocol, player.protocol);
 

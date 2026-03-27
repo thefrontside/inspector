@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
-import { join, dirname } from "node:path";
+import { join, dirname, resolve } from "node:path";
+
+const root = resolve(import.meta.dirname, "..");
 
 const shoelaceIcons = join(
   dirname(import.meta.resolve("@shoelace-style/shoelace")),
@@ -8,6 +10,11 @@ const shoelaceIcons = join(
 ).replace(/^file:/, "");
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "~lib": join(root, "lib"),
+    },
+  },
   plugins: [
     viteStaticCopy({
       targets: [

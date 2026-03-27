@@ -7,5 +7,5 @@
     "rootDir": "."
   },
   "include": ["**/*.ts", "package.json"],
-  "exclude": ["dist", "ui"]
+  "exclude": ["dist", "app", "browser-ext"]
 }
