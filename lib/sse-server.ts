@@ -1,8 +1,8 @@
 import {
   type Operation,
+  createQueue,
   createScope,
   ensure,
-  once,
   race,
   resource,
   spawn,
@@ -11,13 +11,22 @@ import {
   useAttributes,
   useScope,
   withResolvers,
+  sleep,
 } from "effection";
 import type { Handle, Methods } from "./types.ts";
 import { validateUnsafe } from "./validate.ts";
 
-import { createEventStream, defineEventHandler, H3, serve, serveStatic } from "h3";
+import {
+  type EventStreamMessage,
+  createEventStream,
+  defineEventHandler,
+  H3,
+  serve,
+  serveStatic,
+} from "h3";
 import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
+import { type Maybe, Nothing } from "./maybe.ts";
 
 export interface SSEServerOptions {
   port: number;
@@ -43,6 +52,15 @@ export function useSSEServer<M extends Methods>(
         // when the response ends for whatever reason, h3 by default closes the stream
         // instead we opt to handle the close ourselves, and kill the task on that event
         let stream = createEventStream(event, { autoclose: false });
+        let queue = createQueue<EventStreamMessage, Maybe<never>>();
+
+        function* drain() {
+          let next = yield* queue.next();
+          while (!next.done) {
+            yield* until(stream.push(next.value));
+            next = yield* queue.next();
+          }
+        }
 
         scope.run(function* () {
           yield* ensure(function* () {
@@ -71,39 +89,41 @@ export function useSSEServer<M extends Methods>(
                 if (req.signal.aborted) {
                   break;
                 }
-                yield* until(
-                  stream.push({
-                    event: "yield",
-                    data: JSON.stringify(next.value),
-                  }),
-                );
+                queue.add({
+                  event: "yield",
+                  data: JSON.stringify(next.value),
+                });
                 next = yield* subscription.next();
               }
               let value = validateUnsafe(protocol.methods[name].returns, next?.value);
-              yield* until(
-                stream.push({
-                  event: "return",
-                  data: JSON.stringify(value),
-                }),
-              );
+              queue.add({
+                event: "return",
+                data: JSON.stringify(value),
+              });
               // return sent, we can consider the stream finalized
               // and skip remaining steps in the finally block
             } catch (cause) {
               let error = cause instanceof Error ? cause : new Error("unknown", { cause });
               let { name, message } = error;
-              yield* until(
-                stream.push({
-                  event: "throw",
-                  data: JSON.stringify({ name, message }),
-                }),
-              );
+              queue.add({
+                event: "throw",
+                data: JSON.stringify({ name, message }),
+              });
             }
           });
 
           try {
-            yield* race([events, once(req.signal, "abort")]);
+            yield* drain();
           } finally {
             yield* flush();
+            yield* events.halt();
+            console.log("subscription halted, draining queue");
+            queue.close(Nothing());
+            console.log("queue closed, draining remaining messages");
+            yield* drain();
+            console.log("done draining, waiting to ensure stream is closed on client");
+            yield* race([sleep(1000), drain()]);
+            console.log("done waiting");
           }
         });
 
