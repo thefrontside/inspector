@@ -96,9 +96,10 @@ export function useSSEServer<M extends Methods>(
                 next = yield* subscription.next();
               }
               let value = validateUnsafe(protocol.methods[name].returns, next?.value);
+              let data = JSON.stringify(value);
               queue.add({
                 event: "return",
-                data: JSON.stringify(value),
+                data,
               });
               // return sent, we can consider the stream finalized
               // and skip remaining steps in the finally block

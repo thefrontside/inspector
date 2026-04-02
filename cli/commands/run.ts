@@ -41,7 +41,7 @@ export function run(config: RunType["config"], passthroughArgs: string[]) {
         }
       });
 
-      yield* spawn(function* () {
+      const recordTask = yield* spawn(function* () {
         yield* ready.operation;
         if (config.inspectRecord) {
           yield* recordNodeMapToFile(host, config.inspectRecord, config.protocol);
@@ -56,6 +56,7 @@ export function run(config: RunType["config"], passthroughArgs: string[]) {
       });
 
       let status = yield* child.join();
+      yield* recordTask;
 
       yield* provide(status.code);
     } finally {
