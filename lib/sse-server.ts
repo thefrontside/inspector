@@ -49,9 +49,9 @@ export function useSSEServer<M extends Methods>(
     for (let name of methodNames) {
       app.all(`/${String(name)}`, async (event) => {
         let { req } = event;
-        // when the response ends for whatever reason, h3 by default closes the stream
-        // instead we opt to handle the close ourselves, and kill the task on that event
-        let stream = createEventStream(event, { autoclose: false });
+        // when this closes (default is autoclose), we will halt the `requestTask`
+        // based on the event which cleans up the rest of the resource
+        let stream = createEventStream(event, { autoclose: true });
         let queue = createQueue<EventStreamMessage, Maybe<never>>();
 
         function* drain() {
@@ -62,7 +62,7 @@ export function useSSEServer<M extends Methods>(
           }
         }
 
-        scope.run(function* () {
+        let requestTask = scope.run(function* () {
           yield* ensure(function* () {
             yield* until(stream.flush());
             yield* until(stream.close());
@@ -80,7 +80,7 @@ export function useSSEServer<M extends Methods>(
             handle.invoke({ name, args }),
           );
 
-          let events = yield* spawn(function* () {
+          yield* spawn(function* () {
             try {
               yield* useAttributes({ name: "EventStream" });
 
@@ -95,7 +95,7 @@ export function useSSEServer<M extends Methods>(
                 });
                 next = yield* subscription.next();
               }
-              let value = validateUnsafe(protocol.methods[name].returns, next?.value);
+              let value = validateUnsafe(protocol.methods[name].returns, next.value);
               let data = JSON.stringify(value);
               queue.add({
                 event: "return",
@@ -117,18 +117,17 @@ export function useSSEServer<M extends Methods>(
             yield* drain();
           } finally {
             yield* flush();
-            yield* events.halt();
-            console.log("subscription halted, draining queue");
+            console.log("request complete, closing stream", req._url);
             queue.close(Nothing());
-            console.log("queue closed, draining remaining messages");
+            console.log("queue closed, waiting for drain to complete");
             yield* drain();
-            console.log("done draining, waiting to ensure stream is closed on client");
-            yield* race([sleep(1000), drain()]);
-            console.log("done waiting");
+            console.log("drain complete");
           }
         });
 
-        return await stream.send();
+        stream.onClosed(() => requestTask.halt());
+
+        return stream.send();
       });
     }
 

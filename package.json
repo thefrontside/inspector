@@ -32,8 +32,8 @@
   },
   "scripts": {
     "start": "vite --host 0.0.0.0 ui",
-    "example": "node --experimental-strip-types --import ./loader.ts ./examples/spawn-children.ts",
-    "cli": "node --experimental-strip-types ./cli/index.ts",
+    "example": "node --import ./loader.ts ./examples/spawn-children.ts",
+    "cli": "node ./cli/index.ts",
     "build": "pnpm run build:tsc && pnpm run build:ui",
     "build:tsc": "tsc -p tsconfig.build.json",
     "build:ui": "vite build ui",
@@ -55,7 +55,7 @@
     "@standard-schema/spec": "^1.0.0",
     "arktype": "^2.1.27",
     "configliere": "^0.3.0",
-    "h3": "2.0.1-rc.14",
+    "h3": "2.0.1-rc.20",
     "parse-sse": "^0.1.0",
     "remeda": "^2"
   },
