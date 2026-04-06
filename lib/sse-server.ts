@@ -28,6 +28,11 @@ import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { type Maybe, Nothing } from "./maybe.ts";
 
+function isExpectedShutdownError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return error.name === "AbortError" || error.message === "halted";
+}
+
 export interface SSEServerOptions {
   port: number;
 }
@@ -49,9 +54,15 @@ export function useSSEServer<M extends Methods>(
     for (let name of methodNames) {
       app.all(`/${String(name)}`, async (event) => {
         let { req } = event;
-        // when this closes (default is autoclose), we will halt the `requestTask`
-        // based on the event which cleans up the rest of the resource
+        // The SSE stream is bound to the HTTP request lifecycle. `autoclose`
+        // means the stream will automatically finish when the response ends.
+        // If the client disconnects, `stream.onClosed()` will halt the request task.
         let stream = createEventStream(event, { autoclose: true });
+        // The queue buffers outgoing EventStream messages. The producer writes
+        // to the queue and the `drain()` consumer flushes them into the stream.
+        // This way the producer can start shutdown and stop sending messages,
+        // and out of band from that action, we can finalize and send anything
+        // remaining in the queue before closing the stream.
         let queue = createQueue<EventStreamMessage, Maybe<never>>();
 
         function* drain() {
@@ -80,6 +91,7 @@ export function useSSEServer<M extends Methods>(
             handle.invoke({ name, args }),
           );
 
+          // The middleware producer reads from the protocol subscription and enqueues events
           yield* spawn(function* () {
             try {
               yield* useAttributes({ name: "EventStream" });
@@ -95,14 +107,18 @@ export function useSSEServer<M extends Methods>(
                 });
                 next = yield* subscription.next();
               }
-              let value = validateUnsafe(protocol.methods[name].returns, next.value);
-              let data = JSON.stringify(value);
-              queue.add({
-                event: "return",
-                data,
-              });
-              // return sent, we can consider the stream finalized
-              // and skip remaining steps in the finally block
+
+              // If the request was aborted it means that the client has disconnected
+              // while we were sending progress events. It will trigger the `break` above,
+              // drop out of the loop and we won't be able to emit the final event.
+              if (!req.signal.aborted) {
+                let value = validateUnsafe(protocol.methods[name].returns, next.value);
+                let data = JSON.stringify(value);
+                queue.add({
+                  event: "return",
+                  data,
+                });
+              }
             } catch (cause) {
               let error = cause instanceof Error ? cause : new Error("unknown", { cause });
               let { name, message } = error;
@@ -110,22 +126,43 @@ export function useSSEServer<M extends Methods>(
                 event: "throw",
                 data: JSON.stringify({ name, message }),
               });
+            } finally {
+              queue.close(Nothing());
             }
           });
 
           try {
             yield* drain();
           } finally {
+            // `drain()` has finished either because the queue closed normally or
+            // because the request was interrupted. Clean up the underlying
+            // protocol subscription and ensure the stream is flushed/closed.
             yield* flush();
-            console.log("request complete, closing stream", req._url);
             queue.close(Nothing());
-            console.log("queue closed, waiting for drain to complete");
-            yield* drain();
-            console.log("drain complete");
+            try {
+              yield* race([sleep(1000), drain()]);
+            } catch {
+              // ignore shutdown race failures in the last effort to drain
+              // as H3 seems to abort the promise as some point and with
+              // the sleep it can end up just getting killed
+            }
           }
         });
 
-        stream.onClosed(() => requestTask.halt());
+        requestTask.catch((error) => {
+          if (isExpectedShutdownError(error)) return;
+          console.error("requestTask failed unexpectedly:", error);
+        });
+
+        // The transport has closed the SSE response, either because the client
+        // disconnected or because the stream finished normally. Halt the request
+        // task so any leftover work stops immediately.
+        stream.onClosed(() =>
+          requestTask.halt().catch((error) => {
+            if (isExpectedShutdownError(error)) return;
+            console.error("requestTask.halt() failed unexpectedly:", error);
+          }),
+        );
 
         return stream.send();
       });
