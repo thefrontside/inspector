@@ -1,25 +1,26 @@
 import {
-  type Operation,
+  all,
+  call,
   createQueue,
   createScope,
   ensure,
-  race,
+  type Operation,
   resource,
+  sleep,
   spawn,
   suspend,
   until,
   useAttributes,
   useScope,
   withResolvers,
-  sleep,
 } from "effection";
 import type { Handle, Methods } from "./types.ts";
 import { validateUnsafe } from "./validate.ts";
 
 import {
-  type EventStreamMessage,
   createEventStream,
   defineEventHandler,
+  type EventStreamMessage,
   H3,
   serve,
   serveStatic,
@@ -47,9 +48,10 @@ export function useSSEServer<M extends Methods>(
 
   return resource(function* (provide) {
     yield* useAttributes({ name: "SSEServer", port });
-    let [scope, destroy] = createScope(yield* useScope());
 
     let app = new H3();
+    let [requestScope, destroyRequestScope] = createScope();
+    let activeRequests = new Set<ReturnType<typeof requestScope.run>>();
 
     for (let name of methodNames) {
       app.all(`/${String(name)}`, async (event) => {
@@ -68,12 +70,21 @@ export function useSSEServer<M extends Methods>(
         function* drain() {
           let next = yield* queue.next();
           while (!next.done) {
-            yield* until(stream.push(next.value));
+            yield* until(stream.push([next.value]));
             next = yield* queue.next();
           }
         }
 
-        let requestTask = scope.run(function* () {
+        let requestTask: ReturnType<typeof requestScope.run>;
+        let requestStarted = withResolvers<void>();
+        requestTask = requestScope.run(function* () {
+          yield* requestStarted.operation;
+          yield* spawn(function* () {
+            while (true) {
+              yield* sleep(1000);
+              yield* until(stream.pushComment("keepalive"));
+            }
+          });
           yield* ensure(function* () {
             yield* until(stream.flush());
             yield* until(stream.close());
@@ -113,7 +124,8 @@ export function useSSEServer<M extends Methods>(
               // drop out of the loop and we won't be able to emit the final event.
               if (!req.signal.aborted) {
                 let value = validateUnsafe(protocol.methods[name].returns, next.value);
-                let data = JSON.stringify(value);
+                // to avoid throws around JSON handling, let it throw in validation
+                let data = value === undefined ? "undefined" : JSON.stringify(value);
                 queue.add({
                   event: "return",
                   data,
@@ -136,33 +148,26 @@ export function useSSEServer<M extends Methods>(
           } finally {
             // `drain()` has finished either because the queue closed normally or
             // because the request was interrupted. Clean up the underlying
-            // protocol subscription and ensure the stream is flushed/closed.
+            // protocol subscription first, then allow any remaining queued
+            // events to drain.
             yield* flush();
             queue.close(Nothing());
-            try {
-              yield* race([sleep(1000), drain()]);
-            } catch {
-              // ignore shutdown race failures in the last effort to drain
-              // as H3 seems to abort the promise as some point and with
-              // the sleep it can end up just getting killed
-            }
           }
         });
+        activeRequests.add(requestTask);
+        requestTask.then(
+          () => activeRequests.delete(requestTask),
+          () => activeRequests.delete(requestTask),
+        );
+
+        event.waitUntil?.(requestTask);
+
+        requestStarted.resolve();
 
         requestTask.catch((error) => {
           if (isExpectedShutdownError(error)) return;
           console.error("requestTask failed unexpectedly:", error);
         });
-
-        // The transport has closed the SSE response, either because the client
-        // disconnected or because the stream finished normally. Halt the request
-        // task so any leftover work stops immediately.
-        stream.onClosed(() =>
-          requestTask.halt().catch((error) => {
-            if (isExpectedShutdownError(error)) return;
-            console.error("requestTask.halt() failed unexpectedly:", error);
-          }),
-        );
 
         return stream.send();
       });
@@ -206,7 +211,22 @@ export function useSSEServer<M extends Methods>(
     try {
       yield* provide(`http://localhost:${port}`);
     } finally {
-      yield* destroy();
+      if (activeRequests.size > 0) {
+        yield* all(
+          [...activeRequests].map((task) => {
+            return call(function* () {
+              try {
+                yield* task;
+              } catch (error) {
+                if (!isExpectedShutdownError(error)) {
+                  throw error;
+                }
+              }
+            });
+          }),
+        );
+      }
+      yield* destroyRequestScope();
       yield* until(server.close());
     }
   });
