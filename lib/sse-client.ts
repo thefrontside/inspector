@@ -73,7 +73,9 @@ export function createSSEClient<M extends Methods>(
             }
 
             let { type, data } = next.value;
-            let parsed = JSON.parse(data);
+            // check so we don't throw on our parse of the data,
+            // but we will throw  in validation instead
+            let parsed = data === "undefined" ? undefined : JSON.parse(data);
             if (type === "yield") {
               return {
                 done: false,
