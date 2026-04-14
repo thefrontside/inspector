@@ -4,6 +4,7 @@ import {
   createQueue,
   createScope,
   ensure,
+  race,
   type Operation,
   resource,
   sleep,
@@ -212,21 +213,36 @@ export function useSSEServer<M extends Methods>(
       yield* provide(`http://localhost:${port}`);
     } finally {
       if (activeRequests.size > 0) {
-        yield* all(
-          [...activeRequests].map((task) => {
-            return call(function* () {
-              try {
-                yield* task;
-              } catch (error) {
-                if (!isExpectedShutdownError(error)) {
-                  throw error;
-                }
+        let active = [...activeRequests].map((task) => {
+          return call(function* () {
+            try {
+              yield* task;
+            } catch (error) {
+              if (!isExpectedShutdownError(error)) {
+                throw error;
               }
-            });
+            }
+          });
+        });
+
+        let result = yield* race([
+          call(function* () {
+            yield* all(active);
+            return "finished";
           }),
-        );
+          call(function* () {
+            yield* sleep(10000);
+            return "timeout";
+          }),
+        ]);
+
+        if (result === "timeout") {
+          yield* destroyRequestScope();
+          yield* all(active);
+        }
+      } else {
+        yield* destroyRequestScope();
       }
-      yield* destroyRequestScope();
       yield* until(server.close());
     }
   });
