@@ -1,6 +1,6 @@
 import * as fsp from "node:fs/promises";
 import type { Dirent, Stats } from "node:fs";
-import { type Api, createApi } from "effection/experimental";
+import { createApi } from "effection/experimental";
 import type { Operation } from "effection";
 import { ensure, until } from "effection";
 

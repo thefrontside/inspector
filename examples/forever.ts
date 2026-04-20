@@ -4,7 +4,7 @@ await main(function* () {
   yield* useAttributes({ name: "Main" });
 
   try {
-    let supervisor = yield* spawn(function* () {
+    yield* spawn(function* () {
       yield* useAttributes({ name: "supervisor", role: "watcher" });
       yield* sleep(1000);
       return "supervisor done";

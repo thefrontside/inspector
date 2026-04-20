@@ -1,10 +1,7 @@
 import {
-  all,
-  call,
   createQueue,
   createScope,
   ensure,
-  race,
   type Operation,
   resource,
   sleep,
@@ -30,11 +27,6 @@ import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { type Maybe, Nothing } from "./maybe.ts";
 
-function isExpectedShutdownError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-  return error.name === "AbortError" || error.message === "halted";
-}
-
 export interface SSEServerOptions {
   port: number;
 }
@@ -53,7 +45,6 @@ export function useSSEServer<M extends Methods>(
 
     let app = new H3();
     let [requestScope, destroyRequestScope] = createScope(currentScope);
-    let activeRequests = new Set<ReturnType<typeof requestScope.run>>();
 
     for (let name of methodNames) {
       app.all(`/${String(name)}`, async (event) => {
@@ -77,10 +68,7 @@ export function useSSEServer<M extends Methods>(
           }
         }
 
-        let requestTask: ReturnType<typeof requestScope.run>;
-        let requestStarted = withResolvers<void>();
-        requestTask = requestScope.run(function* () {
-          yield* requestStarted.operation;
+        requestScope.run(function* () {
           yield* spawn(function* () {
             while (true) {
               yield* sleep(1000);
@@ -142,6 +130,7 @@ export function useSSEServer<M extends Methods>(
               });
             } finally {
               queue.close(Nothing());
+              yield* drain();
             }
           });
 
@@ -155,20 +144,6 @@ export function useSSEServer<M extends Methods>(
             yield* flush();
             queue.close(Nothing());
           }
-        });
-        activeRequests.add(requestTask);
-        requestTask.then(
-          () => activeRequests.delete(requestTask),
-          () => activeRequests.delete(requestTask),
-        );
-
-        event.waitUntil?.(requestTask);
-
-        requestStarted.resolve();
-
-        requestTask.catch((error) => {
-          if (isExpectedShutdownError(error)) return;
-          console.error("requestTask failed unexpectedly:", error);
         });
 
         return stream.send();
@@ -213,37 +188,7 @@ export function useSSEServer<M extends Methods>(
     try {
       yield* provide(`http://localhost:${port}`);
     } finally {
-      if (activeRequests.size > 0) {
-        let active = [...activeRequests].map((task) => {
-          return call(function* () {
-            try {
-              yield* task;
-            } catch (error) {
-              if (!isExpectedShutdownError(error)) {
-                throw error;
-              }
-            }
-          });
-        });
-
-        let result = yield* race([
-          call(function* () {
-            yield* all(active);
-            return "finished";
-          }),
-          call(function* () {
-            yield* sleep(10000);
-            return "timeout";
-          }),
-        ]);
-
-        if (result === "timeout") {
-          yield* destroyRequestScope();
-          yield* all(active);
-        }
-      } else {
-        yield* destroyRequestScope();
-      }
+      yield* destroyRequestScope();
       yield* until(server.close());
     }
   });

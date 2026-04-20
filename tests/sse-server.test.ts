@@ -133,7 +133,7 @@ describe("useSSEServer()", () => {
 
       const inspector: Inspector<{ echo: Method<never[], never, string> }> = {
         protocol,
-        *attach(scope) {
+        *attach(_scope) {
           return handle;
         },
       };
