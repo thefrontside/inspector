@@ -49,9 +49,10 @@ export function useSSEServer<M extends Methods>(
 
   return resource(function* (provide) {
     yield* useAttributes({ name: "SSEServer", port });
+    let currentScope = yield* useScope();
 
     let app = new H3();
-    let [requestScope, destroyRequestScope] = createScope();
+    let [requestScope, destroyRequestScope] = createScope(currentScope);
     let activeRequests = new Set<ReturnType<typeof requestScope.run>>();
 
     for (let name of methodNames) {

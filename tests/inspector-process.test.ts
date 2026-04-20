@@ -206,10 +206,18 @@ describe("inspector child process", () => {
       const childPresentAtEnd = Object.values(finalSnapshot).some(
         (node) => node.data?.["@effection/attributes"]?.name === "child",
       );
+      const mainPresentAtEnd = Object.values(finalSnapshot).some(
+        (node) => node.data?.["@effection/attributes"]?.name === "Main",
+      );
+      const inspectorPresentAtEnd = Object.values(finalSnapshot).some(
+        (node) => node.data?.["@effection/attributes"]?.name === "Inspector",
+      );
 
       assert(foundMain, "expected Main node");
       assert(foundInspector, "expected Inspector node");
       assert(foundChild, "expected child node during run");
+      assert(mainPresentAtEnd, "expected Main to remain present in final recorded state");
+      assert(inspectorPresentAtEnd, "expected Inspector to remain present in final recorded state");
       assert(!childPresentAtEnd, "expected child scopes to be gone after shutdown");
     });
 
@@ -365,10 +373,18 @@ describe("inspector child process", () => {
       const childPresentAtEnd = Object.values(finalSnapshot).some(
         (node) => node.data?.["@effection/attributes"]?.name === "child",
       );
+      const mainPresentAtEnd = Object.values(finalSnapshot).some(
+        (node) => node.data?.["@effection/attributes"]?.name === "Main",
+      );
+      const inspectorPresentAtEnd = Object.values(finalSnapshot).some(
+        (node) => node.data?.["@effection/attributes"]?.name === "Inspector",
+      );
 
       assert(foundMain, "expected Main node");
       assert(foundInspector, "expected Inspector node");
       assert(foundChild, "expected child node during run");
+      assert(mainPresentAtEnd, "expected Main to remain present in final recorded state");
+      assert(inspectorPresentAtEnd, "expected Inspector to remain present in final recorded state");
       assert(!childPresentAtEnd, "expected child scopes to be gone after shutdown");
     });
 
