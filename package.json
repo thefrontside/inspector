@@ -83,7 +83,8 @@
   "packageManager": "pnpm@9.15.9",
   "pnpm": {
     "patchedDependencies": {
-      "@effectionx/test-adapter@0.7.2": "patches/@effectionx__test-adapter@0.7.2.patch"
+      "@effectionx/test-adapter@0.7.2": "patches/@effectionx__test-adapter@0.7.2.patch",
+      "effection@4.1.0-alpha.7": "patches/effection@4.1.0-alpha.7.patch"
     }
   }
 }

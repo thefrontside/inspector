@@ -8,6 +8,9 @@ patchedDependencies:
   '@effectionx/test-adapter@0.7.2':
     hash: 5e55lwc63rmijksdakvpd5lq2m
     path: patches/@effectionx__test-adapter@0.7.2.patch
+  effection@4.1.0-alpha.7:
+    hash: wipyqrz763hb3akxfrnccbogri
+    path: patches/effection@4.1.0-alpha.7.patch
 
 importers:
 
@@ -21,10 +24,10 @@ importers:
         version: 0.7.5
       '@effectionx/process':
         specifier: ^0.7.3
-        version: 0.7.3(effection@4.1.0-alpha.7)
+        version: 0.7.3(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
       '@effectionx/stream-helpers':
         specifier: ^0.8.0
-        version: 0.8.0(effection@4.1.0-alpha.7)
+        version: 0.8.0(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
       '@standard-schema/spec':
         specifier: ^1.0.0
         version: 1.1.0
@@ -46,7 +49,7 @@ importers:
     devDependencies:
       '@effectionx/bdd':
         specifier: ^0.4.3
-        version: 0.4.3(effection@4.1.0-alpha.7)
+        version: 0.4.3(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
       '@nano-router/history':
         specifier: ^4.0.4
         version: 4.0.4
@@ -70,7 +73,7 @@ importers:
         version: 7.9.0
       effection:
         specifier: 4.1.0-alpha.7
-        version: 4.1.0-alpha.7
+        version: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
       expect:
         specifier: ^30.2.0
         version: 30.2.0
@@ -1389,6 +1392,7 @@ packages:
   querystring@0.2.1:
     resolution: {integrity: sha512-wkvS7mL/JMugcup3/rMitHmd9ecIGd2lhFhK9N3UUQ450h66d1r3Y9nvXzQAW1Lq+wyx61k/1pfKS5KuKiyEbg==}
     engines: {node: '>=0.4.x'}
+    deprecated: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
@@ -1551,43 +1555,43 @@ snapshots:
 
   '@ctrl/tinycolor@4.2.0': {}
 
-  '@effectionx/bdd@0.4.3(effection@4.1.0-alpha.7)':
+  '@effectionx/bdd@0.4.3(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
     dependencies:
-      '@effectionx/test-adapter': 0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7)
-      effection: 4.1.0-alpha.7
+      '@effectionx/test-adapter': 0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
+      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
 
-  '@effectionx/node@0.2.2(effection@4.1.0-alpha.7)':
+  '@effectionx/node@0.2.2(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
     dependencies:
-      effection: 4.1.0-alpha.7
+      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
 
-  '@effectionx/process@0.7.3(effection@4.1.0-alpha.7)':
+  '@effectionx/process@0.7.3(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
     dependencies:
-      '@effectionx/node': 0.2.2(effection@4.1.0-alpha.7)
+      '@effectionx/node': 0.2.2(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
       cross-spawn: 7.0.6
       ctrlc-windows: 2.2.0
-      effection: 4.1.0-alpha.7
+      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
       shellwords-ts: 3.0.1
 
-  '@effectionx/signals@0.5.1(effection@4.1.0-alpha.7)':
+  '@effectionx/signals@0.5.1(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
     dependencies:
-      effection: 4.1.0-alpha.7
+      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
       immutable: 5.1.4
 
-  '@effectionx/stream-helpers@0.8.0(effection@4.1.0-alpha.7)':
+  '@effectionx/stream-helpers@0.8.0(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
     dependencies:
-      '@effectionx/signals': 0.5.1(effection@4.1.0-alpha.7)
-      '@effectionx/timebox': 0.4.1(effection@4.1.0-alpha.7)
-      effection: 4.1.0-alpha.7
+      '@effectionx/signals': 0.5.1(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
+      '@effectionx/timebox': 0.4.1(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
+      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
       immutable: 5.1.4
       remeda: 2.33.6
 
-  '@effectionx/test-adapter@0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7)':
+  '@effectionx/test-adapter@0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
     dependencies:
-      effection: 4.1.0-alpha.7
+      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
 
-  '@effectionx/timebox@0.4.1(effection@4.1.0-alpha.7)':
+  '@effectionx/timebox@0.4.1(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
     dependencies:
-      effection: 4.1.0-alpha.7
+      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
 
   '@esbuild/aix-ppc64@0.27.3':
     optional: true
@@ -2347,7 +2351,7 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  effection@4.1.0-alpha.7: {}
+  effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri): {}
 
   esbuild@0.27.3:
     optionalDependencies:
