@@ -1,5 +1,6 @@
 .DS_Store
 .vscode
+tmp
 
 /deno.lock
 node_modules/

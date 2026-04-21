@@ -1,10 +1,10 @@
 import {
-  type Operation,
+  createQueue,
   createScope,
   ensure,
-  once,
-  race,
+  type Operation,
   resource,
+  sleep,
   spawn,
   suspend,
   until,
@@ -15,9 +15,17 @@ import {
 import type { Handle, Methods } from "./types.ts";
 import { validateUnsafe } from "./validate.ts";
 
-import { createEventStream, defineEventHandler, H3, serve, serveStatic } from "h3";
+import {
+  createEventStream,
+  defineEventHandler,
+  type EventStreamMessage,
+  H3,
+  serve,
+  serveStatic,
+} from "h3";
 import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
+import { type Maybe, Nothing } from "./maybe.ts";
 
 export interface SSEServerOptions {
   port: number;
@@ -33,18 +41,40 @@ export function useSSEServer<M extends Methods>(
 
   return resource(function* (provide) {
     yield* useAttributes({ name: "SSEServer", port });
-    let [scope, destroy] = createScope(yield* useScope());
+    let currentScope = yield* useScope();
 
     let app = new H3();
+    let [requestScope, destroyRequestScope] = createScope(currentScope);
 
     for (let name of methodNames) {
       app.all(`/${String(name)}`, async (event) => {
         let { req } = event;
-        // when the response ends for whatever reason, h3 by default closes the stream
-        // instead we opt to handle the close ourselves, and kill the task on that event
-        let stream = createEventStream(event, { autoclose: false });
+        // The SSE stream is bound to the HTTP request lifecycle. `autoclose`
+        // means the stream will automatically finish when the response ends.
+        // If the client disconnects, `stream.onClosed()` will halt the request task.
+        let stream = createEventStream(event, { autoclose: true });
+        // The queue buffers outgoing EventStream messages. The producer writes
+        // to the queue and the `drain()` consumer flushes them into the stream.
+        // This way the producer can start shutdown and stop sending messages,
+        // and out of band from that action, we can finalize and send anything
+        // remaining in the queue before closing the stream.
+        let queue = createQueue<EventStreamMessage, Maybe<never>>();
 
-        scope.run(function* () {
+        function* drain() {
+          let next = yield* queue.next();
+          while (!next.done) {
+            yield* until(stream.push([next.value]));
+            next = yield* queue.next();
+          }
+        }
+
+        requestScope.run(function* () {
+          yield* spawn(function* () {
+            while (true) {
+              yield* sleep(1000);
+              yield* until(stream.pushComment("keepalive"));
+            }
+          });
           yield* ensure(function* () {
             yield* until(stream.flush());
             yield* until(stream.close());
@@ -62,7 +92,8 @@ export function useSSEServer<M extends Methods>(
             handle.invoke({ name, args }),
           );
 
-          let events = yield* spawn(function* () {
+          // The middleware producer reads from the protocol subscription and enqueues events
+          yield* spawn(function* () {
             try {
               yield* useAttributes({ name: "EventStream" });
 
@@ -71,43 +102,51 @@ export function useSSEServer<M extends Methods>(
                 if (req.signal.aborted) {
                   break;
                 }
-                yield* until(
-                  stream.push({
-                    event: "yield",
-                    data: JSON.stringify(next.value),
-                  }),
-                );
+                queue.add({
+                  event: "yield",
+                  data: JSON.stringify(next.value),
+                });
                 next = yield* subscription.next();
               }
-              let value = validateUnsafe(protocol.methods[name].returns, next?.value);
-              yield* until(
-                stream.push({
+
+              // If the request was aborted it means that the client has disconnected
+              // while we were sending progress events. It will trigger the `break` above,
+              // drop out of the loop and we won't be able to emit the final event.
+              if (!req.signal.aborted) {
+                let value = validateUnsafe(protocol.methods[name].returns, next.value);
+                // to avoid throws around JSON handling, let it throw in validation
+                let data = value === undefined ? "undefined" : JSON.stringify(value);
+                queue.add({
                   event: "return",
-                  data: JSON.stringify(value),
-                }),
-              );
-              // return sent, we can consider the stream finalized
-              // and skip remaining steps in the finally block
+                  data,
+                });
+              }
             } catch (cause) {
               let error = cause instanceof Error ? cause : new Error("unknown", { cause });
               let { name, message } = error;
-              yield* until(
-                stream.push({
-                  event: "throw",
-                  data: JSON.stringify({ name, message }),
-                }),
-              );
+              queue.add({
+                event: "throw",
+                data: JSON.stringify({ name, message }),
+              });
+            } finally {
+              queue.close(Nothing());
+              yield* drain();
             }
           });
 
           try {
-            yield* race([events, once(req.signal, "abort")]);
+            yield* drain();
           } finally {
+            // `drain()` has finished either because the queue closed normally or
+            // because the request was interrupted. Clean up the underlying
+            // protocol subscription first, then allow any remaining queued
+            // events to drain.
             yield* flush();
+            queue.close(Nothing());
           }
         });
 
-        return await stream.send();
+        return stream.send();
       });
     }
 
@@ -149,7 +188,7 @@ export function useSSEServer<M extends Methods>(
     try {
       yield* provide(`http://localhost:${port}`);
     } finally {
-      yield* destroy();
+      yield* destroyRequestScope();
       yield* until(server.close());
     }
   });

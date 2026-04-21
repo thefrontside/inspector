@@ -24,20 +24,22 @@ export function* call(config: CallType) {
     name: name as any,
     args: argsList,
   });
-  let next = yield* subscription.next();
-  // log progress values and collect everything, including final return
-  while (!next.done) {
-    results.push(next.value);
-    yield* log.info(JSON.stringify(next.value));
-    next = yield* subscription.next();
-  }
-
-  if (out) {
-    try {
-      yield* until(writeFile(out, JSON.stringify(results, null, 2)));
-    } catch (e) {
-      let msg = e instanceof Error ? e.message : String(e);
-      yield* log.error(`failed to write ${out}: ${msg}`);
+  try {
+    let next = yield* subscription.next();
+    // log progress values and collect everything, including final return
+    while (!next.done) {
+      results.push(next.value);
+      yield* log.info(JSON.stringify(next.value));
+      next = yield* subscription.next();
+    }
+  } finally {
+    if (out) {
+      try {
+        yield* until(writeFile(out, JSON.stringify(results, null, 2)));
+      } catch (e) {
+        let msg = e instanceof Error ? e.message : String(e);
+        yield* log.error(`failed to write ${out}: ${msg}`);
+      }
     }
   }
 }

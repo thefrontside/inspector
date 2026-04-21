@@ -1,5 +1,5 @@
 import process from "node:process";
-import { global, useAttributes } from "effection";
+import { global, scoped, useAttributes } from "effection";
 import { api } from "effection/experimental";
 import { combine } from "./mod.ts";
 import { scope } from "./lib/implementations/scope.ts";
@@ -38,7 +38,7 @@ if (config.ok) {
             yield* pause();
           }
 
-          yield* body(args);
+          yield* scoped(() => body(args));
         } finally {
           yield* detach();
           process.stderr.write("detached, inspector shut down");

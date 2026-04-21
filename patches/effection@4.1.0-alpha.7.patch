@@ -1,0 +1,70 @@
+diff --git a/lib/delimiter.ts b/lib/delimiter.ts
+index a262961e8..cba294469 100644
+--- a/lib/delimiter.ts
++++ b/lib/delimiter.ts
+@@ -12,6 +12,7 @@ export class Delimiter<T>
+   finalized = false;
+   future = withResolvers<Maybe<Result<T>>>();
+   computed = false;
++  settling = false;
+   routine?: Coroutine;
+   outcome?: Maybe<Result<T>>;
+ 
+@@ -33,6 +34,10 @@ export class Delimiter<T>
+     this.exit(Nothing());
+   }
+ 
++  settle(): void {
++    this.settling = true;
++  }
++
+   *close(): Operation<void> {
+     let done = this.future.operation;
+     let interrupted = !this.computed;
+@@ -46,6 +51,8 @@ export class Delimiter<T>
+     if (!this.outcome) {
+       this.interrupt();
+       yield* this.close();
++    } else if (!this.finalized) {
++      yield* this.close();
+     } else {
+       if (interrupted && this.outcome.exists && !this.outcome.value.ok) {
+         throw this.outcome.value.error;
+@@ -65,7 +72,7 @@ export class Delimiter<T>
+     if (!this.routine) {
+       this.finalized = true;
+       this.future.resolve(this.outcome);
+-    } else {
++    } else if (!this.settling) {
+       this.routine.return(Ok(this.outcome));
+     }
+   }
+ diff --git a/lib/task-group.ts b/lib/task-group.ts
+ index cbabbc9b3..adbc7efc8 100644
+--- a/lib/task-group.ts
++++ b/lib/task-group.ts
+@@ -1,6 +1,8 @@
+ import { createContext } from "./context.ts";
+ import { box } from "./box.ts";
++import { DelimiterContext } from "./delimiter.ts";
+ import { Ok, unbox } from "./result.ts";
++import { useScope } from "./scope.ts";
+ import type { Operation, Task } from "./types.ts";
+ 
+ export class TaskGroup {
+@@ -40,7 +42,14 @@ export function encapsulate<T>(operation: () => Operation<T>): Operation<T> {
+     try {
+       return yield* operation();
+     } finally {
+-      yield* group.halt();
++      let scope = yield* useScope();
++      let delimiter = scope.expect(DelimiterContext);
++      delimiter.settle();
++      try {
++        yield* group.halt();
++      } finally {
++        delimiter.settling = false;
++      }
+     }
+   });
+ }
