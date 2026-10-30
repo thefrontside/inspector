@@ -1,4 +1,4 @@
-import { until } from "effection";
+import { ensure, until } from "effection";
 import { writeFile } from "node:fs/promises";
 import { createSSEClient } from "../../lib/sse-client.ts";
 import { log } from "../logger.ts";
@@ -20,26 +20,25 @@ export function* call(config: CallType) {
     yield* log.error(`unknown command: ${name}`);
   }
   let results: unknown[] = [];
-  let subscription = yield* handle.invoke({
-    name: name as any,
-    args: argsList,
-  });
-  try {
-    let next = yield* subscription.next();
-    // log progress values and collect everything, including final return
-    while (!next.done) {
-      results.push(next.value);
-      yield* log.info(JSON.stringify(next.value));
-      next = yield* subscription.next();
-    }
-  } finally {
-    if (out) {
+  if (out) {
+    yield* ensure(function* () {
       try {
         yield* until(writeFile(out, JSON.stringify(results, null, 2)));
       } catch (e) {
         let msg = e instanceof Error ? e.message : String(e);
         yield* log.error(`failed to write ${out}: ${msg}`);
       }
-    }
+    });
+  }
+  let subscription = yield* handle.invoke({
+    name: name as any,
+    args: argsList,
+  });
+  let next = yield* subscription.next();
+  // log progress values and collect everything, including final return
+  while (!next.done) {
+    results.push(next.value);
+    yield* log.info(JSON.stringify(next.value));
+    next = yield* subscription.next();
   }
 }

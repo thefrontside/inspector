@@ -4,7 +4,7 @@ import { createServer } from "node:net";
 import type { Method, Handle, Inspector } from "../lib/types.ts";
 import { createProtocol } from "../lib/mod.ts";
 import { attach } from "../lib/attach.ts";
-import { createScope, call, suspend, useScope, withResolvers } from "effection";
+import { createScope, call, spawn, suspend, useScope, withResolvers } from "effection";
 import { scope as arktypeScope } from "arktype";
 import { useSSEServer } from "../lib/sse-server.ts";
 
@@ -100,7 +100,7 @@ describe("useSSEServer()", () => {
   });
 
   describe("loader path integration", () => {
-    it("uses attach() and useSSEServer() together and keeps the SSE request alive on shutdown", function* () {
+    it("serves a protocol request through attach() and useSSEServer()", function* () {
       const schema = arktypeScope({
         NoneArr: "never[]",
         None: "never",
@@ -146,9 +146,36 @@ describe("useSSEServer()", () => {
       });
 
       const address = yield* addressResolver.operation;
+      const requestTask = yield* spawn(function* () {
+        const response = yield* call(() =>
+          fetch(`${address}/echo`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: "[]",
+          }),
+        );
+        const text = yield* call(async () => {
+          const reader = response.body?.getReader();
+          if (!reader) throw new Error("response body is missing");
+
+          const decoder = new TextDecoder();
+          let body = "";
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            body += decoder.decode(value, { stream: true });
+          }
+          return body;
+        });
+        return { status: response.status, text };
+      });
+      const result = yield* requestTask;
       yield* detach();
 
       expect(address).toMatch(/^http:\/\/localhost:\d+$/);
+      expect(result.status).toBe(200);
+      expect(result.text).toContain("event: return");
+      expect(result.text).toContain("goodbye");
     });
   });
 });

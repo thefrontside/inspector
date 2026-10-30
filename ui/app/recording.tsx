@@ -5,6 +5,7 @@ import { router } from "../src/router.ts";
 import { createScope, each, createSignal, until, type Operation } from "effection";
 import type { NodeMap } from "../../lib/update-node-map.ts";
 import { RenderRecording } from "./components/render-recording.tsx";
+import { parseRecording } from "./data/recording.ts";
 
 export async function* Recording(this: Context): AsyncGenerator<Element> {
   const { state } = router.location;
@@ -16,7 +17,7 @@ export async function* Recording(this: Context): AsyncGenerator<Element> {
   let nodeMap: NodeMap[] = [];
   // runs on first render if we navigated here with a file in the router state
   if (state?.file) {
-    nodeMap = JSON.parse(await state.file.text()) as NodeMap[];
+    nodeMap = parseRecording(JSON.parse(await state.file.text()));
   }
 
   let refresh = this.refresh.bind(this);
@@ -26,7 +27,7 @@ export async function* Recording(this: Context): AsyncGenerator<Element> {
     for (let file of yield* each(files)) {
       try {
         const text = yield* until(file.text());
-        const json: NodeMap[] = JSON.parse(text);
+        const json = parseRecording(JSON.parse(text));
 
         refresh(() => (nodeMap = json));
       } catch (e) {

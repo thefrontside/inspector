@@ -8,7 +8,6 @@ import {
   spawn,
   suspend,
   until,
-  useAttributes,
   useScope,
   withResolvers,
 } from "effection";
@@ -26,6 +25,7 @@ import {
 import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { type Maybe, Nothing } from "./maybe.ts";
+import { useAttributes } from "./labels.ts";
 
 export interface SSEServerOptions {
   port: number;
@@ -94,6 +94,10 @@ export function useSSEServer<M extends Methods>(
 
           // The middleware producer reads from the protocol subscription and enqueues events
           yield* spawn(function* () {
+            yield* ensure(() => {
+              queue.close(Nothing());
+            });
+
             try {
               yield* useAttributes({ name: "EventStream" });
 
@@ -128,22 +132,18 @@ export function useSSEServer<M extends Methods>(
                 event: "throw",
                 data: JSON.stringify({ name, message }),
               });
-            } finally {
-              queue.close(Nothing());
-              yield* drain();
             }
           });
 
-          try {
-            yield* drain();
-          } finally {
-            // `drain()` has finished either because the queue closed normally or
+          yield* ensure(function* () {
+            // `drain()` finishes either because the queue closed normally or
             // because the request was interrupted. Clean up the underlying
-            // protocol subscription first, then allow any remaining queued
-            // events to drain.
+            // protocol subscription before closing the queue.
             yield* flush();
             queue.close(Nothing());
-          }
+            yield* drain();
+          });
+          yield* drain();
         });
 
         return stream.send();
@@ -183,14 +183,13 @@ export function useSSEServer<M extends Methods>(
       silent: true,
     });
 
-    yield* until(server.ready());
-
-    try {
-      yield* provide(`http://localhost:${port}`);
-    } finally {
+    yield* ensure(function* () {
       yield* destroyRequestScope();
       yield* until(server.close());
-    }
+    });
+    yield* until(server.ready());
+
+    yield* provide(`http://localhost:${port}`);
   });
 }
 

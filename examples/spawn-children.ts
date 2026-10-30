@@ -1,6 +1,8 @@
-import { main, sleep, spawn, useAttributes, type Task } from "effection";
+import { main, sleep, spawn, type Task } from "effection";
+import { useAttributes } from "../lib/labels.ts";
 
 await main(function* () {
+  yield* useAttributes({ name: "Main" });
   let groupTasks: Task<string>[] = [];
   for (let group of ["alpha", "beta"]) {
     let groupTask = yield* spawn(function* () {
@@ -35,6 +37,8 @@ await main(function* () {
 
     groupTasks.push(groupTask);
   }
+
+  yield* sleep(100);
 
   for (let task of groupTasks) {
     yield* task.halt();

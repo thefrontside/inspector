@@ -4,14 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  '@effectionx/test-adapter@0.7.2':
-    hash: 5e55lwc63rmijksdakvpd5lq2m
-    path: patches/@effectionx__test-adapter@0.7.2.patch
-  effection@4.1.0-alpha.7:
-    hash: wipyqrz763hb3akxfrnccbogri
-    path: patches/effection@4.1.0-alpha.7.patch
-
 importers:
 
   .:
@@ -23,11 +15,14 @@ importers:
         specifier: ^0.7.5
         version: 0.7.5
       '@effectionx/process':
-        specifier: ^0.7.3
-        version: 0.7.3(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
+        specifier: ^0.8.3
+        version: 0.8.3(effection@https://pkg.pr.new/effection@00ef0d7)
       '@effectionx/stream-helpers':
-        specifier: ^0.8.0
-        version: 0.8.0(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
+        specifier: ^0.8.3
+        version: 0.8.3(effection@https://pkg.pr.new/effection@00ef0d7)
+      '@effectionx/timebox':
+        specifier: ^0.4.3
+        version: 0.4.3(effection@https://pkg.pr.new/effection@00ef0d7)
       '@standard-schema/spec':
         specifier: ^1.0.0
         version: 1.1.0
@@ -48,8 +43,8 @@ importers:
         version: 2.33.6
     devDependencies:
       '@effectionx/bdd':
-        specifier: ^0.4.3
-        version: 0.4.3(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
+        specifier: ^0.5.2
+        version: 0.5.2(effection@https://pkg.pr.new/effection@00ef0d7)
       '@nano-router/history':
         specifier: ^4.0.4
         version: 4.0.4
@@ -72,8 +67,8 @@ importers:
         specifier: ^7.9.0
         version: 7.9.0
       effection:
-        specifier: 4.1.0-alpha.7
-        version: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
+        specifier: https://pkg.pr.new/effection@00ef0d7
+        version: https://pkg.pr.new/effection@00ef0d7
       expect:
         specifier: ^30.2.0
         version: 30.2.0
@@ -119,45 +114,60 @@ packages:
     resolution: {integrity: sha512-kzyuwOAQnXJNLS9PSyrk0CWk35nWJW/zl/6KvnTBMFK65gm7U1/Z5BqjxeapjZCIhQcM/DsrEmcbRwDyXyXK4A==}
     engines: {node: '>=14'}
 
-  '@effectionx/bdd@0.4.3':
-    resolution: {integrity: sha512-g/T43KTtrqq2WqlLUgJdaJUOGbzGXMYbA4OKhaiiGIqrx8vMh5UElz/kHI73ADgWm6x9ItbwJRnFjxy4a32k6w==}
-    engines: {node: '>= 22'}
+  '@effectionx/bdd@0.5.2':
+    resolution: {integrity: sha512-1+sgUxXvUghz0UZvSstcCYJvYrQ/LO0ptVa0VZUBAZliQ6vCc5ulveYQ9M3/h5+Ec314B8ZedwkGbdHiHK9byQ==}
+    version: 0.5.2
     peerDependencies:
       effection: ^3 || ^4
 
-  '@effectionx/node@0.2.2':
-    resolution: {integrity: sha512-bUwnCqzBsVERGzKZRTc6XMZ6yDLkRPgcxSvM6eAkuc2D5A7L0+nSu4J/x60y6geSYrAVv2UZBgAktukNtB6LxA==}
-    engines: {node: '>= 22'}
+  '@effectionx/context-api@0.6.0':
+    resolution: {integrity: sha512-t004qvlkJDMB6EhHP1lOQ97PeIn90m7cv4+wsRPnx4YBem+pJzTL+Sm1KWbKMjMeFJz4oqllUWuBJZsCi+nuTw==}
+    version: 0.6.0
     peerDependencies:
       effection: ^3 || ^4
 
-  '@effectionx/process@0.7.3':
-    resolution: {integrity: sha512-ic+cv9aNeq0UgF+SO61jd8nYLiF3jFT2c6n+nOYstc4pmtUez70yFb0H5Rzppu21wql5QYCbQayVrRRUa5YRQQ==}
-    engines: {node: '>= 22'}
+  '@effectionx/middleware@0.1.1':
+    resolution: {integrity: sha512-ss/bZRkt/xzJNE59r8NR1+0K/xQcIyCm0y9n8FYC8jKdFn51SPe3m3t7EfPcK8zkdjCoTOU7k1UpIXRl26asYA==}
+
+  '@effectionx/node@0.2.5':
+    resolution: {integrity: sha512-hL8mROda8Lx375MVS+Ubu86+yMht/I0wOZG5VR6Pel0XUA5ReObQDYvNS6ocW0cNFKnEmvlVLWGWbcjJ+VkVhA==}
+    version: 0.2.5
     peerDependencies:
       effection: ^3 || ^4
 
-  '@effectionx/signals@0.5.1':
-    resolution: {integrity: sha512-rUO4yErDLDuody7UCwlwHvQwulDoqtLWei2vgIVftf5KTvz83EI+dovjgJTtPSZ+X1tNPDG3s5V5KRn8xTHAcQ==}
-    engines: {node: '>= 22'}
+  '@effectionx/process@0.8.3':
+    resolution: {integrity: sha512-LkF2X4uJXR3gRfLC2Is1Ra4Zq9YRvCeCt73t+fn2ploP+CSU8aFszsFAu3dF43cl0fXTGMnpmOvb00ynTJ+TTw==}
+    version: 0.8.3
     peerDependencies:
       effection: ^3 || ^4
 
-  '@effectionx/stream-helpers@0.8.0':
-    resolution: {integrity: sha512-wiBz6XtR74u3jvqtj4n42+yuWwo8ZcjmLP2+MBlxe3q5tPJk6Ol+iuo5wfxA8bbKPNZjj51jz5fCqCPjoMgklw==}
-    engines: {node: '>= 22'}
+  '@effectionx/scope-eval@0.1.3':
+    resolution: {integrity: sha512-Acn45lb3H94WYhNVHXYtXOZYzjpBGDPPlsyW1Talb/vYjQzCzus5lkxxOlPyphzvi7d+7mGNXiIVt4JLSZmLnQ==}
+    version: 0.1.3
     peerDependencies:
       effection: ^3 || ^4
 
-  '@effectionx/test-adapter@0.7.2':
-    resolution: {integrity: sha512-U/usZtP66cli7iQ4/ww/ikZ5qA9U21SKyPAMDmsz3r3B2UJM4C+jwvlxFsJ2t1sQpRinOJHxZfp6ufgARMAvTg==}
-    engines: {node: '>= 22'}
+  '@effectionx/signals@0.5.4':
+    resolution: {integrity: sha512-c3tnlq9qqjb4fb/4g+uf03ABbvaDbgcXqWZRuifXOFNeTyhnBy5t86Fpk0tVKBLQI2M9sStV0c62xxHXPhH2Pw==}
+    version: 0.5.4
     peerDependencies:
       effection: ^3 || ^4
 
-  '@effectionx/timebox@0.4.1':
-    resolution: {integrity: sha512-LpKZP9wvhoDu+Agkv79G8Px0eCTWCnUyuvG7yyNwAyPHAibSimzI3XOwtREWDUiclPTZFd9wOu9jhe6DW1XXaQ==}
-    engines: {node: '>= 22'}
+  '@effectionx/stream-helpers@0.8.3':
+    resolution: {integrity: sha512-3yNSrdmW3ahOAXrEnBGmlzxp7k9Yzixtqzij98y167srYdAE8sm+V/WNtMLHYScShzw2hl6E8uCm9ghhQw7zKA==}
+    version: 0.8.3
+    peerDependencies:
+      effection: ^3 || ^4
+
+  '@effectionx/test-adapter@0.7.4':
+    resolution: {integrity: sha512-zPA5dz2SKG1N/1WxIxYy4zBB1qjviLZy6o/u8PEQo82Tnjtch4rS+2zIrHriWGKX6KY+5VjPlryjtzcBaxvD3Q==}
+    version: 0.7.4
+    peerDependencies:
+      effection: ^3 || ^4
+
+  '@effectionx/timebox@0.4.3':
+    resolution: {integrity: sha512-cc7SLpL3svAYK8M5NS8kLQuL0lrZNoQb+Hi9NSaWOudzAW1HoewuDfUtfXLemPJnnLqLYhbghRhmpVqCm4Xg3Q==}
+    version: 0.4.3
     peerDependencies:
       effection: ^3 || ^4
 
@@ -1113,8 +1123,9 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  effection@4.1.0-alpha.7:
-    resolution: {integrity: sha512-ir7qM7vQXOo7eiuNxaD6FgwUetdy3XMB3dwtzUxp9ytiZl6abZUrXwM3vMqKWdMW4cW1KZzJqSEuXofJFscwFw==}
+  effection@https://pkg.pr.new/effection@00ef0d7:
+    resolution: {tarball: https://pkg.pr.new/effection@00ef0d7}
+    version: 4.2.0-pr
     engines: {node: '>= 16'}
 
   esbuild@0.27.3:
@@ -1555,43 +1566,56 @@ snapshots:
 
   '@ctrl/tinycolor@4.2.0': {}
 
-  '@effectionx/bdd@0.4.3(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
+  '@effectionx/bdd@0.5.2(effection@https://pkg.pr.new/effection@00ef0d7)':
     dependencies:
-      '@effectionx/test-adapter': 0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
-      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
+      '@effectionx/test-adapter': 0.7.4(effection@https://pkg.pr.new/effection@00ef0d7)
+      effection: https://pkg.pr.new/effection@00ef0d7
 
-  '@effectionx/node@0.2.2(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
+  '@effectionx/context-api@0.6.0(effection@https://pkg.pr.new/effection@00ef0d7)':
     dependencies:
-      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
+      '@effectionx/middleware': 0.1.1
+      effection: https://pkg.pr.new/effection@00ef0d7
 
-  '@effectionx/process@0.7.3(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
+  '@effectionx/middleware@0.1.1': {}
+
+  '@effectionx/node@0.2.5(effection@https://pkg.pr.new/effection@00ef0d7)':
     dependencies:
-      '@effectionx/node': 0.2.2(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
+      effection: https://pkg.pr.new/effection@00ef0d7
+
+  '@effectionx/process@0.8.3(effection@https://pkg.pr.new/effection@00ef0d7)':
+    dependencies:
+      '@effectionx/context-api': 0.6.0(effection@https://pkg.pr.new/effection@00ef0d7)
+      '@effectionx/node': 0.2.5(effection@https://pkg.pr.new/effection@00ef0d7)
+      '@effectionx/scope-eval': 0.1.3(effection@https://pkg.pr.new/effection@00ef0d7)
       cross-spawn: 7.0.6
       ctrlc-windows: 2.2.0
-      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
+      effection: https://pkg.pr.new/effection@00ef0d7
       shellwords-ts: 3.0.1
 
-  '@effectionx/signals@0.5.1(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
+  '@effectionx/scope-eval@0.1.3(effection@https://pkg.pr.new/effection@00ef0d7)':
     dependencies:
-      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
+      effection: https://pkg.pr.new/effection@00ef0d7
+
+  '@effectionx/signals@0.5.4(effection@https://pkg.pr.new/effection@00ef0d7)':
+    dependencies:
+      effection: https://pkg.pr.new/effection@00ef0d7
       immutable: 5.1.4
 
-  '@effectionx/stream-helpers@0.8.0(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
+  '@effectionx/stream-helpers@0.8.3(effection@https://pkg.pr.new/effection@00ef0d7)':
     dependencies:
-      '@effectionx/signals': 0.5.1(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
-      '@effectionx/timebox': 0.4.1(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))
-      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
+      '@effectionx/signals': 0.5.4(effection@https://pkg.pr.new/effection@00ef0d7)
+      '@effectionx/timebox': 0.4.3(effection@https://pkg.pr.new/effection@00ef0d7)
+      effection: https://pkg.pr.new/effection@00ef0d7
       immutable: 5.1.4
       remeda: 2.33.6
 
-  '@effectionx/test-adapter@0.7.2(patch_hash=5e55lwc63rmijksdakvpd5lq2m)(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
+  '@effectionx/test-adapter@0.7.4(effection@https://pkg.pr.new/effection@00ef0d7)':
     dependencies:
-      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
+      effection: https://pkg.pr.new/effection@00ef0d7
 
-  '@effectionx/timebox@0.4.1(effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri))':
+  '@effectionx/timebox@0.4.3(effection@https://pkg.pr.new/effection@00ef0d7)':
     dependencies:
-      effection: 4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri)
+      effection: https://pkg.pr.new/effection@00ef0d7
 
   '@esbuild/aix-ppc64@0.27.3':
     optional: true
@@ -2351,7 +2375,7 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  effection@4.1.0-alpha.7(patch_hash=wipyqrz763hb3akxfrnccbogri): {}
+  effection@https://pkg.pr.new/effection@00ef0d7: {}
 
   esbuild@0.27.3:
     optionalDependencies:

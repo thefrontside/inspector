@@ -1,4 +1,5 @@
-import { main, suspend, spawn, sleep, useAttributes, type Task } from "effection";
+import { main, suspend, spawn, sleep, type Task } from "effection";
+import { useAttributes } from "../lib/labels.ts";
 
 await main(function* () {
   yield* useAttributes({ name: "Main" });

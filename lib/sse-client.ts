@@ -1,4 +1,4 @@
-import { resource, stream, until, useAbortSignal, useAttributes } from "effection";
+import { resource, stream, until, useAbortSignal } from "effection";
 import {
   toJson,
   type Handle,
@@ -9,6 +9,7 @@ import {
 } from "../mod.ts";
 import { validateUnsafe } from "../lib/validate.ts";
 import { parseServerSentEvents, type ServerSentEvent } from "parse-sse";
+import { useAttributes } from "./labels.ts";
 
 export interface SSEClientOptions {
   url?: string;

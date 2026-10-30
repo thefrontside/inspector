@@ -74,6 +74,11 @@ export const protocol = createProtocol({
     progress: schema.ScopeEvent,
     returns: schema.Null,
   },
+  recordScopes: {
+    args: schema.None,
+    progress: schema.ScopeEvent,
+    returns: schema.Null,
+  },
   getScopes: {
     args: schema.None,
     progress: schema.Never,

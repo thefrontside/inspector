@@ -1,7 +1,7 @@
 import type { Inspector } from "../mod.ts";
 import { createImplementation, toJson } from "../mod.ts";
 import { op } from "../impl.ts";
-import { createContext, createSignal, type Scope } from "effection";
+import { createContext, createSignal, ensure, type Scope } from "effection";
 import { api } from "effection/experimental";
 import { protocol, type ScopeNode, type ScopeEvent, type ScopeTree } from "../protocols/scope.ts";
 import { pipe } from "remeda";
@@ -14,9 +14,12 @@ const Children = createContext<Set<Scope>>("@effection/scope.children", new Set(
 
 export const scope = createImplementation(protocol, function* (root) {
   let ids = 0;
-  let { send, ...stream } = createSignal<ScopeEvent, never>();
+  let { send, close, ...stream } = createSignal<ScopeEvent, null>();
 
   root.set(AttributesContext, { name: "Global" });
+  yield* ensure(() => {
+    close(null);
+  });
 
   // give every node an id that does not have it.
   visit(
@@ -77,6 +80,8 @@ export const scope = createImplementation(protocol, function* (root) {
 
   return {
     watchScopes: () =>
+      pipe(stream, createSubject<ScopeEvent>({ type: "tree", value: readTree(root) })),
+    recordScopes: () =>
       pipe(stream, createSubject<ScopeEvent>({ type: "tree", value: readTree(root) })),
     getScopes: op(function* () {
       return readTree(root);
