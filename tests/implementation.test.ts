@@ -5,6 +5,7 @@ import { scope as arktypeScope } from "arktype";
 import type { Method } from "../lib/types.ts";
 
 import { createImplementation, createProtocol } from "../lib/mod.ts";
+import { player } from "../lib/implementations/player.ts";
 
 describe("createImplementation()", () => {
   it("attach yields a handle with protocol and methods and invoke calls the method", function* () {
@@ -50,5 +51,21 @@ describe("createImplementation()", () => {
     const sub = yield* stream;
     const next = yield* sub.next();
     expect(next).toEqual({ done: true, value: "hello" });
+  });
+
+  it("play returns null", function* () {
+    const [rootScope] = createScope();
+    const handle = yield* player.attach(rootScope);
+
+    let result;
+    let invocation = rootScope.run(function* () {
+      const stream = handle.invoke({ name: "play", args: [] });
+      const sub = yield* stream;
+      result = yield* sub.next();
+    });
+
+    yield* invocation;
+
+    expect(result).toEqual({ done: true, value: null });
   });
 });

@@ -1,4 +1,4 @@
-import { resource, stream, until, useAbortSignal, useAttributes } from "effection";
+import { resource, stream, until, useAbortSignal } from "effection";
 import {
   toJson,
   type Handle,
@@ -9,6 +9,7 @@ import {
 } from "../mod.ts";
 import { validateUnsafe } from "../lib/validate.ts";
 import { parseServerSentEvents, type ServerSentEvent } from "parse-sse";
+import { useAttributes } from "./labels.ts";
 
 export interface SSEClientOptions {
   url?: string;
@@ -73,7 +74,9 @@ export function createSSEClient<M extends Methods>(
             }
 
             let { type, data } = next.value;
-            let parsed = JSON.parse(data);
+            // check so we don't throw on our parse of the data,
+            // but we will throw  in validation instead
+            let parsed = data === "undefined" ? undefined : JSON.parse(data);
             if (type === "yield") {
               return {
                 done: false,

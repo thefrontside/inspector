@@ -1,21 +1,22 @@
-import { createSignal, each, resource, spawn, type Subscription, type Stream } from "effection";
+import { createQueue, each, resource, spawn, type Subscription, type Stream } from "effection";
 
 export function truncate(): <T, TClose>(source: Stream<T, TClose>) => Stream<T, null> {
   return <T, TClose>(source: Stream<T, TClose>) =>
     resource<Subscription<T, null>>(function* (provide) {
-      let target = createSignal<T, null>();
+      let queue = createQueue<T, null>();
 
       yield* spawn(function* () {
         for (let event of yield* each(source)) {
-          target.send(event);
+          queue.add(event);
           yield* each.next();
         }
       });
 
       try {
-        yield* provide(yield* target);
+        yield* provide(queue);
       } finally {
-        target.close(null);
+        console.log("marking queue done");
+        queue.close(null);
       }
     });
 }

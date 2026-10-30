@@ -32,8 +32,8 @@
   },
   "scripts": {
     "start": "vite --host 0.0.0.0 ui",
-    "example": "node --experimental-strip-types --import ./loader.ts ./examples/spawn-children.ts",
-    "cli": "node --experimental-strip-types ./cli/index.ts",
+    "example": "node --import ./loader.ts ./examples/spawn-children.ts",
+    "cli": "node ./cli/index.ts",
     "build": "pnpm run build:tsc && pnpm run build:ui",
     "build:tsc": "tsc -p tsconfig.build.json",
     "build:ui": "vite build ui",
@@ -50,25 +50,26 @@
   "dependencies": {
     "@ark/util": "^0.56.0",
     "@b9g/crank": "^0.7.5",
-    "@effectionx/process": "^0.7.3",
-    "@effectionx/stream-helpers": "^0.8.0",
+    "@effectionx/process": "^0.8.3",
+    "@effectionx/stream-helpers": "^0.8.3",
+    "@effectionx/timebox": "^0.4.3",
     "@standard-schema/spec": "^1.0.0",
     "arktype": "^2.1.27",
     "configliere": "^0.3.0",
-    "h3": "2.0.1-rc.14",
+    "h3": "2.0.1-rc.20",
     "parse-sse": "^0.1.0",
     "remeda": "^2"
   },
   "devDependencies": {
-    "@effectionx/bdd": "^0.4.3",
+    "@effectionx/bdd": "^0.5.2",
     "@nano-router/history": "^4.0.4",
     "@nano-router/router": "^4.0.4",
     "@playwright/test": "^1.58.2",
     "@shoelace-style/shoelace": "^2.20.1",
     "@types/d3": "^7.4.3",
-    "@types/node": "22",
+    "@types/node": "24",
     "d3": "^7.9.0",
-    "effection": "4.1.0-alpha.7",
+    "effection": "https://pkg.pr.new/effection@00ef0d7",
     "expect": "^30.2.0",
     "lightningcss": "^1.31.1",
     "oxfmt": "^0.34.0",
@@ -78,12 +79,7 @@
     "vite-plugin-static-copy": "^3.2.0"
   },
   "peerDependencies": {
-    "effection": "^4.1.0-alpha.7"
+    "effection": "^4.1.1"
   },
-  "packageManager": "pnpm@9.15.9",
-  "pnpm": {
-    "patchedDependencies": {
-      "@effectionx/test-adapter@0.7.2": "patches/@effectionx__test-adapter@0.7.2.patch"
-    }
-  }
+  "packageManager": "pnpm@9.15.9"
 }
