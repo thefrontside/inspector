@@ -32,8 +32,9 @@
   },
   "scripts": {
     "start": "vite --host 0.0.0.0 ui",
-    "example": "node --import ./loader.ts ./examples/spawn-children.ts",
+    "example": "pnpm inspect --inspect-pause --inspect-record=out.json ./examples/spawn-children.ts",
     "cli": "node ./cli/index.ts",
+    "inspect": "pnpm cli --inspect-package ./loader.ts",
     "build": "pnpm run build:tsc && pnpm run build:ui",
     "build:tsc": "tsc -p tsconfig.build.json",
     "build:ui": "vite build ui",

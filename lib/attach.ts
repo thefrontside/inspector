@@ -64,7 +64,7 @@ export function* withInspector<M extends Methods, T>(
     let address = yield* useSSEServer(handle, { port: config.value.inspectPort });
     process.stderr.write(
       `effection inspector@${version} running at ${address}/live\n` +
-        `inspect the running program using \`npx @effectionx/inspector call *\` or other CLI commands`,
+        `inspect the running program using \`npx @effectionx/inspector call *\` or other CLI commands\n\n`,
     );
 
     return yield* scoped(function* () {
