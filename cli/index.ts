@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { main, suspend } from "effection";
+import { exit, main, suspend } from "effection";
 import { config } from "./config.ts";
 import { call } from "./commands/call.ts";
 import { run } from "./commands/run.ts";
@@ -72,7 +72,10 @@ await main(function* () {
       if (!remainder.args || (remainder.args && remainder.args.length === 0)) {
         yield* log.info(app.help({ args: ["run", "--help"] }));
       } else {
-        yield* run(command.config, remainder.args);
+        let status = yield* run(command.config, remainder.args);
+        if (status && status !== 0) {
+          yield* exit(status);
+        }
       }
       break;
     }

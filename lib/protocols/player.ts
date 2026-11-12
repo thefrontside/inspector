@@ -10,6 +10,6 @@ export const protocol = createProtocol({
   play: {
     args: type("never[]"),
     progress: type("never"),
-    returns: type("undefined"),
+    returns: type("null"),
   },
 });

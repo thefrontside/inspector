@@ -18,6 +18,29 @@ export interface Tick {
   nodemap: NodeMap;
 }
 
+export interface RecordingFile {
+  frames: NodeMap[];
+  events?: unknown[];
+  diagnostics?: {
+    code?: number | null;
+    signal?: string | null;
+    stdout?: string;
+    stderr?: string;
+  };
+}
+
+export function parseRecording(value: unknown): NodeMap[] {
+  if (Array.isArray(value)) {
+    return value as NodeMap[];
+  }
+
+  if (value && typeof value === "object" && Array.isArray((value as RecordingFile).frames)) {
+    return (value as RecordingFile).frames;
+  }
+
+  throw new TypeError("recording must contain a frames array");
+}
+
 export function* useRecording(load: () => Operation<Cassette>): Operation<Recording> {
   let { length, loadOffset } = yield* load();
   let stream = createSignal<number, never>();

@@ -35,6 +35,7 @@ export const player = createImplementation(protocol, function* (root) {
         yield* setContext({ status: "playing" });
         yield* cxt.resume();
       }
+      return null;
     }),
 
     watchPlayerState: () =>
